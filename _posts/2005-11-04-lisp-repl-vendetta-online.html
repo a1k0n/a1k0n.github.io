@@ -1,26 +1,23 @@
-TITLE: Lisp REPL in Vendetta Online
-AUTHOR: a1k0n
-DATE: Fri Nov  4 17:36:48 CST 2005
-DESC: lisp-vo
-FORMAT: autobr
------
-BODY:
-<a href="http://www.vendetta-online.com">Vendetta Online</a> has a
+---
+title: Lisp REPL in Vendetta Online
+layout: post
+---
+<p><a href="http://www.vendetta-online.com">Vendetta Online</a> has a
 Lisp environment (using SBCL) which controls much of its NPC behavior
 and will soon be in charge of generating player and NPC missions.
 Partly in order to get around some thread-safety issues, and partly
 for convenience we built an REPL into a secret chat channel.  (it only
-responds to developer accounts)
+responds to developer accounts)</p>
 
-<a href="/lisp/vo-lisp-repl1.png"><img src="/lisp/vo-lisp-repl1_small.png"></a>
+<a href="/lisp/vo-lisp-repl1.png"><img src="/lisp/vo-lisp-repl1_small.png"></a><br />
 
-<a href="/lisp/vo-lisp-repl2.png"><img src="/lisp/vo-lisp-repl2_small.png"></a>
+<a href="/lisp/vo-lisp-repl2.png"><img src="/lisp/vo-lisp-repl2_small.png"></a><br />
 
-It also handles errors by printing a quick and dirty stack trace:
+<p>It also handles errors by printing a quick and dirty stack trace:</p>
 
-<a href="/lisp/vo-lisp-repl3.png"><img src="/lisp/vo-lisp-repl3_small.png"></a>
+<a href="/lisp/vo-lisp-repl3.png"><img src="/lisp/vo-lisp-repl3_small.png"></a><br />
 
-Here's the code for the stack dump handler, for interested readers:
+Here's the code for the stack dump handler, for interested readers:<br />
 
 <pre>
 (defun trap-and-log-error-handler (condition)
@@ -70,4 +67,4 @@ from where this is called)
 
 Why didn't I just use <tt>sb-debug:backtrace</tt>?  I didn't know
 about it.  I just looked at how SLIME did it.
-END-----
+
