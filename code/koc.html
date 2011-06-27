@@ -1,0 +1,36 @@
+Download <a href="autoupgrade.user.js">KOC Auto-build v0.4.2 for
+  Greasemonkey</a>.
+Download <a href="autofarm.user.js">KOC Auto-build v0.1.3 for
+  Greasemonkey</a>.
+<hr>
+<p />To use: Install the script above (if you don't have <a
+  href="https://addons.mozilla.org/en-US/firefox/addon/748">Greasemonkey</a>
+installed, do that first).  Log into the game via Facebook.
+Right-click on the game and choose <b>This Frame</b> -&gt; <b>Show
+  Only This Frame</b>.
+Then right click on the monkey, <b>User Script Commands...</b> -&gt;
+<b>Start auto-upgrading</b>.  It will continuously start the available
+building upgrades and research that takes the least time until you
+choose the <b>Stop auto-upgrading</b> option, thus freeing you to
+sleep or go about your day.
+
+<p />It is biased towards farm/mine/quarry/sawmill/cottage upgrades; it
+will choose one of those that takes up to fifteen minutes shorter than
+a non-field/cottage upgrade.
+
+<p />Research prioritizes fletching above all else, but beyond that it
+is least-time only.
+
+<p />You will probably want to modify the above prioritizations to
+suit your current game.
+
+<p />You will also want to set your tax rate exactly equal to your
+tavern level (e.g. with a level 7 tavern, use a 7% tax rate).  This
+script will automatically levy gold as soon as your happiness reaches
+100% (i.e. every two hours).  This nets you 5*(population limit) gold
+per hour.  This is a lot of gold.
+
+<p />This unfortunately will only operate on the currently-open city,
+not any of your other cities.  It wouldn't be too hard to support all
+cities, though; in fact it would be very easy, but I only have one
+city so I have no way to test.

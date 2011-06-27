@@ -1,0 +1,102 @@
+// Generate an RSA public/private key pair suitable for a software "CD key"
+#include <gmp.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+void print_decoder_key(const char *name, mpz_t value, int size)
+{
+  int i;
+  mpz_t v;
+  mpz_init_set(v, value);
+  printf("  ");
+  for(i=0;i<size;i++) {
+    unsigned x = mpz_get_ui(v);
+    mpz_tdiv_q_2exp(v, v, 32);
+    printf("%s[%d]=0x%08x; ", name, i, x);
+  }
+  printf("\n");
+}
+
+void randomprime(mpz_t r1, gmp_randstate_t rs, int nbits)
+{
+  mpz_t rt, randmin;
+
+  // this is kind of a lame hack; we really should be drawing random numbers
+  // directly from /dev/random rather than just a seed, as this makes our key
+  // space a lot smaller
+  srandomdev(); 
+  gmp_randseed_ui(rs, random());
+
+  mpz_init(rt);
+  mpz_init(randmin);
+  mpz_ui_pow_ui(randmin, 2, nbits-1);
+  mpz_urandomb(r1, rs, nbits-1);
+  mpz_setbit(r1, 0); // make an odd 1024-bit number
+  mpz_add(r1, r1, randmin); // plus one
+  mpz_nextprime(r1, r1);
+  mpz_clear(rt);
+  mpz_clear(randmin);
+}
+
+int main(int argc, char **argv)
+{
+  gmp_randstate_t rs;
+  mpz_t p, q, t1, t2;
+  mpz_t n, tot, e, d;
+
+  if(argc<2) {
+    printf("usage: %s <nbits>\nGenerate a public-private key pair with nbits bits.\nAs a general guideline, there are five bits for every character in the \"CD key\" code.\n", argv[0]);
+    return 0;
+  }
+  int nbits = atoi(argv[1]);
+
+  gmp_randinit_mt(rs);
+
+  // generate random primes p and q
+  mpz_init(p);
+  mpz_init(q);
+  randomprime(p, rs, nbits/2);
+  gmp_printf("p: %Zd\n", p);
+  randomprime(q, rs, nbits - mpz_sizeinbase(p, 2));
+  gmp_printf("q: %Zd\n", q);
+
+  // generate n = pq
+  mpz_init(n);
+  mpz_mul(n, p, q);
+
+  // generate totient
+  mpz_init(t1);
+  mpz_init(t2);
+  mpz_init(tot);
+  mpz_sub_ui(t1, p, 1);
+  mpz_sub_ui(t2, q, 1);
+  mpz_mul(tot, t1, t2);
+//  gmp_printf("tot: %Zd\n", tot);
+
+  // generate encryption and decryption exponents
+  mpz_init(e);
+  mpz_init(d);
+  do {
+    mpz_urandomm(e, rs, tot);
+    mpz_invert(d, e, tot);
+  } while(mpz_sgn(d) != 1);
+
+  gmp_printf("n: %Zd\n", n);
+  gmp_printf("e: %Zd\n", e);
+  gmp_printf("d: %Zd\n", d);
+
+  printf("encoder keys:\n");
+  gmp_printf("  mpz_t n,e;\n  mpz_init_set_str(n, \"%Zd\", 10); /* %d bits */\n", n, mpz_sizeinbase(n, 2));
+  gmp_printf("  mpz_init_set_str(e, \"%Zd\", 10);\n", e);
+
+  {
+    int size = 1+(mpz_sizeinbase(n, 2)/32);
+    printf("decoder keys:\n");
+    printf("  ubint<%d> n,d;\n", size);
+    print_decoder_key("n", n, size);
+    print_decoder_key("d", d, size);
+  }
+
+  return 0;
+}
+

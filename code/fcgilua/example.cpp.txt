@@ -1,0 +1,114 @@
+extern "C" {
+#include <lua51/lua.h>
+#include <lua51/lualib.h>
+#include <lua51/lauxlib.h>
+#ifdef USE_MYSQL
+#include "luasql.h"
+extern LUASQL_API int luasql_libopen_mysql (lua_State *L);
+#endif
+}
+
+#include <string>
+#include <fcgiapp.h>
+
+static FCGX_Stream *in, *out, *err;
+static FCGX_ParamArray envp;
+
+int lgetparam(lua_State *L)
+{
+    char *param = FCGX_GetParam(luaL_checkstring(L, 1), envp);
+    lua_settop(L, 0);
+    if(param) {
+        lua_pushstring(L, param);
+    } else {
+        lua_pushnil(L);
+    }
+    return 1;
+}
+
+int lputcgi(lua_State *L)
+{
+    FCGX_PutStr(luaL_checkstring(L, 1), lua_strlen(L, 1), out);
+    return 0;
+}
+
+int lgetcgi(lua_State *L)
+{
+    unsigned siz = (unsigned)luaL_checknumber(L, 1);
+    char *buf = (char*)malloc(siz);
+    siz = FCGX_GetStr(buf, siz, in);
+    lua_settop(L, 0);
+    lua_pushlstring(L, buf, siz);
+    lua_pushnumber(L, siz);
+    free(buf);
+    return 2;
+}
+
+extern "C" {
+#include "md5.h"
+}
+
+int lmd5(lua_State *L)
+{
+    MD5_CTX ctx;
+    unsigned char digest[16];
+    char digstr[16*2+1];
+    int i;
+    MD5Init(&ctx);
+    MD5Update(&ctx, (unsigned char*)luaL_checkstring(L, 1), lua_strlen(L, 1));
+    MD5Final(digest, &ctx);
+    for(i=0;i<16;i++) sprintf(digstr+i*2, "%02x", digest[i]);
+    digstr[32] = 0;
+    lua_settop(L, 0);
+    lua_pushstring(L, digstr);
+    return 1;
+}
+
+void runcgi(lua_State *L)
+{
+    lua_register(L, "getparam", lgetparam);
+    lua_register(L, "putcgi", lputcgi);
+    lua_register(L, "getcgi", lgetcgi);
+    lua_register(L, "md5", lmd5);
+
+    while (FCGX_Accept(&in, &out, &err, &envp) >= 0) {
+        lua_pushcfunction(L, lua_err_handler);
+        lua_getglobal(L, "handle_request");
+        lua_pcall(L, 0, 0, -2);
+        lua_settop(L, 0);
+    }
+}
+
+int main(int argc, char **argv)
+{
+    lua_State *L = lua_open();
+    lua_atpanic(L, lua_err_handler);
+    luaL_openlibs(L);
+
+#ifdef USE_MYSQL
+    luasql_libopen_mysql(L);
+#endif
+    lua_settop(L, 0);
+
+    if(luaL_dofile(L, LUA_STARTUP_FILE) != 0) {
+        printf("unable to load "LUA_STARTUP_FILE"!\n");
+        exit(-1);
+    }
+    lua_getglobal(L, "init");
+    lua_call(L, 0, 1);
+    if(lua_isnil(L, -1)) {
+        printf("init returned nil; aborting\n");
+        exit(-1);
+    }
+    lua_settop(L, 0);
+    if(argc > 1) {
+        if(luaL_dofile(L, argv[1]) != 0) {
+            printf("unable to load %s!\n", argv[1]);
+            exit(-1);
+        }
+    } else {
+        runcgi(L);
+    }
+    return 0;
+}
+

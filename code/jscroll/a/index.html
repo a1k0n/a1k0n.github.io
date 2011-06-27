@@ -1,0 +1,35 @@
+<head>
+  <title>infinite sandbox</title>
+  <link rel="shortcut icon" href="favicon.ico">
+  <script src="c.js"></script>
+</head>
+<body onunload="b()" onload="a()">
+  <table>
+    <tr>
+      <td valign=top>
+        <div id=map style="position:relative; overflow:hidden; border:solid 1px; width:512px; height:512px;"></div>
+        <div id=inputdiv></div>
+      </td>
+      <td valign=top>
+        <div id=banner>
+          <p>Use the arrow keys to move your guy around.</p>
+          <p><a href="javascript:void(0);" onclick="t()">about</a></p>
+
+          <div id=about style="position:absolute; visibility:hidden; border:solid 1px; font-size: 8pt; background-color:#ffc;">
+            <p>Code (including procedurally-generated map and tile set) by <a
+              href="http://a1k0n.net/">Andy Sloane</a>.  Character art by <a
+              href="http://antifarea.deviantart.com/">Antifarea</a> for <a
+              href="http://opengameart.org">Open Game Art</a>.</p>
+            <p><a href="javascript:void(0);" onclick="t()">close</a><p>
+
+          </div>
+        </div>
+        <div id=status></div>
+        <div id=log style="width: 100%;"></div>
+        <hr>
+        <div id=chat style="width: 100%; vertical-align:bottom;"></div>
+      </td>
+    </tr>
+  </table>
+</body>
+

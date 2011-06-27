@@ -1,0 +1,90 @@
+#include <gmp.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+
+// p: 3374067537210606443
+// q: 6510719912576296457
+// n: 21967608700894359473408781171922272451
+// e: 12565401870538259349397318250721943231
+// d: 4444901153489723031681183441752517327
+// encoder keys:
+//   mpz_t n,e;
+//   mpz_init_set_str(n, "21967608700894359473408781171922272451", 10); /* 125 bits */
+//   mpz_init_set_str(e, "12565401870538259349397318250721943231", 10);
+// decoder keys:
+//   ubint<4> n,d;
+//   n[0]=0x776f80c3; n[1]=0x9f46d28b; n[2]=0xf71b044b; n[3]=0x1086ceba; 
+//   d[0]=0xa4856acf; d[1]=0x77f3c3aa; d[2]=0xf60149d3; d[3]=0x03580e8b; 
+
+const int nkeybits = 32;
+
+void gen_key_ciphertext(mpz_t k, mpz_t n, mpz_t e, const char *keynum)
+{
+  mpz_t check_mod;
+  mpz_init(check_mod);
+  mpz_init_set_str(k, keynum, 10);
+
+  mpz_tdiv_q_2exp(check_mod, n, nkeybits);
+  mpz_mul(k, k, check_mod);
+  // validity check: k%check_mod == 12345678
+  // this is just a "nothing up my sleeve" number; it could be anything else,
+  // as long as it's >1 and <check_mod
+  mpz_add_ui(k, k, 12345678); 
+  gmp_printf("check_mod: %Zd\nk: %Zd\n", check_mod, k);
+  
+  // encipher
+  mpz_powm(k, k, e, n);
+  gmp_printf("ciphertext: %Zd\n", k);
+}
+
+// 32 possible characters, in this canonical order:
+const char *codetable="123456789ABCDEFGHJKLMNOPRSTUVWXY";
+// to translate to canonical form: 0=Q=O, I=1, Z=2
+void gen_printable_key(mpz_t _k)
+{
+  mpz_t k; mpz_init_set(k, _k);
+  int n=0;
+  while(mpz_sgn(k) != 0) {
+    if(n>0 && (n%5) == 0) putchar('-');
+    unsigned x = mpz_get_ui(k);
+    mpz_tdiv_q_2exp(k, k, 5);
+    putchar(codetable[x&31]);
+    n++;
+  }
+  printf("\n");
+}
+
+void check_key(mpz_t _k, mpz_t d, mpz_t n)
+{
+  mpz_t k, chk;
+  mpz_t check_mod;
+  mpz_powm(k, _k, d, n);
+  mpz_init(chk);
+  mpz_init(check_mod);
+  mpz_tdiv_q_2exp(check_mod, n, nkeybits);
+  mpz_mod(chk, k, check_mod);
+  gmp_printf("check: %Zd %s\n", chk, mpz_cmp_ui(chk, 12345678)==0?"ok":"FAIL");
+}
+ 
+
+int main(int argc, char **argv)
+{
+  mpz_t k;
+  mpz_t n,e,d;
+  mpz_init_set_str(n, "21967608700894359473408781171922272451", 10); /* 125 bits */
+  mpz_init_set_str(e, "12565401870538259349397318250721943231", 10);
+  mpz_init_set_str(d, "4444901153489723031681183441752517327", 10);
+
+  if(argc<2) {
+    printf("usage: %s <keynumber>\n", argv[0]);
+    return 0;
+  }
+
+  gen_key_ciphertext(k, n, e, argv[1]);
+  gen_printable_key(k);
+  check_key(k, d, n);
+
+  return 0;
+}
+

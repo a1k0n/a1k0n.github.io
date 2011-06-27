@@ -1,0 +1,78 @@
+<script>
+a=0;
+C=Math.cos;
+
+var loaded=0;
+function onimgload() { if((++loaded) == 2) setInterval(update,9); }
+
+var sh = new Image();
+var img = new Image();
+img.onload = onimgload;
+sh.onload = onimgload;
+img.src = 'o.png';
+sh.src = 'bob_shadow.png';
+
+var Lx=-3; // light source location
+var Ly=-8;
+var Lz=-4;
+var h=5; // "floor" height
+var bsz = 0.8; // ball size
+
+function update()
+{
+  a +=.03;
+  with(R.getContext('2d')) {
+    var grad;
+    with(grad = createLinearGradient(0,0,0,140)) {
+      addColorStop(0, '#063d76');
+      addColorStop(0.5, '#03235c');
+      addColorStop(1.0, '#02113c');
+    }
+
+    fillStyle = '#822a1c';
+    fillRect(0,120,320,120);
+    fillStyle='#93a189';
+    for(var i=0;i<20;i++) {
+      var j = (i+a)%20 - 8;
+      beginPath();
+      moveTo(130,120);
+      lineTo(130+119*(4*j)/h, 240);
+      lineTo(130+119*(4*j-2)/h, 240);
+      fill();
+    }
+    fillStyle = grad;
+    fillRect(0,0,320,140);
+
+
+    for(var _x=-5;_x<=5;_x++) {
+      for(var _y=-4;_y<=4;_y++) {
+        if((_x+_y+1)&1) continue;
+        var x=_x*0.8;
+        var y=_y*0.8;
+        var z = 6+0.5*C(a-.7*x+.43*y)-C(1.84*a-.6*x+.2*y);
+        var t = (h-Ly)/(y-Ly);
+        var sx = Lx+(x-Lx)*t;
+        var sz = Lz+(z-Lz)*t + 5;
+        var r = 1.4*t*bsz;
+        var sszx = r*270/sz;
+        var sszy = 270*2*r*h/(sz*sz - r*r);
+        z += 5;
+        var s = 270*bsz/z;
+        var X=130+270*x/z,Y=100+270*y/z;
+        var Sx=130+270*sx/sz,Sy=100+270*h/sz;
+        drawImage(img, 0,0,32,32, X-s/2,Y-s/2,s,s);
+        drawImage(sh, 0,0,32,32, Sx-sszx/2,Sy-sszy/2,sszx,sszy);
+      }
+    }
+  }
+
+}
+</script>
+
+<body style='background-color:#03235c;text-align:center;color:#fff'>
+  <div style='font-size:50px;'>YES WE DID
+  <div>
+	<canvas id=R width=320 height=240>
+  </div>
+  </div>
+</body>

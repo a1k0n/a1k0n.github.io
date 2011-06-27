@@ -1,0 +1,833 @@
+--- reshuffle ---
+deck={56,8,40}, bankk=     10000 betk=    1667; bankm=   10000 betm= 1666 drawn=1
+deck={55,8,40}, bankk=     11667 betk=    1842; bankm=   11666 betm= 1666 drawn=3
+deck={55,8,39}, bankk=      9825 betk=    1672; bankm=   10000 betm= 3332 drawn=2
+deck={55,7,39}, bankk=      9825 betk=    1672; bankm=   10000 betm= 1666 drawn=1
+deck={54,7,39}, bankk=     11497 betk=    1854; bankm=   11666 betm= 1666 drawn=3
+deck={54,7,38}, bankk=      9643 betk=    1677; bankm=   10000 betm= 3332 drawn=1
+deck={53,7,38}, bankk=     11320 betk=    1866; bankm=   13332 betm= 1666 drawn=3
+deck={53,7,37}, bankk=      9454 betk=    1681; bankm=   11666 betm= 3332 drawn=1
+deck={52,7,37}, bankk=     11135 betk=    1877; bankm=   14998 betm= 1666 drawn=1
+deck={51,7,37}, bankk=     13012 betk=    2070; bankm=   16664 betm= 1666 drawn=3
+deck={51,7,36}, bankk=     10942 betk=    1887; bankm=   14998 betm= 3332 drawn=2
+deck={51,6,36}, bankk=     10942 betk=    1887; bankm=   14998 betm= 1666 drawn=1
+deck={50,6,36}, bankk=     12829 betk=    2088; bankm=   16664 betm= 1666 drawn=3
+deck={50,6,35}, bankk=     10741 betk=    1895; bankm=   14998 betm= 3332 drawn=1
+deck={49,6,35}, bankk=     12636 betk=    2106; bankm=   18330 betm= 1666 drawn=1
+deck={48,6,35}, bankk=     14742 betk=    2309; bankm=   19996 betm= 1666 drawn=3
+deck={48,6,34}, bankk=     12433 betk=    2123; bankm=   18330 betm= 3332 drawn=3
+deck={48,6,33}, bankk=     10310 betk=    1909; bankm=   14998 betm= 6664 drawn=1
+deck={47,6,33}, bankk=     12219 betk=    2138; bankm=   21662 betm= 1666 drawn=3
+deck={47,6,32}, bankk=     10081 betk=    1914; bankm=   19996 betm= 3332 drawn=3
+deck={47,6,31}, bankk=      8167 betk=    1675; bankm=   16664 betm= 6664 drawn=1
+deck={46,6,31}, bankk=      9842 betk=    1917; bankm=   23328 betm= 1666 drawn=1
+deck={45,6,31}, bankk=     11759 betk=    2166; bankm=   24994 betm= 1666 drawn=1
+deck={44,6,31}, bankk=     13925 betk=    2414; bankm=   26660 betm= 1666 drawn=2
+deck={44,5,31}, bankk=     13925 betk=    2414; bankm=   26660 betm= 1666 drawn=3
+deck={44,5,30}, bankk=     11511 betk=    2178; bankm=   24994 betm= 3332 drawn=1
+deck={43,5,30}, bankk=     13689 betk=    2438; bankm=   28326 betm= 1666 drawn=1
+deck={42,5,30}, bankk=     16127 betk=    2688; bankm=   29992 betm= 1666 drawn=1
+deck={41,5,30}, bankk=     18815 betk=    2915; bankm=   31658 betm= 1666 drawn=1
+deck={40,5,30}, bankk=     21730 betk=    3104; bankm=   33324 betm= 1666 drawn=3
+deck={40,5,29}, bankk=     18626 betk=    2969; bankm=   31658 betm= 3332 drawn=3
+deck={40,5,28}, bankk=     15657 betk=    2763; bankm=   28326 betm= 6664 drawn=1
+deck={39,5,28}, bankk=     18420 betk=    3024; bankm=   34990 betm= 1666 drawn=2
+deck={39,4,28}, bankk=     18420 betk=    3024; bankm=   34990 betm= 1666 drawn=2
+deck={39,3,28}, bankk=     18420 betk=    3024; bankm=   34990 betm= 1666 drawn=1
+deck={38,3,28}, bankk=     21444 betk=    3249; bankm=   36656 betm= 1666 drawn=1
+deck={37,3,28}, bankk=     24693 betk=    3419; bankm=   38322 betm= 1666 drawn=1
+deck={36,3,28}, bankk=     28112 betk=    3514; bankm=   39988 betm= 1666 drawn=3
+deck={36,3,27}, bankk=     24598 betk=    3514; bankm=   38322 betm= 3332 drawn=1
+deck={35,3,27}, bankk=     28112 betk=    3627; bankm=   41654 betm= 1666 drawn=3
+deck={35,3,26}, bankk=     24485 betk=    3613; bankm=   39988 betm= 3332 drawn=3
+deck={35,3,25}, bankk=     20872 betk=    3479; bankm=   36656 betm= 6664 drawn=1
+deck={34,3,25}, bankk=     24351 betk=    3715; bankm=   43320 betm= 1666 drawn=3
+deck={34,3,24}, bankk=     20636 betk=    3558; bankm=   41654 betm= 3332 drawn=1
+deck={33,3,24}, bankk=     24194 betk=    3820; bankm=   44986 betm= 1666 drawn=3
+deck={33,3,23}, bankk=     20374 betk=    3638; bankm=   43320 betm= 3332 drawn=1
+deck={32,3,23}, bankk=     24012 betk=    3929; bankm=   46652 betm= 1666 drawn=1
+deck={31,3,23}, bankk=     27941 betk=    4139; bankm=   48318 betm= 1666 drawn=1
+deck={30,3,23}, bankk=     32080 betk=    4237; bankm=   49984 betm= 1666 drawn=3
+deck={30,3,22}, bankk=     27843 betk=    4284; bankm=   48318 betm= 3332 drawn=1
+--- reshuffle ---
+deck={56,8,40}, bankk=     32127 betk=    5355; bankm=   51650 betm= 1666 drawn=1
+deck={55,8,40}, bankk=     37482 betk=    5918; bankm=   53316 betm= 1666 drawn=1
+deck={54,8,40}, bankk=     43400 betk=    6464; bankm=   54982 betm= 1666 drawn=1
+deck={53,8,40}, bankk=     49864 betk=    6970; bankm=   56648 betm= 1666 drawn=1
+deck={52,8,40}, bankk=     56834 betk=    7413; bankm=   58314 betm= 1666 drawn=1
+deck={51,8,40}, bankk=     64247 betk=    7766; bankm=   59980 betm= 1666 drawn=1
+deck={50,8,40}, bankk=     72013 betk=    8001; bankm=   61646 betm= 1666 drawn=1
+deck={49,8,40}, bankk=     80014 betk=    8091; bankm=   63312 betm= 1666 drawn=3
+deck={49,8,39}, bankk=     71923 betk=    8173; bankm=   61646 betm= 3332 drawn=1
+deck={48,8,39}, bankk=     80096 betk=    8286; bankm=   64978 betm= 1666 drawn=1
+deck={47,8,39}, bankk=     88382 betk=    8222; bankm=   66644 betm= 1666 drawn=3
+deck={47,8,38}, bankk=     80160 betk=    8488; bankm=   64978 betm= 3332 drawn=1
+deck={46,8,38}, bankk=     88648 betk=    8443; bankm=   68310 betm= 1666 drawn=3
+deck={46,8,37}, bankk=     80205 betk=    8697; bankm=   66644 betm= 3332 drawn=1
+deck={45,8,37}, bankk=     88902 betk=    8673; bankm=   69976 betm= 1666 drawn=3
+deck={45,8,36}, bankk=     80229 betk=    8914; bankm=   68310 betm= 3332 drawn=1
+deck={44,8,36}, bankk=     89143 betk=    8914; bankm=   71642 betm= 1666 drawn=1
+deck={43,8,36}, bankk=     98057 betk=    8689; bankm=   73308 betm= 1666 drawn=3
+deck={43,8,35}, bankk=     89368 betk=    9166; bankm=   71642 betm= 3332 drawn=1
+deck={42,8,35}, bankk=     98534 betk=    8958; bankm=   74974 betm= 1666 drawn=1
+deck={41,8,35}, bankk=    107492 betk=    8486; bankm=   76640 betm= 1666 drawn=1
+deck={40,8,35}, bankk=    115978 betk=    7732; bankm=   78306 betm= 1666 drawn=1
+deck={39,8,35}, bankk=    123710 betk=    6687; bankm=   79972 betm= 1666 drawn=3
+deck={39,8,34}, bankk=    117023 betk=    8015; bankm=   78306 betm= 3332 drawn=2
+deck={39,7,34}, bankk=    117023 betk=    8015; bankm=   78306 betm= 1666 drawn=1
+deck={38,7,34}, bankk=    125038 betk=    6947; bankm=   79972 betm= 1666 drawn=3
+deck={38,7,33}, bankk=    118091 betk=    8316; bankm=   78306 betm= 3332 drawn=3
+deck={38,7,32}, bankk=    109775 betk=    9409; bankm=   74974 betm= 6664 drawn=3
+deck={38,7,31}, bankk=    100366 betk=   10182; bankm=   68310 betm=13328 drawn=1
+deck={37,7,31}, bankk=    110548 betk=    9754; bankm=   81638 betm= 1666 drawn=3
+deck={37,7,30}, bankk=    100794 betk=   10531; bankm=   79972 betm= 3332 drawn=1
+deck={36,7,30}, bankk=    111325 betk=   10120; bankm=   83304 betm= 1666 drawn=3
+deck={36,7,29}, bankk=    101205 betk=   10899; bankm=   81638 betm= 3332 drawn=3
+deck={36,7,28}, bankk=     90306 betk=   11288; bankm=   78306 betm= 6664 drawn=3
+deck={36,7,27}, bankk=     79018 betk=   11288; bankm=   71642 betm=13328 drawn=3
+deck={36,7,26}, bankk=     67730 betk=   10924; bankm=   58314 betm=26656 drawn=1
+deck={35,7,26}, bankk=     78654 betk=   11605; bankm=   84970 betm= 1666 drawn=1
+deck={34,7,26}, bankk=     90259 betk=   12035; bankm=   86636 betm= 1666 drawn=3
+deck={34,7,25}, bankk=     78224 betk=   11932; bankm=   84970 betm= 3332 drawn=1
+deck={33,7,25}, bankk=     90156 betk=   12435; bankm=   88302 betm= 1666 drawn=3
+deck={33,7,24}, bankk=     77721 betk=   12272; bankm=   86636 betm= 3332 drawn=3
+deck={33,7,23}, bankk=     65449 betk=   11687; bankm=   83304 betm= 6664 drawn=3
+deck={33,7,22}, bankk=     53762 betk=   10752; bankm=   76640 betm=13328 drawn=3
+deck={33,7,21}, bankk=     43010 betk=    9558; bankm=   63312 betm=26656 drawn=1
+deck={32,7,21}, bankk=     52568 betk=   10910; bankm=   89968 betm= 1666 drawn=2
+deck={32,6,21}, bankk=     52568 betk=   10910; bankm=   89968 betm= 1666 drawn=1
+deck={31,6,21}, bankk=     63478 betk=   12207; bankm=   91634 betm= 1666 drawn=3
+deck={31,6,20}, bankk=     51271 betk=   11058; bankm=   89968 betm= 3332 drawn=3
+deck={31,6,19}, bankk=     40213 betk=    9651; bankm=   86636 betm= 6664 drawn=1
+deck={30,6,19}, bankk=     49864 betk=   11194; bankm=   93300 betm= 1666 drawn=2
+--- reshuffle ---
+deck={56,8,40}, bankk=     49864 betk=    8311; bankm=   93300 betm= 1666 drawn=3
+deck={56,8,39}, bankk=     41553 betk=    7436; bankm=   91634 betm= 3332 drawn=1
+deck={55,8,39}, bankk=     48989 betk=    8339; bankm=   94966 betm= 1666 drawn=1
+deck={54,8,39}, bankk=     57328 betk=    9246; bankm=   96632 betm= 1666 drawn=1
+deck={53,8,39}, bankk=     66574 betk=   10131; bankm=   98298 betm= 1666 drawn=2
+deck={53,7,39}, bankk=     66574 betk=   10131; bankm=   98298 betm= 1666 drawn=1
+deck={52,7,39}, bankk=     76705 betk=   10958; bankm=   99964 betm= 1666 drawn=3
+deck={52,7,38}, bankk=     65747 betk=   10227; bankm=   98298 betm= 3332 drawn=3
+deck={52,7,37}, bankk=     55520 betk=    9357; bankm=   94966 betm= 6664 drawn=1
+deck={51,7,37}, bankk=     64877 betk=   10321; bankm=  101630 betm= 1666 drawn=1
+deck={50,7,37}, bankk=     75198 betk=   11236; bankm=  103296 betm= 1666 drawn=1
+deck={49,7,37}, bankk=     86434 betk=   12061; bankm=  104962 betm= 1666 drawn=1
+deck={48,7,37}, bankk=     98495 betk=   12746; bankm=  106628 betm= 1666 drawn=1
+deck={47,7,37}, bankk=    111241 betk=   13243; bankm=  108294 betm= 1666 drawn=3
+deck={47,7,36}, bankk=     97998 betk=   12988; bankm=  106628 betm= 3332 drawn=1
+deck={46,7,36}, bankk=    110986 betk=   13535; bankm=  109960 betm= 1666 drawn=1
+deck={45,7,36}, bankk=    124521 betk=   13836; bankm=  111626 betm= 1666 drawn=1
+deck={44,7,36}, bankk=    138357 betk=   13836; bankm=  113292 betm= 1666 drawn=3
+deck={44,7,35}, bankk=    124521 betk=   14186; bankm=  111626 betm= 3332 drawn=3
+deck={44,7,34}, bankk=    110335 betk=   14146; bankm=  108294 betm= 6664 drawn=1
+deck={43,7,34}, bankk=    124481 betk=   14550; bankm=  114958 betm= 1666 drawn=1
+deck={42,7,34}, bankk=    139031 betk=   14635; bankm=  116624 betm= 1666 drawn=2
+deck={42,6,34}, bankk=    139031 betk=   14635; bankm=  116624 betm= 1666 drawn=3
+deck={42,6,33}, bankk=    124396 betk=   14928; bankm=  114958 betm= 3332 drawn=3
+deck={42,6,32}, bankk=    109468 betk=   14793; bankm=  111626 betm= 6664 drawn=1
+deck={41,6,32}, bankk=    124261 betk=   15320; bankm=  118290 betm= 1666 drawn=1
+deck={40,6,32}, bankk=    139581 betk=   15509; bankm=  119956 betm= 1666 drawn=1
+deck={39,6,32}, bankk=    155090 betk=   15291; bankm=  121622 betm= 1666 drawn=1
+deck={38,6,32}, bankk=    170381 betk=   14604; bankm=  123288 betm= 1666 drawn=3
+deck={38,6,31}, bankk=    155777 betk=   15803; bankm=  121622 betm= 3332 drawn=3
+deck={38,6,30}, bankk=    139974 betk=   16468; bankm=  118290 betm= 6664 drawn=3
+deck={38,6,29}, bankk=    123506 betk=   16590; bankm=  111626 betm=13328 drawn=1
+deck={37,6,29}, bankk=    140096 betk=   16981; bankm=  124954 betm= 1666 drawn=1
+deck={36,6,29}, bankk=    157077 betk=   16916; bankm=  126620 betm= 1666 drawn=1
+deck={35,6,29}, bankk=    173993 betk=   16312; bankm=  128286 betm= 1666 drawn=2
+deck={35,5,29}, bankk=    173993 betk=   16312; bankm=  128286 betm= 1666 drawn=1
+deck={34,5,29}, bankk=    190305 betk=   15104; bankm=  129952 betm= 1666 drawn=3
+deck={34,5,28}, bankk=    175201 betk=   16955; bankm=  128286 betm= 3332 drawn=3
+deck={34,5,27}, bankk=    158246 betk=   18159; bankm=  124954 betm= 6664 drawn=1
+deck={33,5,27}, bankk=    176405 betk=   17641; bankm=  131618 betm= 1666 drawn=1
+deck={32,5,27}, bankk=    194046 betk=   16445; bankm=  133284 betm= 1666 drawn=3
+deck={32,5,26}, bankk=    177601 betk=   18373; bankm=  131618 betm= 3332 drawn=3
+deck={32,5,25}, bankk=    159228 betk=   19554; bankm=  128286 betm= 6664 drawn=3
+deck={32,5,24}, bankk=    139674 betk=   19953; bankm=  121622 betm=13328 drawn=1
+deck={31,5,24}, bankk=    159627 betk=   20316; bankm=  134950 betm= 1666 drawn=3
+deck={31,5,23}, bankk=    139311 betk=   20639; bankm=  133284 betm= 3332 drawn=1
+deck={30,5,23}, bankk=    159950 betk=   21125; bankm=  136616 betm= 1666 drawn=1
+deck={29,5,23}, bankk=    181075 betk=   20893; bankm=  138282 betm= 1666 drawn=1
+deck={28,5,23}, bankk=    201968 betk=   19801; bankm=  139948 betm= 1666 drawn=3
+deck={28,5,22}, bankk=    182167 betk=   21860; bankm=  138282 betm= 3332 drawn=3
+--- reshuffle ---
+deck={56,8,40}, bankk=    160307 betk=   26718; bankm=  134950 betm= 6664 drawn=3
+deck={56,8,39}, bankk=    133589 betk=   23905; bankm=  128286 betm=13328 drawn=2
+deck={56,7,39}, bankk=    133589 betk=   23905; bankm=  128286 betm= 1666 drawn=3
+deck={56,7,38}, bankk=    109684 betk=   21003; bankm=  126620 betm= 3332 drawn=3
+deck={56,7,37}, bankk=     88681 betk=   18118; bankm=  123288 betm= 6664 drawn=1
+deck={55,7,37}, bankk=    106799 betk=   20895; bankm=  129952 betm= 1666 drawn=3
+deck={55,7,36}, bankk=     85904 betk=   17936; bankm=  128286 betm= 3332 drawn=3
+deck={55,7,35}, bankk=     67968 betk=   15104; bankm=  124954 betm= 6664 drawn=3
+deck={55,7,34}, bankk=     52864 betk=   12474; bankm=  118290 betm=13328 drawn=1
+deck={54,7,34}, bankk=     65338 betk=   14850; bankm=  131618 betm= 1666 drawn=1
+deck={53,7,34}, bankk=     80188 betk=   17512; bankm=  133284 betm= 1666 drawn=3
+deck={53,7,33}, bankk=     62676 betk=   14576; bankm=  131618 betm= 3332 drawn=1
+deck={52,7,33}, bankk=     77252 betk=   17268; bankm=  134950 betm= 1666 drawn=3
+deck={52,7,32}, bankk=     59984 betk=   14282; bankm=  133284 betm= 3332 drawn=1
+deck={51,7,32}, bankk=     74266 betk=   17001; bankm=  136616 betm= 1666 drawn=3
+deck={51,7,31}, bankk=     57265 betk=   13967; bankm=  134950 betm= 3332 drawn=3
+deck={51,7,30}, bankk=     43298 betk=   11225; bankm=  131618 betm= 6664 drawn=1
+deck={50,7,30}, bankk=     54523 betk=   13631; bankm=  138282 betm= 1666 drawn=3
+deck={50,7,29}, bankk=     40892 betk=   10870; bankm=  136616 betm= 3332 drawn=3
+deck={50,7,28}, bankk=     30022 betk=    8468; bankm=  133284 betm= 6664 drawn=3
+deck={50,7,27}, bankk=     21554 betk=    6438; bankm=  126620 betm=13328 drawn=2
+deck={50,6,27}, bankk=     21554 betk=    6438; bankm=  126620 betm= 1666 drawn=3
+deck={50,6,26}, bankk=     15116 betk=    4773; bankm=  124954 betm= 3332 drawn=2
+deck={50,5,26}, bankk=     15116 betk=    4773; bankm=  124954 betm= 1666 drawn=1
+deck={49,5,26}, bankk=     19889 betk=    6099; bankm=  126620 betm= 1666 drawn=2
+deck={49,4,26}, bankk=     19889 betk=    6099; bankm=  126620 betm= 1666 drawn=1
+deck={48,4,26}, bankk=     25988 betk=    7726; bankm=  128286 betm= 1666 drawn=1
+deck={47,4,26}, bankk=     33714 betk=    9699; bankm=  129952 betm= 1666 drawn=3
+deck={47,4,25}, bankk=     24015 betk=    7338; bankm=  128286 betm= 3332 drawn=1
+deck={46,4,25}, bankk=     31353 betk=    9273; bankm=  131618 betm= 1666 drawn=1
+deck={45,4,25}, bankk=     40626 betk=   11607; bankm=  133284 betm= 1666 drawn=1
+deck={44,4,25}, bankk=     52233 betk=   14383; bankm=  134950 betm= 1666 drawn=1
+deck={43,4,25}, bankk=     66616 betk=   17634; bankm=  136616 betm= 1666 drawn=1
+deck={42,4,25}, bankk=     84250 betk=   21377; bankm=  138282 betm= 1666 drawn=3
+deck={42,4,24}, bankk=     62873 betk=   17147; bankm=  136616 betm= 3332 drawn=3
+deck={42,4,23}, bankk=     45726 betk=   13366; bankm=  133284 betm= 6664 drawn=1
+deck={41,4,23}, bankk=     59092 betk=   16620; bankm=  139948 betm= 1666 drawn=1
+deck={40,4,23}, bankk=     75712 betk=   20430; bankm=  141614 betm= 1666 drawn=1
+deck={39,4,23}, bankk=     96142 betk=   24811; bankm=  143280 betm= 1666 drawn=1
+deck={38,4,23}, bankk=    120953 betk=   29743; bankm=  144946 betm= 1666 drawn=1
+deck={37,4,23}, bankk=    150696 betk=   35162; bankm=  146612 betm= 1666 drawn=1
+deck={36,4,23}, bankk=    185858 betk=   40952; bankm=  148278 betm= 1666 drawn=2
+deck={36,3,23}, bankk=    185858 betk=   40952; bankm=  148278 betm= 1666 drawn=1
+deck={35,3,23}, bankk=    226810 betk=   46926; bankm=  149944 betm= 1666 drawn=3
+deck={35,3,22}, bankk=    179884 betk=   41026; bankm=  148278 betm= 3332 drawn=3
+deck={35,3,21}, bankk=    138858 betk=   34715; bankm=  144946 betm= 6664 drawn=1
+deck={34,3,21}, bankk=    173573 betk=   41026; bankm=  151610 betm= 1666 drawn=3
+deck={34,3,20}, bankk=    132547 betk=   34364; bankm=  149944 betm= 3332 drawn=1
+deck={33,3,20}, bankk=    166911 betk=   40940; bankm=  153276 betm= 1666 drawn=3
+deck={33,3,19}, bankk=    125971 betk=   33915; bankm=  151610 betm= 3332 drawn=1
+--- reshuffle ---
+deck={56,8,40}, bankk=    159886 betk=   26648; bankm=  154942 betm= 1666 drawn=1
+deck={55,8,40}, bankk=    186534 betk=   29453; bankm=  156608 betm= 1666 drawn=1
+deck={54,8,40}, bankk=    215987 betk=   32168; bankm=  158274 betm= 1666 drawn=1
+deck={53,8,40}, bankk=    248155 betk=   34688; bankm=  159940 betm= 1666 drawn=3
+deck={53,8,39}, bankk=    213467 betk=   32484; bankm=  158274 betm= 3332 drawn=1
+deck={52,8,39}, bankk=    245951 betk=   35136; bankm=  161606 betm= 1666 drawn=3
+deck={52,8,38}, bankk=    210815 betk=   32793; bankm=  159940 betm= 3332 drawn=1
+deck={51,8,38}, bankk=    243608 betk=   35583; bankm=  163272 betm= 1666 drawn=1
+deck={50,8,38}, bankk=    279191 betk=   38072; bankm=  164938 betm= 1666 drawn=3
+deck={50,8,37}, bankk=    241119 betk=   36029; bankm=  163272 betm= 3332 drawn=3
+deck={50,8,36}, bankk=    205090 betk=   33387; bankm=  159940 betm= 6664 drawn=3
+deck={50,8,35}, bankk=    171703 betk=   30301; bankm=  153276 betm=13328 drawn=1
+deck={49,8,35}, bankk=    202004 betk=   33667; bankm=  166604 betm= 1666 drawn=2
+deck={49,7,35}, bankk=    202004 betk=   33667; bankm=  166604 betm= 1666 drawn=3
+deck={49,7,34}, bankk=    168337 betk=   30422; bankm=  164938 betm= 3332 drawn=2
+deck={49,6,34}, bankk=    168337 betk=   30422; bankm=  164938 betm= 1666 drawn=3
+deck={49,6,33}, bankk=    137915 betk=   26910; bankm=  163272 betm= 3332 drawn=1
+deck={48,6,33}, bankk=    164825 betk=   30523; bankm=  166604 betm= 1666 drawn=1
+deck={47,6,33}, bankk=    195348 betk=   34186; bankm=  168270 betm= 1666 drawn=3
+deck={47,6,32}, bankk=    161162 betk=   30600; bankm=  166604 betm= 3332 drawn=1
+deck={46,6,32}, bankk=    191762 betk=   34419; bankm=  169936 betm= 1666 drawn=1
+deck={45,6,32}, bankk=    226181 betk=   38186; bankm=  171602 betm= 1666 drawn=3
+deck={45,6,31}, bankk=    187995 betk=   34631; bankm=  169936 betm= 3332 drawn=1
+deck={44,6,31}, bankk=    222626 betk=   38589; bankm=  173268 betm= 1666 drawn=3
+deck={44,6,30}, bankk=    184037 betk=   34818; bankm=  171602 betm= 3332 drawn=1
+deck={43,6,30}, bankk=    218855 betk=   38974; bankm=  174934 betm= 1666 drawn=1
+deck={42,6,30}, bankk=    257829 betk=   42972; bankm=  176600 betm= 1666 drawn=2
+deck={42,5,30}, bankk=    257829 betk=   42972; bankm=  176600 betm= 1666 drawn=1
+deck={41,5,30}, bankk=    300801 betk=   46603; bankm=  178266 betm= 1666 drawn=3
+deck={41,5,29}, bankk=    254198 betk=   43577; bankm=  176600 betm= 3332 drawn=3
+deck={41,5,28}, bankk=    210621 betk=   39682; bankm=  173268 betm= 6664 drawn=3
+deck={41,5,27}, bankk=    170939 betk=   35193; bankm=  166604 betm=13328 drawn=1
+deck={40,5,27}, bankk=    206132 betk=   39996; bankm=  179932 betm= 1666 drawn=1
+deck={39,5,27}, bankk=    246128 betk=   44751; bankm=  181598 betm= 1666 drawn=1
+deck={38,5,27}, bankk=    290879 betk=   49226; bankm=  183264 betm= 1666 drawn=1
+deck={37,5,27}, bankk=    340105 betk=   53141; bankm=  184930 betm= 1666 drawn=3
+deck={37,5,26}, bankk=    286964 betk=   50105; bankm=  183264 betm= 3332 drawn=3
+deck={37,5,25}, bankk=    236859 betk=   45844; bankm=  179932 betm= 6664 drawn=1
+deck={36,5,25}, bankk=    282703 betk=   50979; bankm=  186596 betm= 1666 drawn=1
+deck={35,5,25}, bankk=    333682 betk=   55614; bankm=  188262 betm= 1666 drawn=3
+deck={35,5,24}, bankk=    278068 betk=   51843; bankm=  186596 betm= 3332 drawn=1
+deck={34,5,24}, bankk=    329911 betk=   56881; bankm=  189928 betm= 1666 drawn=2
+deck={34,4,24}, bankk=    329911 betk=   56881; bankm=  189928 betm= 1666 drawn=3
+deck={34,4,23}, bankk=    273030 betk=   52690; bankm=  188262 betm= 3332 drawn=1
+deck={33,4,23}, bankk=    325720 betk=   58164; bankm=  191594 betm= 1666 drawn=1
+deck={32,4,23}, bankk=    383884 betk=   62817; bankm=  193260 betm= 1666 drawn=1
+deck={31,4,23}, bankk=    446701 betk=   66178; bankm=  194926 betm= 1666 drawn=3
+deck={31,4,22}, bankk=    380523 betk=   64617; bankm=  193260 betm= 3332 drawn=1
+deck={30,4,22}, bankk=    445140 betk=   68483; bankm=  196592 betm= 1666 drawn=1
+deck={29,4,22}, bankk=    513623 betk=   70497; bankm=  198258 betm= 1666 drawn=3
+--- reshuffle ---
+deck={56,8,40}, bankk=    443126 betk=   73854; bankm=  196592 betm= 3332 drawn=1
+deck={55,8,40}, bankk=    516980 betk=   81628; bankm=  199924 betm= 1666 drawn=1
+deck={54,8,40}, bankk=    598608 betk=   89154; bankm=  201590 betm= 1666 drawn=1
+deck={53,8,40}, bankk=    687762 betk=   96139; bankm=  203256 betm= 1666 drawn=3
+deck={53,8,39}, bankk=    591623 betk=   90030; bankm=  201590 betm= 3332 drawn=1
+deck={52,8,39}, bankk=    681653 betk=   97379; bankm=  204922 betm= 1666 drawn=3
+deck={52,8,38}, bankk=    584274 betk=   90887; bankm=  203256 betm= 3332 drawn=3
+deck={52,8,37}, bankk=    493387 betk=   83155; bankm=  199924 betm= 6664 drawn=3
+deck={52,8,36}, bankk=    410232 betk=   74588; bankm=  193260 betm=13328 drawn=1
+deck={51,8,36}, bankk=    484820 betk=   83590; bankm=  206588 betm= 1666 drawn=1
+deck={50,8,36}, bankk=    568410 betk=   92532; bankm=  208254 betm= 1666 drawn=3
+deck={50,8,35}, bankk=    475878 betk=   83978; bankm=  206588 betm= 3332 drawn=3
+deck={50,8,34}, bankk=    391900 betk=   74648; bankm=  203256 betm= 6664 drawn=1
+deck={49,8,34}, bankk=    466548 betk=   84316; bankm=  209920 betm= 1666 drawn=3
+deck={49,8,33}, bankk=    382232 betk=   74582; bankm=  208254 betm= 3332 drawn=1
+deck={48,8,33}, bankk=    456814 betk=   84595; bankm=  211586 betm= 1666 drawn=1
+deck={47,8,33}, bankk=    541409 betk=   94747; bankm=  213252 betm= 1666 drawn=1
+deck={46,8,33}, bankk=    636156 betk=  104684; bankm=  214918 betm= 1666 drawn=3
+deck={46,8,32}, bankk=    531472 betk=   95392; bankm=  213252 betm= 3332 drawn=3
+deck={46,8,31}, bankk=    436080 betk=   84951; bankm=  209920 betm= 6664 drawn=3
+deck={46,8,30}, bankk=    351129 betk=   73922; bankm=  203256 betm=13328 drawn=3
+deck={46,8,29}, bankk=    277207 betk=   62834; bankm=  189928 betm=26656 drawn=1
+deck={45,8,29}, bankk=    340041 betk=   73522; bankm=  216584 betm= 1666 drawn=3
+deck={45,8,28}, bankk=    266519 betk=   62066; bankm=  214918 betm= 3332 drawn=1
+deck={44,8,28}, bankk=    328585 betk=   73019; bankm=  218250 betm= 1666 drawn=1
+deck={43,8,28}, bankk=    401604 betk=   84846; bankm=  219916 betm= 1666 drawn=3
+deck={43,8,27}, bankk=    316758 betk=   72402; bankm=  218250 betm= 3332 drawn=3
+deck={43,8,26}, bankk=    244356 betk=   60204; bankm=  214918 betm= 6664 drawn=3
+deck={43,8,25}, bankk=    184152 betk=   48746; bankm=  208254 betm=13328 drawn=1
+deck={42,8,25}, bankk=    232898 betk=   59094; bankm=  221582 betm= 1666 drawn=3
+deck={42,8,24}, bankk=    173804 betk=   47401; bankm=  219916 betm= 3332 drawn=1
+deck={41,8,24}, bankk=    221205 betk=   57854; bankm=  223248 betm= 1666 drawn=1
+deck={40,8,24}, bankk=    279059 betk=   69765; bankm=  224914 betm= 1666 drawn=3
+deck={40,8,23}, bankk=    209294 betk=   56476; bankm=  223248 betm= 3332 drawn=1
+deck={39,8,23}, bankk=    265770 betk=   68586; bankm=  226580 betm= 1666 drawn=2
+deck={39,7,23}, bankk=    265770 betk=   68586; bankm=  226580 betm= 1666 drawn=3
+deck={39,7,22}, bankk=    197184 betk=   54953; bankm=  224914 betm= 3332 drawn=3
+deck={39,7,21}, bankk=    142231 betk=   42669; bankm=  221582 betm= 6664 drawn=1
+deck={38,7,21}, bankk=    184900 betk=   53276; bankm=  228246 betm= 1666 drawn=1
+deck={37,7,21}, bankk=    238176 betk=   65704; bankm=  229912 betm= 1666 drawn=3
+deck={37,7,20}, bankk=    172472 betk=   51439; bankm=  228246 betm= 3332 drawn=1
+deck={36,7,20}, bankk=    223911 betk=   63975; bankm=  231578 betm= 1666 drawn=2
+deck={36,6,20}, bankk=    223911 betk=   63975; bankm=  231578 betm= 1666 drawn=1
+deck={35,6,20}, bankk=    287886 betk=   78514; bankm=  233244 betm= 1666 drawn=2
+deck={35,5,20}, bankk=    287886 betk=   78514; bankm=  233244 betm= 1666 drawn=3
+deck={35,5,19}, bankk=    209372 betk=   62036; bankm=  231578 betm= 3332 drawn=3
+deck={35,5,18}, bankk=    147336 betk=   47259; bankm=  228246 betm= 6664 drawn=1
+deck={34,5,18}, bankk=    194595 betk=   59875; bankm=  234910 betm= 1666 drawn=1
+deck={33,5,18}, bankk=    254470 betk=   74844; bankm=  236576 betm= 1666 drawn=1
+deck={32,5,18}, bankk=    329314 betk=   92208; bankm=  238242 betm= 1666 drawn=1
+--- reshuffle ---
+deck={56,8,40}, bankk=    421522 betk=   70254; bankm=  239908 betm= 1666 drawn=3
+deck={56,8,39}, bankk=    351268 betk=   62858; bankm=  238242 betm= 3332 drawn=3
+deck={56,8,38}, bankk=    288410 betk=   55227; bankm=  234910 betm= 6664 drawn=3
+deck={56,8,37}, bankk=    233183 betk=   47640; bankm=  228246 betm=13328 drawn=3
+deck={56,8,36}, bankk=    185543 betk=   40335; bankm=  214918 betm=26656 drawn=3
+deck={56,8,35}, bankk=    145208 betk=   33510; bankm=  188262 betm=53312 drawn=3
+deck={56,8,34}, bankk=    111698 betk=   27304; bankm=  134950 betm=106624 drawn=1
+deck={55,8,34}, bankk=    139002 betk=   32798; bankm=  241574 betm= 1666 drawn=1
+deck={54,8,34}, bankk=    171800 betk=   39045; bankm=  243240 betm= 1666 drawn=1
+deck={53,8,34}, bankk=    210845 betk=   46047; bankm=  244906 betm= 1666 drawn=1
+deck={52,8,34}, bankk=    256892 betk=   53768; bankm=  246572 betm= 1666 drawn=1
+deck={51,8,34}, bankk=    310660 betk=   62132; bankm=  248238 betm= 1666 drawn=3
+deck={51,8,33}, bankk=    248528 betk=   53256; bankm=  246572 betm= 3332 drawn=1
+deck={50,8,33}, bankk=    301784 betk=   61811; bankm=  249904 betm= 1666 drawn=1
+deck={49,8,33}, bankk=    363595 betk=   70945; bankm=  251570 betm= 1666 drawn=3
+deck={49,8,32}, bankk=    292650 betk=   61420; bankm=  249904 betm= 3332 drawn=1
+deck={48,8,32}, bankk=    354070 betk=   70814; bankm=  253236 betm= 1666 drawn=3
+deck={48,8,31}, bankk=    283256 betk=   60954; bankm=  251570 betm= 3332 drawn=1
+deck={47,8,31}, bankk=    344210 betk=   70607; bankm=  254902 betm= 1666 drawn=3
+deck={47,8,30}, bankk=    273603 betk=   60406; bankm=  253236 betm= 3332 drawn=1
+deck={46,8,30}, bankk=    334009 betk=   70318; bankm=  256568 betm= 1666 drawn=2
+deck={46,7,30}, bankk=    334009 betk=   70318; bankm=  256568 betm= 1666 drawn=3
+deck={46,7,29}, bankk=    263691 betk=   59770; bankm=  254902 betm= 3332 drawn=3
+deck={46,7,28}, bankk=    203921 betk=   49602; bankm=  251570 betm= 6664 drawn=1
+deck={45,7,28}, bankk=    253523 betk=   59040; bankm=  258234 betm= 1666 drawn=1
+deck={44,7,28}, bankk=    312563 betk=   69458; bankm=  259900 betm= 1666 drawn=1
+deck={43,7,28}, bankk=    382021 betk=   80709; bankm=  261566 betm= 1666 drawn=3
+deck={43,7,27}, bankk=    301312 betk=   68871; bankm=  259900 betm= 3332 drawn=1
+deck={42,7,27}, bankk=    370183 betk=   80475; bankm=  263232 betm= 1666 drawn=1
+deck={41,7,27}, bankk=    450658 betk=   92783; bankm=  264898 betm= 1666 drawn=1
+deck={40,7,27}, bankk=    543441 betk=  105444; bankm=  266564 betm= 1666 drawn=1
+deck={39,7,27}, bankk=    648885 betk=  117979; bankm=  268230 betm= 1666 drawn=1
+deck={38,7,27}, bankk=    766864 betk=  129777; bankm=  269896 betm= 1666 drawn=1
+deck={37,7,27}, bankk=    896641 betk=  140100; bankm=  271562 betm= 1666 drawn=1
+deck={36,7,27}, bankk=   1036741 betk=  148106; bankm=  273228 betm= 1666 drawn=3
+deck={36,7,26}, bankk=    888635 betk=  143328; bankm=  271562 betm= 3332 drawn=2
+deck={36,6,26}, bankk=    888635 betk=  143328; bankm=  271562 betm= 1666 drawn=2
+deck={36,5,26}, bankk=    888635 betk=  143328; bankm=  271562 betm= 1666 drawn=3
+deck={36,5,25}, bankk=    745307 betk=  134400; bankm=  269896 betm= 3332 drawn=1
+deck={35,5,25}, bankk=    879707 betk=  146618; bankm=  273228 betm= 1666 drawn=3
+deck={35,5,24}, bankk=    733089 betk=  136678; bankm=  271562 betm= 3332 drawn=1
+deck={34,5,24}, bankk=    869767 betk=  149960; bankm=  274894 betm= 1666 drawn=2
+deck={34,4,24}, bankk=    869767 betk=  149960; bankm=  274894 betm= 1666 drawn=3
+deck={34,4,23}, bankk=    719807 betk=  138910; bankm=  273228 betm= 3332 drawn=3
+deck={34,4,22}, bankk=    580897 betk=  124478; bankm=  269896 betm= 6664 drawn=1
+deck={33,4,22}, bankk=    705375 betk=  141075; bankm=  276560 betm= 1666 drawn=1
+deck={32,4,22}, bankk=    846450 betk=  156750; bankm=  278226 betm= 1666 drawn=1
+deck={31,4,22}, bankk=   1003200 betk=  170355; bankm=  279892 betm= 1666 drawn=3
+deck={31,4,21}, bankk=    832845 betk=  160163; bankm=  278226 betm= 3332 drawn=1
+deck={30,4,21}, bankk=    993008 betk=  175237; bankm=  281558 betm= 1666 drawn=3
+--- reshuffle ---
+deck={56,8,40}, bankk=    817771 betk=  136295; bankm=  279892 betm= 3332 drawn=1
+deck={55,8,40}, bankk=    954066 betk=  150642; bankm=  283224 betm= 1666 drawn=1
+deck={54,8,40}, bankk=   1104708 betk=  164531; bankm=  284890 betm= 1666 drawn=1
+deck={53,8,40}, bankk=   1269239 betk=  177421; bankm=  286556 betm= 1666 drawn=1
+deck={52,8,40}, bankk=   1446660 betk=  188695; bankm=  288222 betm= 1666 drawn=3
+deck={52,8,39}, bankk=   1257965 betk=  179709; bankm=  286556 betm= 3332 drawn=3
+deck={52,8,38}, bankk=   1078256 betk=  167729; bankm=  283224 betm= 6664 drawn=1
+deck={51,8,38}, bankk=   1245985 betk=  181998; bankm=  289888 betm= 1666 drawn=1
+deck={50,8,38}, bankk=   1427983 betk=  194725; bankm=  291554 betm= 1666 drawn=1
+deck={49,8,38}, bankk=   1622708 betk=  205170; bankm=  293220 betm= 1666 drawn=1
+deck={48,8,38}, bankk=   1827878 betk=  212544; bankm=  294886 betm= 1666 drawn=1
+deck={47,8,38}, bankk=   2040422 betk=  216045; bankm=  296552 betm= 1666 drawn=1
+deck={46,8,38}, bankk=   2256467 betk=  214902; bankm=  298218 betm= 1666 drawn=1
+deck={45,8,38}, bankk=   2471369 betk=  208429; bankm=  299884 betm= 1666 drawn=1
+deck={44,8,38}, bankk=   2679798 betk=  196083; bankm=  301550 betm= 1666 drawn=1
+deck={43,8,38}, bankk=   2875881 betk=  177524; bankm=  303216 betm= 1666 drawn=3
+deck={43,8,37}, bankk=   2698357 betk=  202377; bankm=  301550 betm= 3332 drawn=1
+deck={42,8,37}, bankk=   2900734 betk=  183591; bankm=  304882 betm= 1666 drawn=1
+deck={41,8,37}, bankk=   3084325 betk=  158171; bankm=  306548 betm= 1666 drawn=1
+deck={40,8,37}, bankk=   3242496 betk=  126331; bankm=  308214 betm= 1666 drawn=1
+deck={39,8,37}, bankk=   3368827 betk=   88653; bankm=  309880 betm= 1666 drawn=1
+deck={38,8,37}, bankk=   3457480 betk=   46100; bankm=  311546 betm= 1666 drawn=3
+deck={38,8,36}, bankk=   3411380 betk=   92199; bankm=  309880 betm= 3332 drawn=3
+deck={38,8,35}, bankk=   3319181 betk=  136405; bankm=  306548 betm= 6664 drawn=1
+deck={37,8,35}, bankk=   3455586 betk=   95989; bankm=  313212 betm= 1666 drawn=1
+deck={36,8,35}, bankk=   3551575 betk=   50022; bankm=  314878 betm= 1666 drawn=3
+deck={36,8,34}, bankk=   3501553 betk=  100044; bankm=  313212 betm= 3332 drawn=2
+deck={36,7,34}, bankk=   3501553 betk=  100044; bankm=  313212 betm= 1666 drawn=2
+deck={36,6,34}, bankk=   3501553 betk=  100044; bankm=  313212 betm= 1666 drawn=1
+deck={35,6,34}, bankk=   3601597 betk=   52197; bankm=  314878 betm= 1666 drawn=1
+deck={34,6,34}, bankk=   3653794 betk=       0; bankm=  316544 betm= 1666 drawn=3
+deck={34,6,33}, bankk=   3653794 betk=   54534; bankm=  314878 betm= 3332 drawn=3
+deck={34,6,32}, bankk=   3599260 betk=  109068; bankm=  311546 betm= 6664 drawn=1
+deck={33,6,32}, bankk=   3708328 betk=   57051; bankm=  318210 betm= 1666 drawn=1
+deck={32,6,32}, bankk=   3765379 betk=       0; bankm=  319876 betm= 1666 drawn=1
+deck={31,6,32}, bankk=   3765379 betk=       0; bankm=  321542 betm= 1666 drawn=3
+deck={31,6,31}, bankk=   3765379 betk=       0; bankm=  319876 betm= 3332 drawn=3
+deck={31,6,30}, bankk=   3765379 betk=   61728; bankm=  316544 betm= 6664 drawn=1
+deck={30,6,30}, bankk=   3827107 betk=       0; bankm=  323208 betm= 1666 drawn=1
+deck={29,6,30}, bankk=   3827107 betk=       0; bankm=  324874 betm= 1666 drawn=1
+deck={28,6,30}, bankk=   3827107 betk=       0; bankm=  326540 betm= 1666 drawn=3
+deck={28,6,29}, bankk=   3827107 betk=       0; bankm=  324874 betm= 3332 drawn=3
+deck={28,6,28}, bankk=   3827107 betk=       0; bankm=  321542 betm= 6664 drawn=1
+deck={27,6,28}, bankk=   3827107 betk=       0; bankm=  328206 betm= 1666 drawn=3
+deck={27,6,27}, bankk=   3827107 betk=       0; bankm=  326540 betm= 3332 drawn=1
+deck={26,6,27}, bankk=   3827107 betk=       0; bankm=  329872 betm= 1666 drawn=3
+deck={26,6,26}, bankk=   3827107 betk=       0; bankm=  328206 betm= 3332 drawn=1
+deck={25,6,26}, bankk=   3827107 betk=       0; bankm=  331538 betm= 1666 drawn=3
+deck={25,6,25}, bankk=   3827107 betk=       0; bankm=  329872 betm= 3332 drawn=3
+deck={25,6,24}, bankk=   3827107 betk=   78104; bankm=  326540 betm= 6664 drawn=2
+--- reshuffle ---
+deck={56,8,40}, bankk=   3827107 betk=  637851; bankm=  326540 betm= 1666 drawn=1
+deck={55,8,40}, bankk=   4464958 betk=  704993; bankm=  328206 betm= 1666 drawn=1
+deck={54,8,40}, bankk=   5169951 betk=  769993; bankm=  329872 betm= 1666 drawn=3
+deck={54,8,39}, bankk=   4399958 betk=  709671; bankm=  328206 betm= 3332 drawn=3
+deck={54,8,38}, bankk=   3690287 betk=  641789; bankm=  324874 betm= 6664 drawn=2
+deck={54,7,38}, bankk=   3690287 betk=  641789; bankm=  324874 betm= 1666 drawn=2
+deck={54,6,38}, bankk=   3690287 betk=  641789; bankm=  324874 betm= 1666 drawn=1
+deck={53,6,38}, bankk=   4332076 betk=  714078; bankm=  326540 betm= 1666 drawn=2
+deck={53,5,38}, bankk=   4332076 betk=  714078; bankm=  326540 betm= 1666 drawn=1
+deck={52,5,38}, bankk=   5046154 betk=  784957; bankm=  328206 betm= 1666 drawn=1
+deck={51,5,38}, bankk=   5831111 betk=  851735; bankm=  329872 betm= 1666 drawn=1
+deck={50,5,38}, bankk=   6682846 betk=  911297; bankm=  331538 betm= 1666 drawn=3
+deck={50,5,37}, bankk=   5771549 betk=  862415; bankm=  329872 betm= 3332 drawn=1
+deck={49,5,37}, bankk=   6633964 betk=  925669; bankm=  333204 betm= 1666 drawn=1
+deck={48,5,37}, bankk=   7559633 betk=  978305; bankm=  334870 betm= 1666 drawn=1
+deck={47,5,37}, bankk=   8537938 betk= 1016421; bankm=  336536 betm= 1666 drawn=1
+deck={46,5,37}, bankk=   9554359 betk= 1036015; bankm=  338202 betm= 1666 drawn=3
+deck={46,5,36}, bankk=   8518344 betk= 1038822; bankm=  336536 betm= 3332 drawn=1
+deck={45,5,36}, bankk=   9557166 betk= 1061907; bankm=  339868 betm= 1666 drawn=1
+deck={44,5,36}, bankk=  10619073 betk= 1061907; bankm=  341534 betm= 1666 drawn=3
+deck={44,5,35}, bankk=   9557166 betk= 1088791; bankm=  339868 betm= 3332 drawn=3
+deck={44,5,34}, bankk=   8468375 betk= 1085689; bankm=  336536 betm= 6664 drawn=2
+deck={44,4,34}, bankk=   8468375 betk= 1085689; bankm=  336536 betm= 1666 drawn=3
+deck={44,4,33}, bankk=   7382686 betk= 1054669; bankm=  334870 betm= 3332 drawn=2
+deck={44,3,33}, bankk=   7382686 betk= 1054669; bankm=  334870 betm= 1666 drawn=1
+deck={43,3,33}, bankk=   8437355 betk= 1110178; bankm=  336536 betm= 1666 drawn=1
+deck={42,3,33}, bankk=   9547533 betk= 1145704; bankm=  338202 betm= 1666 drawn=2
+deck={42,2,33}, bankk=   9547533 betk= 1145704; bankm=  338202 betm= 1666 drawn=1
+deck={41,2,33}, bankk=  10693237 betk= 1156026; bankm=  339868 betm= 1666 drawn=1
+deck={40,2,33}, bankk=  11849263 betk= 1136231; bankm=  341534 betm= 1666 drawn=1
+deck={39,2,33}, bankk=  12985494 betk= 1082125; bankm=  343200 betm= 1666 drawn=3
+deck={39,2,32}, bankk=  11903369 betk= 1173572; bankm=  341534 betm= 3332 drawn=1
+deck={38,2,32}, bankk=  13076941 betk= 1120881; bankm=  344866 betm= 1666 drawn=1
+deck={37,2,32}, bankk=  14197822 betk= 1028828; bankm=  346532 betm= 1666 drawn=1
+deck={36,2,32}, bankk=  15226650 betk=  895685; bankm=  348198 betm= 1666 drawn=1
+deck={35,2,32}, bankk=  16122335 betk=  721896; bankm=  349864 betm= 1666 drawn=1
+deck={34,2,32}, bankk=  16844231 betk=  510431; bankm=  351530 betm= 1666 drawn=3
+deck={34,2,31}, bankk=  16333800 betk=  753868; bankm=  349864 betm= 3332 drawn=1
+deck={33,2,31}, bankk=  17087668 betk=  533990; bankm=  353196 betm= 1666 drawn=3
+deck={33,2,30}, bankk=  16553678 betk=  788270; bankm=  351530 betm= 3332 drawn=1
+deck={32,2,30}, bankk=  17341948 betk=  559418; bankm=  354862 betm= 1666 drawn=3
+deck={32,2,29}, bankk=  16782530 betk=  825370; bankm=  353196 betm= 3332 drawn=3
+deck={32,2,28}, bankk=  15957160 betk= 1063811; bankm=  349864 betm= 6664 drawn=3
+deck={32,2,27}, bankk=  14893349 betk= 1262148; bankm=  343200 betm=13328 drawn=1
+deck={31,2,27}, bankk=  16155497 betk= 1114172; bankm=  356528 betm= 1666 drawn=3
+deck={31,2,26}, bankk=  15041325 betk= 1319414; bankm=  354862 betm= 3332 drawn=1
+deck={30,2,26}, bankk=  16360739 betk= 1168624; bankm=  358194 betm= 1666 drawn=1
+deck={29,2,26}, bankk=  17529363 betk=  956147; bankm=  359860 betm= 1666 drawn=1
+deck={28,2,26}, bankk=  18485510 betk=  684649; bankm=  361526 betm= 1666 drawn=1
+deck={27,2,26}, bankk=  19170159 betk=  361701; bankm=  363192 betm= 1666 drawn=3
+--- reshuffle ---
+deck={56,8,40}, bankk=  18808458 betk= 3134743; bankm=  361526 betm= 3332 drawn=1
+deck={55,8,40}, bankk=  21943201 betk= 3464716; bankm=  364858 betm= 1666 drawn=3
+deck={55,8,39}, bankk=  18478485 betk= 3145274; bankm=  363192 betm= 3332 drawn=1
+deck={54,8,39}, bankk=  21623759 betk= 3487703; bankm=  366524 betm= 1666 drawn=3
+deck={54,8,38}, bankk=  18136056 betk= 3154097; bankm=  364858 betm= 3332 drawn=1
+deck={53,8,38}, bankk=  21290153 betk= 3509366; bankm=  368190 betm= 1666 drawn=1
+deck={52,8,38}, bankk=  24799519 betk= 3857703; bankm=  369856 betm= 1666 drawn=3
+deck={52,8,37}, bankk=  20941816 betk= 3529520; bankm=  368190 betm= 3332 drawn=2
+deck={52,7,37}, bankk=  20941816 betk= 3529520; bankm=  368190 betm= 1666 drawn=3
+deck={52,7,36}, bankk=  17412296 betk= 3165872; bankm=  366524 betm= 3332 drawn=3
+deck={52,7,35}, bankk=  14246424 betk= 2783784; bankm=  363192 betm= 6664 drawn=3
+deck={52,7,34}, bankk=  11462640 betk= 2399157; bankm=  356528 betm=13328 drawn=3
+deck={52,7,33}, bankk=   9063483 betk= 2025955; bankm=  343200 betm=26656 drawn=1
+deck={51,7,33}, bankk=  11089438 betk= 2376308; bankm=  369856 betm= 1666 drawn=1
+deck={50,7,33}, bankk=  13465746 betk= 2758044; bankm=  371522 betm= 1666 drawn=2
+deck={50,6,33}, bankk=  13465746 betk= 2758044; bankm=  371522 betm= 1666 drawn=3
+deck={50,6,32}, bankk=  10707702 betk= 2350471; bankm=  369856 betm= 3332 drawn=2
+deck={50,5,32}, bankk=  10707702 betk= 2350471; bankm=  369856 betm= 1666 drawn=1
+deck={49,5,32}, bankk=  13058173 betk= 2740604; bankm=  371522 betm= 1666 drawn=1
+deck={48,5,32}, bankk=  15798777 betk= 3159755; bankm=  373188 betm= 1666 drawn=3
+deck={48,5,31}, bankk=  12639022 betk= 2719790; bankm=  371522 betm= 3332 drawn=3
+deck={48,5,30}, bankk=   9919232 betk= 2289054; bankm=  368190 betm= 6664 drawn=1
+deck={47,5,30}, bankk=  12208286 betk= 2695336; bankm=  374854 betm= 1666 drawn=3
+deck={47,5,29}, bankk=   9512950 betk= 2253067; bankm=  373188 betm= 3332 drawn=1
+deck={46,5,29}, bankk=  11766017 betk= 2666964; bankm=  376520 betm= 1666 drawn=1
+deck={45,5,29}, bankk=  14432981 betk= 3120645; bankm=  378186 betm= 1666 drawn=1
+deck={44,5,29}, bankk=  17553626 betk= 3606909; bankm=  379852 betm= 1666 drawn=3
+deck={44,5,28}, bankk=  13946717 betk= 3099270; bankm=  378186 betm= 3332 drawn=1
+deck={43,5,28}, bankk=  17045987 betk= 3601265; bankm=  381518 betm= 1666 drawn=2
+deck={43,4,28}, bankk=  17045987 betk= 3601265; bankm=  381518 betm= 1666 drawn=1
+deck={42,4,28}, bankk=  20647252 betk= 4129450; bankm=  383184 betm= 1666 drawn=1
+deck={41,4,28}, bankk=  24776702 betk= 4668074; bankm=  384850 betm= 1666 drawn=3
+deck={41,4,27}, bankk=  20108628 betk= 4140012; bankm=  383184 betm= 3332 drawn=1
+deck={40,4,27}, bankk=  24248640 betk= 4704960; bankm=  386516 betm= 1666 drawn=2
+deck={40,3,27}, bankk=  24248640 betk= 4704960; bankm=  386516 betm= 1666 drawn=1
+deck={39,3,27}, bankk=  28953600 betk= 5264291; bankm=  388182 betm= 1666 drawn=3
+deck={39,3,26}, bankk=  23689309 betk= 4737862; bankm=  386516 betm= 3332 drawn=3
+deck={39,3,25}, bankk=  18951447 betk= 4145629; bankm=  383184 betm= 6664 drawn=1
+deck={38,3,25}, bankk=  23097076 betk= 4766063; bankm=  389848 betm= 1666 drawn=1
+deck={37,3,25}, bankk=  27863139 betk= 5392866; bankm=  391514 betm= 1666 drawn=2
+deck={37,2,25}, bankk=  27863139 betk= 5392866; bankm=  391514 betm= 1666 drawn=1
+deck={36,2,25}, bankk=  33256005 betk= 5996985; bankm=  393180 betm= 1666 drawn=3
+deck={36,2,24}, bankk=  27259020 betk= 5451804; bankm=  391514 betm= 3332 drawn=1
+deck={35,2,24}, bankk=  32710824 betk= 6098628; bankm=  394846 betm= 1666 drawn=1
+deck={34,2,24}, bankk=  38809452 betk= 6691285; bankm=  396512 betm= 1666 drawn=1
+deck={33,2,24}, bankk=  45500737 betk= 7184327; bankm=  398178 betm= 1666 drawn=3
+deck={33,2,23}, bankk=  38316410 betk= 6842216; bankm=  396512 betm= 3332 drawn=3
+deck={33,2,22}, bankk=  31474194 betk= 6294839; bankm=  393180 betm= 6664 drawn=1
+deck={32,2,22}, bankk=  37769033 betk= 6994265; bankm=  399844 betm= 1666 drawn=1
+deck={31,2,22}, bankk=  44763298 betk= 7601315; bankm=  401510 betm= 1666 drawn=3
+--- reshuffle ---
+deck={56,8,40}, bankk=  37161983 betk= 6193664; bankm=  399844 betm= 3332 drawn=3
+deck={56,8,39}, bankk=  30968319 betk= 5541699; bankm=  396512 betm= 6664 drawn=1
+deck={55,8,39}, bankk=  36510018 betk= 6214471; bankm=  403176 betm= 1666 drawn=3
+deck={55,8,38}, bankk=  30295547 betk= 5537896; bankm=  401510 betm= 3332 drawn=1
+deck={54,8,38}, bankk=  35833443 betk= 6231903; bankm=  404842 betm= 1666 drawn=1
+deck={53,8,38}, bankk=  42065346 betk= 6933848; bankm=  406508 betm= 1666 drawn=3
+deck={53,8,37}, bankk=  35131498 betk= 6245600; bankm=  404842 betm= 3332 drawn=3
+deck={53,8,36}, bankk=  28885898 betk= 5517531; bankm=  401510 betm= 6664 drawn=1
+deck={52,8,36}, bankk=  34403429 betk= 6255169; bankm=  408174 betm= 1666 drawn=3
+deck={52,8,35}, bankk=  28148260 betk= 5500235; bankm=  406508 betm= 3332 drawn=3
+deck={52,8,34}, bankk=  22648025 betk= 4740284; bankm=  403176 betm= 6664 drawn=1
+deck={51,8,34}, bankk=  27388309 betk= 5477662; bankm=  409840 betm= 1666 drawn=3
+deck={51,8,33}, bankk=  21910647 betk= 4695139; bankm=  408174 betm= 3332 drawn=1
+deck={50,8,33}, bankk=  26605786 betk= 5449378; bankm=  411506 betm= 1666 drawn=1
+deck={49,8,33}, bankk=  32055164 betk= 6254666; bankm=  413172 betm= 1666 drawn=3
+deck={49,8,32}, bankk=  25800498 betk= 5414919; bankm=  411506 betm= 3332 drawn=3
+deck={49,8,31}, bankk=  20385579 betk= 4586755; bankm=  408174 betm= 6664 drawn=3
+deck={49,8,30}, bankk=  15798824 betk= 3799717; bankm=  401510 betm=13328 drawn=3
+deck={49,8,29}, bankk=  11999107 betk= 3076694; bankm=  388182 betm=26656 drawn=1
+deck={48,8,29}, bankk=  15075801 betk= 3720003; bankm=  414838 betm= 1666 drawn=1
+deck={47,8,29}, bankk=  18795804 betk= 4451638; bankm=  416504 betm= 1666 drawn=1
+deck={46,8,29}, bankk=  23247442 betk= 5269420; bankm=  418170 betm= 1666 drawn=3
+deck={46,8,28}, bankk=  17978022 betk= 4373032; bankm=  416504 betm= 3332 drawn=1
+deck={45,8,28}, bankk=  22351054 betk= 5205040; bankm=  419836 betm= 1666 drawn=1
+deck={44,8,28}, bankk=  27556094 betk= 6123576; bankm=  421502 betm= 1666 drawn=1
+deck={43,8,28}, bankk=  33679670 betk= 7115423; bankm=  423168 betm= 1666 drawn=1
+deck={42,8,28}, bankk=  40795093 betk= 8159019; bankm=  424834 betm= 1666 drawn=1
+deck={41,8,28}, bankk=  48954112 betk= 9223238; bankm=  426500 betm= 1666 drawn=3
+deck={41,8,27}, bankk=  39730874 betk= 8179886; bankm=  424834 betm= 3332 drawn=1
+deck={40,8,27}, bankk=  47910760 betk= 9296118; bankm=  428166 betm= 1666 drawn=3
+deck={40,8,26}, bankk=  38614642 betk= 8190985; bankm=  426500 betm= 3332 drawn=3
+deck={40,8,25}, bankk=  30423657 betk= 7020844; bankm=  423168 betm= 6664 drawn=1
+deck={39,8,25}, bankk=  37444501 betk= 8190985; bankm=  429832 betm= 1666 drawn=3
+deck={39,8,24}, bankk=  29253516 betk= 6965123; bankm=  428166 betm= 3332 drawn=3
+deck={39,8,23}, bankk=  22288393 betk= 5751843; bankm=  424834 betm= 6664 drawn=1
+deck={38,8,23}, bankk=  28040236 betk= 6895140; bankm=  431498 betm= 1666 drawn=3
+deck={38,8,22}, bankk=  21145096 betk= 5638692; bankm=  429832 betm= 3332 drawn=1
+deck={37,8,22}, bankk=  26783788 betk= 6809438; bankm=  433164 betm= 1666 drawn=3
+deck={37,8,21}, bankk=  19974350 betk= 5510166; bankm=  431498 betm= 3332 drawn=2
+deck={37,7,21}, bankk=  19974350 betk= 5510166; bankm=  431498 betm= 1666 drawn=3
+deck={37,7,20}, bankk=  14464184 betk= 4313879; bankm=  429832 betm= 3332 drawn=3
+deck={37,7,19}, bankk=  10150305 betk= 3262598; bankm=  426500 betm= 6664 drawn=1
+deck={36,7,19}, bankk=  13412903 betk= 4145806; bankm=  433164 betm= 1666 drawn=3
+deck={36,7,18}, bankk=   9267097 betk= 3089032; bankm=  431498 betm= 3332 drawn=2
+deck={36,6,18}, bankk=   9267097 betk= 3089032; bankm=  431498 betm= 1666 drawn=3
+deck={36,6,17}, bankk=   6178065 betk= 2214778; bankm=  429832 betm= 3332 drawn=1
+deck={35,6,17}, bankk=   8392843 betk= 2905215; bankm=  433164 betm= 1666 drawn=3
+deck={35,6,16}, bankk=   5487628 betk= 2044410; bankm=  431498 betm= 3332 drawn=3
+deck={35,6,15}, bankk=   3443218 betk= 1377287; bankm=  428166 betm= 6664 drawn=3
+deck={35,6,14}, bankk=   2065931 betk=  885399; bankm=  421502 betm=13328 drawn=2
+--- reshuffle ---
+deck={56,8,40}, bankk=   2065931 betk=  344322; bankm=  421502 betm= 1666 drawn=1
+deck={55,8,40}, bankk=   2410253 betk=  380566; bankm=  423168 betm= 1666 drawn=3
+deck={55,8,39}, bankk=   2029687 betk=  345479; bankm=  421502 betm= 3332 drawn=1
+deck={54,8,39}, bankk=   2375166 betk=  383091; bankm=  424834 betm= 1666 drawn=3
+deck={54,8,38}, bankk=   1992075 betk=  346448; bankm=  423168 betm= 3332 drawn=1
+deck={53,8,38}, bankk=   2338523 betk=  385471; bankm=  426500 betm= 1666 drawn=3
+deck={53,8,37}, bankk=   1953052 betk=  347209; bankm=  424834 betm= 3332 drawn=1
+deck={52,8,37}, bankk=   2300261 betk=  387684; bankm=  428166 betm= 1666 drawn=1
+deck={51,8,37}, bankk=   2687945 betk=  427628; bankm=  429832 betm= 1666 drawn=1
+deck={50,8,37}, bankk=   3115573 betk=  465545; bankm=  431498 betm= 1666 drawn=1
+deck={49,8,37}, bankk=   3581118 betk=  499691; bankm=  433164 betm= 1666 drawn=1
+deck={48,8,37}, bankk=   4080809 betk=  528105; bankm=  434830 betm= 1666 drawn=1
+deck={47,8,37}, bankk=   4608914 betk=  548680; bankm=  436496 betm= 1666 drawn=1
+deck={46,8,37}, bankk=   5157594 betk=  559257; bankm=  438162 betm= 1666 drawn=1
+deck={45,8,37}, bankk=   5716851 betk=  557742; bankm=  439828 betm= 1666 drawn=3
+deck={45,8,36}, bankk=   5159109 betk=  573234; bankm=  438162 betm= 3332 drawn=3
+deck={45,8,35}, bankk=   4585875 betk=  573234; bankm=  434830 betm= 6664 drawn=3
+deck={45,8,34}, bankk=   4012641 betk=  558722; bankm=  428166 betm=13328 drawn=3
+deck={45,8,33}, bankk=   3453919 betk=  531372; bankm=  414838 betm=26656 drawn=1
+deck={44,8,33}, bankk=   3985291 betk=  569327; bankm=  441494 betm= 1666 drawn=3
+deck={44,8,32}, bankk=   3415964 betk=  539363; bankm=  439828 betm= 3332 drawn=3
+deck={44,8,31}, bankk=   2876601 betk=  498611; bankm=  436496 betm= 6664 drawn=1
+deck={43,8,31}, bankk=   3375212 betk=  547332; bankm=  443160 betm= 1666 drawn=1
+deck={42,8,31}, bankk=   3922544 betk=  591068; bankm=  444826 betm= 1666 drawn=2
+deck={42,7,31}, bankk=   3922544 betk=  591068; bankm=  444826 betm= 1666 drawn=1
+deck={41,7,31}, bankk=   4513612 betk=  626891; bankm=  446492 betm= 1666 drawn=1
+deck={40,7,31}, bankk=   5140503 betk=  651613; bankm=  448158 betm= 1666 drawn=3
+deck={40,7,30}, bankk=   4488890 betk=  641270; bankm=  446492 betm= 3332 drawn=3
+deck={40,7,29}, bankk=   3847620 betk=  613389; bankm=  443160 betm= 6664 drawn=1
+deck={39,7,29}, bankk=   4461009 betk=  656031; bankm=  449824 betm= 1666 drawn=1
+deck={38,7,29}, bankk=   5117040 betk=  687364; bankm=  451490 betm= 1666 drawn=1
+deck={37,7,29}, bankk=   5804404 betk=  703564; bankm=  453156 betm= 1666 drawn=1
+deck={36,7,29}, bankk=   6507968 betk=  700858; bankm=  454822 betm= 1666 drawn=1
+deck={35,7,29}, bankk=   7208826 betk=  675827; bankm=  456488 betm= 1666 drawn=3
+deck={35,7,28}, bankk=   6532999 betk=  725889; bankm=  454822 betm= 3332 drawn=1
+deck={34,7,28}, bankk=   7258888 betk=  702473; bankm=  458154 betm= 1666 drawn=1
+deck={33,7,28}, bankk=   7961361 betk=  652571; bankm=  459820 betm= 1666 drawn=1
+deck={32,7,28}, bankk=   8613932 betk=  574262; bankm=  461486 betm= 1666 drawn=1
+deck={31,7,28}, bankk=   9188194 betk=  467196; bankm=  463152 betm= 1666 drawn=3
+deck={31,7,27}, bankk=   8720998 betk=  601448; bankm=  461486 betm= 3332 drawn=3
+deck={31,7,26}, bankk=   8119550 betk=  712241; bankm=  458154 betm= 6664 drawn=3
+deck={31,7,25}, bankk=   7407309 betk=  793640; bankm=  451490 betm=13328 drawn=1
+deck={30,7,25}, bankk=   8200949 betk=  745541; bankm=  464818 betm= 1666 drawn=2
+deck={30,6,25}, bankk=   8200949 betk=  745541; bankm=  464818 betm= 1666 drawn=3
+deck={30,6,24}, bankk=   7455408 betk=  828379; bankm=  463152 betm= 3332 drawn=1
+deck={29,6,24}, bankk=   8283787 betk=  781489; bankm=  466484 betm= 1666 drawn=1
+deck={28,6,24}, bankk=   9065276 betk=  697329; bankm=  468150 betm= 1666 drawn=3
+deck={28,6,23}, bankk=   8367947 betk=  820387; bankm=  466484 betm= 3332 drawn=3
+deck={28,6,22}, bankk=   7547560 betk=  905707; bankm=  463152 betm= 6664 drawn=3
+deck={28,6,21}, bankk=   6641853 betk=  948836; bankm=  456488 betm=13328 drawn=1
+--- reshuffle ---
+deck={56,8,40}, bankk=   7590689 betk= 1265115; bankm=  469816 betm= 1666 drawn=3
+deck={56,8,39}, bankk=   6325574 betk= 1131945; bankm=  468150 betm= 3332 drawn=3
+deck={56,8,38}, bankk=   5193629 betk=  994525; bankm=  464818 betm= 6664 drawn=2
+deck={56,7,38}, bankk=   5193629 betk=  994525; bankm=  464818 betm= 1666 drawn=3
+deck={56,7,37}, bankk=   4199104 betk=  857881; bankm=  463152 betm= 3332 drawn=1
+deck={55,7,37}, bankk=   5056985 betk=  989410; bankm=  466484 betm= 1666 drawn=3
+deck={55,7,36}, bankk=   4067575 betk=  849274; bankm=  464818 betm= 3332 drawn=1
+deck={54,7,36}, bankk=   4916849 betk=  983370; bankm=  468150 betm= 1666 drawn=3
+deck={54,7,35}, bankk=   3933479 betk=  839731; bankm=  466484 betm= 3332 drawn=3
+deck={54,7,34}, bankk=   3093748 betk=  703125; bankm=  463152 betm= 6664 drawn=1
+deck={53,7,34}, bankk=   3796873 betk=  829202; bankm=  469816 betm= 1666 drawn=1
+deck={52,7,34}, bankk=   4626075 betk=  968248; bankm=  471482 betm= 1666 drawn=3
+deck={52,7,33}, bankk=   3657827 betk=  817632; bankm=  469816 betm= 3332 drawn=1
+deck={51,7,33}, bankk=   4475459 betk=  959027; bankm=  473148 betm= 1666 drawn=1
+deck={50,7,33}, bankk=   5434486 betk= 1113087; bankm=  474814 betm= 1666 drawn=1
+deck={49,7,33}, bankk=   6547573 betk= 1277575; bankm=  476480 betm= 1666 drawn=1
+deck={48,7,33}, bankk=   7825148 betk= 1449101; bankm=  478146 betm= 1666 drawn=1
+deck={47,7,33}, bankk=   9274249 betk= 1622994; bankm=  479812 betm= 1666 drawn=1
+deck={46,7,33}, bankk=  10897243 betk= 1793217; bankm=  481478 betm= 1666 drawn=2
+deck={46,6,33}, bankk=  10897243 betk= 1793217; bankm=  481478 betm= 1666 drawn=1
+deck={45,6,33}, bankk=  12690460 betk= 1952378; bankm=  483144 betm= 1666 drawn=1
+deck={44,6,33}, bankk=  14642838 betk= 2091834; bankm=  484810 betm= 1666 drawn=3
+deck={44,6,32}, bankk=  12551004 betk= 1981737; bankm=  483144 betm= 3332 drawn=3
+deck={44,6,31}, bankk=  10569267 betk= 1832006; bankm=  479812 betm= 6664 drawn=3
+deck={44,6,30}, bankk=   8737261 betk= 1652995; bankm=  473148 betm=13328 drawn=3
+deck={44,6,29}, bankk=   7084266 betk= 1455671; bankm=  459820 betm=26656 drawn=1
+deck={43,6,29}, bankk=   8539937 betk= 1660543; bankm=  486476 betm= 1666 drawn=1
+deck={42,6,29}, bankk=  10200480 betk= 1867694; bankm=  488142 betm= 1666 drawn=3
+deck={42,6,28}, bankk=   8332786 betk= 1666557; bankm=  486476 betm= 3332 drawn=3
+deck={42,6,27}, bankk=   6666229 betk= 1449180; bankm=  483144 betm= 6664 drawn=1
+deck={41,6,27}, bankk=   8115409 betk= 1670820; bankm=  489808 betm= 1666 drawn=1
+deck={40,6,27}, bankk=   9786229 betk= 1898821; bankm=  491474 betm= 1666 drawn=1
+deck={39,6,27}, bankk=  11685050 betk= 2124555; bankm=  493140 betm= 1666 drawn=1
+deck={38,6,27}, bankk=  13809605 betk= 2337010; bankm=  494806 betm= 1666 drawn=3
+deck={38,6,26}, bankk=  11472595 betk= 2151112; bankm=  493140 betm= 3332 drawn=1
+deck={37,6,26}, bankk=  13623707 betk= 2378742; bankm=  496472 betm= 1666 drawn=2
+deck={37,5,26}, bankk=  13623707 betk= 2378742; bankm=  496472 betm= 1666 drawn=1
+deck={36,5,26}, bankk=  16002449 betk= 2581040; bankm=  498138 betm= 1666 drawn=1
+deck={35,5,26}, bankk=  18583489 betk= 2741826; bankm=  499804 betm= 1666 drawn=1
+deck={34,5,26}, bankk=  21325315 betk= 2843375; bankm=  501470 betm= 1666 drawn=2
+deck={34,4,26}, bankk=  21325315 betk= 2843375; bankm=  501470 betm= 1666 drawn=1
+deck={33,4,26}, bankk=  24168690 betk= 2867472; bankm=  503136 betm= 1666 drawn=1
+deck={32,4,26}, bankk=  27036162 betk= 2796844; bankm=  504802 betm= 1666 drawn=2
+deck={32,3,26}, bankk=  27036162 betk= 2796844; bankm=  504802 betm= 1666 drawn=3
+deck={32,3,25}, bankk=  24239318 betk= 2976758; bankm=  503136 betm= 3332 drawn=1
+deck={31,3,25}, bankk=  27216076 betk= 2916008; bankm=  506468 betm= 1666 drawn=1
+deck={30,3,25}, bankk=  30132084 betk= 2739280; bankm=  508134 betm= 1666 drawn=1
+deck={29,3,25}, bankk=  32871364 betk= 2434916; bankm=  509800 betm= 1666 drawn=1
+deck={28,3,25}, bankk=  35306280 betk= 1998469; bankm=  511466 betm= 1666 drawn=3
+deck={28,3,24}, bankk=  33307811 betk= 2562139; bankm=  509800 betm= 3332 drawn=1
+--- reshuffle ---
+deck={56,8,40}, bankk=  35869950 betk= 5978325; bankm=  513132 betm= 1666 drawn=3
+deck={56,8,39}, bankk=  29891625 betk= 5349028; bankm=  511466 betm= 3332 drawn=1
+deck={55,8,39}, bankk=  35240653 betk= 5998409; bankm=  514798 betm= 1666 drawn=1
+deck={54,8,39}, bankk=  41239062 betk= 6651462; bankm=  516464 betm= 1666 drawn=2
+deck={54,7,39}, bankk=  41239062 betk= 6651462; bankm=  516464 betm= 1666 drawn=1
+deck={53,7,39}, bankk=  47890524 betk= 7287688; bankm=  518130 betm= 1666 drawn=1
+deck={52,7,39}, bankk=  55178212 betk= 7882602; bankm=  519796 betm= 1666 drawn=3
+deck={52,7,38}, bankk=  47295610 betk= 7357095; bankm=  518130 betm= 3332 drawn=1
+deck={51,7,38}, bankk=  54652705 betk= 7982979; bankm=  521462 betm= 1666 drawn=3
+deck={51,7,37}, bankk=  46669726 betk= 7424729; bankm=  519796 betm= 3332 drawn=1
+deck={50,7,37}, bankk=  54094455 betk= 8083079; bankm=  523128 betm= 1666 drawn=2
+deck={50,6,37}, bankk=  54094455 betk= 8083079; bankm=  523128 betm= 1666 drawn=1
+deck={49,6,37}, bankk=  62177534 betk= 8675935; bankm=  524794 betm= 1666 drawn=3
+deck={49,6,36}, bankk=  53501599 betk= 8182597; bankm=  523128 betm= 3332 drawn=1
+deck={48,6,36}, bankk=  61684196 betk= 8812028; bankm=  526460 betm= 1666 drawn=1
+deck={47,6,36}, bankk=  70496224 betk= 9342873; bankm=  528126 betm= 1666 drawn=1
+deck={46,6,36}, bankk=  79839097 betk= 9736475; bankm=  529792 betm= 1666 drawn=1
+deck={45,6,36}, bankk=  89575572 betk= 9952841; bankm=  531458 betm= 1666 drawn=3
+deck={45,6,35}, bankk=  79622731 betk= 9952841; bankm=  529792 betm= 3332 drawn=3
+deck={45,6,34}, bankk=  69669890 betk= 9700871; bankm=  526460 betm= 6664 drawn=1
+deck={44,6,34}, bankk=  79370761 betk=10175739; bankm=  533124 betm= 1666 drawn=3
+deck={44,6,33}, bankk=  69195022 betk= 9885003; bankm=  531458 betm= 3332 drawn=3
+deck={44,6,32}, bankk=  59310019 betk= 9364740; bankm=  528126 betm= 6664 drawn=1
+deck={43,6,32}, bankk=  68674759 betk=10072298; bankm=  534790 betm= 1666 drawn=1
+deck={42,6,32}, bankk=  78747057 betk=10641494; bankm=  536456 betm= 1666 drawn=3
+deck={42,6,31}, bankk=  68105563 betk=10262482; bankm=  534790 betm= 3332 drawn=3
+deck={42,6,30}, bankk=  57843081 betk= 9640514; bankm=  531458 betm= 6664 drawn=3
+deck={42,6,29}, bankk=  48202567 betk= 8825822; bankm=  524794 betm=13328 drawn=1
+deck={41,6,29}, bankk=  57028389 betk= 9776295; bankm=  538122 betm= 1666 drawn=1
+deck={40,6,29}, bankk=  66804684 betk=10650022; bankm=  539788 betm= 1666 drawn=1
+deck={39,6,29}, bankk=  77454706 betk=11390398; bankm=  541454 betm= 1666 drawn=3
+deck={39,6,28}, bankk=  66064308 betk=10846379; bankm=  539788 betm= 3332 drawn=2
+deck={39,5,28}, bankk=  66064308 betk=10846379; bankm=  539788 betm= 1666 drawn=1
+deck={38,5,28}, bankk=  76910687 betk=11653134; bankm=  541454 betm= 1666 drawn=3
+deck={38,5,27}, bankk=  65257553 betk=11043586; bankm=  539788 betm= 3332 drawn=1
+deck={37,5,27}, bankk=  76301139 betk=11922053; bankm=  543120 betm= 1666 drawn=1
+deck={36,5,27}, bankk=  88223192 betk=12603313; bankm=  544786 betm= 1666 drawn=1
+deck={35,5,27}, bankk= 100826505 betk=13009872; bankm=  546452 betm= 1666 drawn=1
+deck={34,5,27}, bankk= 113836377 betk=13063191; bankm=  548118 betm= 1666 drawn=3
+deck={34,5,26}, bankk= 100773186 betk=13436425; bankm=  546452 betm= 3332 drawn=1
+deck={33,5,26}, bankk= 114209611 betk=13550293; bankm=  549784 betm= 1666 drawn=3
+deck={33,5,25}, bankk= 100659318 betk=13884044; bankm=  548118 betm= 3332 drawn=3
+deck={33,5,24}, bankk=  86775274 betk=13701359; bankm=  544786 betm= 6664 drawn=1
+deck={32,5,24}, bankk= 100476633 betk=14353805; bankm=  551450 betm= 1666 drawn=3
+deck={32,5,23}, bankk=  86122828 betk=14092826; bankm=  549784 betm= 3332 drawn=3
+deck={32,5,22}, bankk=  72030002 betk=13338889; bankm=  546452 betm= 6664 drawn=1
+deck={31,5,22}, bankk=  85368891 betk=14496604; bankm=  553116 betm= 1666 drawn=1
+deck={30,5,22}, bankk=  99865495 betk=15363922; bankm=  554782 betm= 1666 drawn=1
+deck={29,5,22}, bankk= 115229417 betk=15815802; bankm=  556448 betm= 1666 drawn=1
+deck={28,5,22}, bankk= 131045219 betk=15725426; bankm=  558114 betm= 1666 drawn=2
+--- reshuffle ---
+deck={56,8,40}, bankk= 131045219 betk=21840870; bankm=  558114 betm= 1666 drawn=1
+deck={55,8,40}, bankk= 152886089 betk=24139909; bankm=  559780 betm= 1666 drawn=3
+deck={55,8,39}, bankk= 128746180 betk=21914243; bankm=  558114 betm= 3332 drawn=1
+deck={54,8,39}, bankk= 150660423 betk=24300068; bankm=  561446 betm= 1666 drawn=1
+deck={53,8,39}, bankk= 174960491 betk=26624423; bankm=  563112 betm= 1666 drawn=3
+deck={53,8,38}, bankk= 148336068 betk=24451000; bankm=  561446 betm= 3332 drawn=2
+deck={53,7,38}, bankk= 148336068 betk=24451000; bankm=  561446 betm= 1666 drawn=3
+deck={53,7,37}, bankk= 123885068 betk=22024012; bankm=  559780 betm= 3332 drawn=3
+deck={53,7,36}, bankk= 101861056 betk=19456606; bankm=  556448 betm= 6664 drawn=3
+deck={53,7,35}, bankk=  82404450 betk=16855456; bankm=  549784 betm=13328 drawn=3
+deck={53,7,34}, bankk=  65548994 betk=14315298; bankm=  536456 betm=26656 drawn=3
+deck={53,7,33}, bankk=  51233696 betk=11914813; bankm=  509800 betm=53312 drawn=1
+deck={52,7,33}, bankk=  63148509 betk=14115549; bankm=  563112 betm= 1666 drawn=1
+deck={51,7,33}, bankk=  77264058 betk=16556584; bankm=  564778 betm= 1666 drawn=3
+deck={51,7,32}, bankk=  60707474 betk=13896892; bankm=  563112 betm= 3332 drawn=3
+deck={51,7,31}, bankk=  46810582 betk=11417215; bankm=  559780 betm= 6664 drawn=3
+deck={51,7,30}, bankk=  35393367 betk= 9176058; bankm=  553116 betm=13328 drawn=1
+deck={50,7,30}, bankk=  44569425 betk=11142356; bankm=  566444 betm= 1666 drawn=1
+deck={49,7,30}, bankk=  55711781 betk=13399036; bankm=  568110 betm= 1666 drawn=1
+deck={48,7,30}, bankk=  69110817 betk=15948650; bankm=  569776 betm= 1666 drawn=3
+deck={48,7,29}, bankk=  53162167 betk=13117937; bankm=  568110 betm= 3332 drawn=3
+deck={48,7,28}, bankk=  40044230 betk=10537955; bankm=  564778 betm= 6664 drawn=1
+deck={47,7,28}, bankk=  50582185 betk=12814154; bankm=  571442 betm= 1666 drawn=3
+deck={47,7,27}, bankk=  37768031 betk=10207576; bankm=  569776 betm= 3332 drawn=1
+deck={46,7,27}, bankk=  47975607 betk=12486802; bankm=  573108 betm= 1666 drawn=2
+deck={46,6,27}, bankk=  47975607 betk=12486802; bankm=  573108 betm= 1666 drawn=1
+deck={45,6,27}, bankk=  60462409 betk=15115602; bankm=  574774 betm= 1666 drawn=1
+deck={44,6,27}, bankk=  75578011 betk=18096143; bankm=  576440 betm= 1666 drawn=1
+deck={43,6,27}, bankk=  93674154 betk=21411235; bankm=  578106 betm= 1666 drawn=1
+deck={42,6,27}, bankk= 115085389 betk=25018563; bankm=  579772 betm= 1666 drawn=2
+deck={42,5,27}, bankk= 115085389 betk=25018563; bankm=  579772 betm= 1666 drawn=3
+deck={42,5,26}, bankk=  90066826 betk=21192194; bankm=  578106 betm= 3332 drawn=3
+deck={42,5,25}, bankk=  68874632 betk=17475653; bankm=  574774 betm= 6664 drawn=1
+deck={41,5,25}, bankk=  86350285 betk=20933402; bankm=  581438 betm= 1666 drawn=2
+deck={41,4,25}, bankk=  86350285 betk=20933402; bankm=  581438 betm= 1666 drawn=3
+deck={41,4,24}, bankk=  65416883 betk=17109031; bankm=  579772 betm= 3332 drawn=3
+deck={41,4,23}, bankk=  48307852 betk=13586583; bankm=  576440 betm= 6664 drawn=1
+deck={40,4,23}, bankk=  61894435 betk=16701673; bankm=  583104 betm= 1666 drawn=3
+deck={40,4,22}, bankk=  45192762 betk=13120479; bankm=  581438 betm= 3332 drawn=1
+deck={39,4,22}, bankk=  58313241 betk=16251231; bankm=  584770 betm= 1666 drawn=1
+deck={38,4,22}, bankk=  74564472 betk=19883859; bankm=  586436 betm= 1666 drawn=3
+deck={38,4,21}, bankk=  54680613 betk=15755431; bankm=  584770 betm= 3332 drawn=2
+deck={38,3,21}, bankk=  54680613 betk=15755431; bankm=  584770 betm= 1666 drawn=1
+deck={37,3,21}, bankk=  70436044 betk=19430633; bankm=  586436 betm= 1666 drawn=3
+deck={37,3,20}, bankk=  51005411 betk=15212140; bankm=  584770 betm= 3332 drawn=1
+deck={36,3,20}, bankk=  66217551 betk=18919300; bankm=  588102 betm= 1666 drawn=1
+deck={35,3,20}, bankk=  85136851 betk=23219141; bankm=  589768 betm= 1666 drawn=1
+deck={34,3,20}, bankk= 108355992 betk=28092294; bankm=  591434 betm= 1666 drawn=3
+deck={34,3,19}, bankk=  80263698 betk=22716141; bankm=  589768 betm= 3332 drawn=1
+deck={33,3,19}, bankk= 102979839 betk=27725341; bankm=  593100 betm= 1666 drawn=1
+--- reshuffle ---
+deck={56,8,40}, bankk= 130705180 betk=21784197; bankm=  594766 betm= 1666 drawn=3
+deck={56,8,39}, bankk= 108920983 betk=19491123; bankm=  593100 betm= 3332 drawn=3
+deck={56,8,38}, bankk=  89429860 betk=17124867; bankm=  589768 betm= 6664 drawn=1
+deck={55,8,38}, bankk= 106554727 betk=19477746; bankm=  596432 betm= 1666 drawn=1
+deck={54,8,38}, bankk= 126032473 betk=21918691; bankm=  598098 betm= 1666 drawn=1
+deck={53,8,38}, bankk= 147951164 betk=24387555; bankm=  599764 betm= 1666 drawn=1
+deck={52,8,38}, bankk= 172338719 betk=26808245; bankm=  601430 betm= 1666 drawn=3
+deck={52,8,37}, bankk= 145530474 betk=24527608; bankm=  599764 betm= 3332 drawn=1
+deck={51,8,37}, bankk= 170058082 betk=27054695; bankm=  603096 betm= 1666 drawn=3
+deck={51,8,36}, bankk= 143003387 betk=24655756; bankm=  601430 betm= 3332 drawn=2
+deck={51,7,36}, bankk= 143003387 betk=24655756; bankm=  601430 betm= 1666 drawn=3
+deck={51,7,35}, bankk= 118347631 betk=22018164; bankm=  599764 betm= 3332 drawn=1
+deck={50,7,35}, bankk= 140365795 betk=24770434; bankm=  603096 betm= 1666 drawn=1
+deck={49,7,35}, bankk= 165136229 betk=27522705; bankm=  604762 betm= 1666 drawn=2
+deck={49,6,35}, bankk= 165136229 betk=27522705; bankm=  604762 betm= 1666 drawn=1
+deck={48,6,35}, bankk= 192658934 betk=30175496; bankm=  606428 betm= 1666 drawn=1
+deck={47,6,35}, bankk= 222834430 betk=32609917; bankm=  608094 betm= 1666 drawn=1
+deck={46,6,35}, bankk= 255444347 betk=34689973; bankm=  609760 betm= 1666 drawn=3
+deck={46,6,34}, bankk= 220754374 betk=33113156; bankm=  608094 betm= 3332 drawn=1
+deck={45,6,34}, bankk= 253867530 betk=35348643; bankm=  611426 betm= 1666 drawn=1
+deck={44,6,34}, bankk= 289216173 betk=37078997; bankm=  613092 betm= 1666 drawn=1
+deck={43,6,34}, bankk= 326295170 betk=38138396; bankm=  614758 betm= 1666 drawn=1
+deck={42,6,34}, bankk= 364433566 betk=38361428; bankm=  616424 betm= 1666 drawn=1
+deck={41,6,34}, bankk= 402794994 betk=37594199; bankm=  618090 betm= 1666 drawn=3
+deck={41,6,33}, bankk= 365200795 betk=39481167; bankm=  616424 betm= 3332 drawn=3
+deck={41,6,32}, bankk= 325719628 betk=40157214; bankm=  613092 betm= 6664 drawn=1
+deck={40,6,32}, bankk= 365876842 betk=40652982; bankm=  619756 betm= 1666 drawn=3
+deck={40,6,31}, bankk= 325223860 betk=41225560; bankm=  618090 betm= 3332 drawn=3
+deck={40,6,30}, bankk= 283998300 betk=40571186; bankm=  614758 betm= 6664 drawn=3
+deck={40,6,29}, bankk= 243427114 betk=38807221; bankm=  608094 betm=13328 drawn=3
+deck={40,6,28}, bankk= 204619893 betk=36109393; bankm=  594766 betm=26656 drawn=1
+deck={39,6,28}, bankk= 240729286 betk=39522719; bankm=  621422 betm= 1666 drawn=1
+deck={38,6,28}, bankk= 280252005 betk=42462425; bankm=  623088 betm= 1666 drawn=3
+deck={38,6,27}, bankk= 237789580 betk=40241314; bankm=  621422 betm= 3332 drawn=2
+deck={38,5,27}, bankk= 237789580 betk=40241314; bankm=  621422 betm= 1666 drawn=1
+deck={37,5,27}, bankk= 278030894 betk=43442327; bankm=  623088 betm= 1666 drawn=2
+deck={37,4,27}, bankk= 278030894 betk=43442327; bankm=  623088 betm= 1666 drawn=2
+deck={37,3,27}, bankk= 278030894 betk=43442327; bankm=  623088 betm= 1666 drawn=1
+deck={36,3,27}, bankk= 321473221 betk=45924746; bankm=  624754 betm= 1666 drawn=3
+deck={36,3,26}, bankk= 275548475 betk=44443302; bankm=  623088 betm= 3332 drawn=1
+deck={35,3,26}, bankk= 319991777 betk=47211902; bankm=  626420 betm= 1666 drawn=3
+deck={35,3,25}, bankk= 272779875 betk=45463313; bankm=  624754 betm= 3332 drawn=3
+deck={35,3,24}, bankk= 227316562 betk=42381054; bankm=  621422 betm= 6664 drawn=1
+deck={34,3,24}, bankk= 269697616 betk=46499589; bankm=  628086 betm= 1666 drawn=3
+deck={34,3,23}, bankk= 223198027 betk=43073303; bankm=  626420 betm= 3332 drawn=1
+deck={33,3,23}, bankk= 266271330 betk=47548452; bankm=  629752 betm= 1666 drawn=3
+deck={33,3,22}, bankk= 218722878 betk=43744576; bankm=  628086 betm= 3332 drawn=1
+deck={32,3,22}, bankk= 262467454 betk=48605084; bankm=  631418 betm= 1666 drawn=1
+deck={31,3,22}, bankk= 311072538 betk=52823639; bankm=  633084 betm= 1666 drawn=1
+deck={30,3,22}, bankk= 363896177 betk=55984027; bankm=  634750 betm= 1666 drawn=1
+--- reshuffle ---
+deck={56,8,40}, bankk= 419880204 betk=69980034; bankm=  636416 betm= 1666 drawn=1
+deck={55,8,40}, bankk= 489860238 betk=77346353; bankm=  638082 betm= 1666 drawn=1
+deck={54,8,40}, bankk= 567206591 betk=84477577; bankm=  639748 betm= 1666 drawn=1
+deck={53,8,40}, bankk= 651684168 betk=91095636; bankm=  641414 betm= 1666 drawn=3
+deck={53,8,39}, bankk= 560588532 betk=85306951; bankm=  639748 betm= 3332 drawn=1
+deck={52,8,39}, bankk= 645895483 betk=92270783; bankm=  643080 betm= 1666 drawn=3
+deck={52,8,38}, bankk= 553624700 betk=86119398; bankm=  641414 betm= 3332 drawn=1
+deck={51,8,38}, bankk= 639744098 betk=93445767; bankm=  644746 betm= 1666 drawn=3
+deck={51,8,37}, bankk= 546298331 betk=86911098; bankm=  643080 betm= 3332 drawn=1
+deck={50,8,37}, bankk= 633209429 betk=94617501; bankm=  646412 betm= 1666 drawn=1
+deck={49,8,37}, bankk= 727826930 betk=101557246; bankm=  648078 betm= 1666 drawn=1
+deck={48,8,37}, bankk= 829384176 betk=107332070; bankm=  649744 betm= 1666 drawn=1
+deck={47,8,37}, bankk= 936716246 betk=111513839; bankm=  651410 betm= 1666 drawn=1
+Kelly won a billion dollars after 813 draws; that's probably enough
+Final: kelly=1048230085 martingale=653076
+Average kelly bet was 6222806.3333333

@@ -1,0 +1,150 @@
+#include <gmp.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+#if 0
+
+p: 12026070341127085754893097835098576041235013569186796331441953314639277634647572425804266039236571162321832835547137 (383 bits)
+q: 2815108457795990843 (62 bits)
+g: 5465993646111629703441036423232576827352108800055160689939983550682370032756410525809260221877924847568552733696072 (382 bits)
+x: 937562526148170002 (60 bits)
+y: 2743496569657851586829024672704666646218346206193952918041150093730722092239431092724025892380242699544101134561292 (381 bits)
+encoder keys:
+  mpz_t p,q,g,x;
+  mpz_init_set_str(p, "12026070341127085754893097835098576041235013569186796331441953314639277634647572425804266039236571162321832835547137", 10); /* 383 bits */
+  mpz_init_set_str(q, "2815108457795990843", 10); /* 62 bits */
+  mpz_init_set_str(g, "5465993646111629703441036423232576827352108800055160689939983550682370032756410525809260221877924847568552733696072", 10); /* 382 bits */
+  mpz_init_set_str(x, "937562526148170002", 10); /* 60 bits */
+decoder keys:
+  ubint<12> p(0),g,y;
+  ubint<2> q;
+  p[0]=0x1; p[10]=0x5e416a76; p[11]=0x4e228c74;
+  q[0]=0x2f20b53b; q[1]=0x2711463a;
+  g[0]=0x608be048; g[1]=0x5b158fcd; g[2]=0x434abfd9; g[3]=0xd174e69f;
+  g[4]=0x887dc6f9; g[5]=0x67d97d37; g[6]=0x4a008f32; g[7]=0x73f5f34d;
+  g[8]=0x7a68ac24; g[9]=0x823989e3; g[10]=0xa16f6380; g[11]=0x23836624;
+  y[0]=0xaae0700c; y[1]=0x1d9fd0a6; y[2]=0x7f4a5861; y[3]=0xc306b628;
+  y[4]=0xc6080aef; y[5]=0x3232d3db; y[6]=0xf0473c91; y[7]=0x5c66b424;
+  y[8]=0x26570faf; y[9]=0xeb072aa; y[10]=0x4c88dcca; y[11]=0x11d329d2;
+
+#endif
+
+#undef VERBOSE
+
+// in the DSA version, we can generate up to q unique valid keys, but the
+// client has no way of actually decoding the key index
+#define MESSAGE_HASH 12345678
+
+void gen_key_ciphertext(mpz_t rs, mpz_t p, mpz_t q, mpz_t g, mpz_t x, mpz_t _k)
+{
+  static mpz_t k,r,s;
+  static int gk_init=0;
+  if(!gk_init) {
+    mpz_init(r);
+    mpz_init(s);
+    mpz_init(k);
+    gk_init=1;
+  }
+  // r = (g^k mod p) mod q
+  mpz_powm(r, g, _k, p);
+  mpz_mod(r, r, q);
+
+  // s = (k^-1(H + xr)) mod q
+  mpz_invert(k, _k, q);
+  mpz_mul(s, x, r);
+  mpz_mod(s, s, q);
+  mpz_add_ui(s, s, MESSAGE_HASH);
+  mpz_mul(s, s, k);
+  mpz_mod(s, s, q);
+  mpz_invert(s, s, q); // transmit s^-1 as it makes work on the client easier
+
+  // calculate rs=rq+s
+  mpz_mul(rs, r, q);
+  mpz_add(rs, rs, s);
+
+#ifdef VERBOSE
+  gmp_printf("r: %Zd\n", r);
+  gmp_printf("s^-1: %Zd\n", s);
+  gmp_printf("ciphertext: %Zd\n", rs);
+#endif
+}
+
+// 32 possible characters, in this canonical order:
+const char *codetable="123456789ABCDEFGHJKLMNOPRSTUVWXY";
+// to translate to canonical form: 0=Q=O, I=1, Z=2
+void gen_printable_key(mpz_t k)
+{
+  int n=0;
+  while(mpz_sgn(k) != 0 || n<25) {
+    if(n>0 && (n%5) == 0) putchar('-');
+    unsigned x = mpz_get_ui(k);
+    mpz_tdiv_q_2exp(k, k, 5);
+    putchar(codetable[x&31]);
+    n++;
+  }
+  printf("\n");
+}
+
+void check_key(mpz_t rs, mpz_t p, mpz_t q, mpz_t g, mpz_t x)
+{
+  mpz_t r, s, y, u1, u2, v;
+  mpz_init(y);
+  mpz_powm(y, g, x, p);
+  gmp_printf("chk y: %Zd\n", y);
+
+  mpz_init(r);
+  mpz_init(s);
+  mpz_fdiv_qr(r, s, rs, q);
+  gmp_printf("chk s^-1: %ZX\n", s);
+  gmp_printf("chk r: %ZX\n", r);
+
+  mpz_init(u1);
+  mpz_init(u2);
+  mpz_mul_ui(u1, s, MESSAGE_HASH);
+  mpz_mod(u1, u1, q);
+  mpz_mul(u2, r, s);
+  mpz_mod(u2, u2, q);
+  gmp_printf("chk u1: %ZX\n", u1);
+  gmp_printf("chk u2: %ZX\n", u2);
+  mpz_init(v);
+  mpz_powm(u1, g, u1, p);
+  gmp_printf("chk v1: %ZX\n", u1);
+  mpz_powm(v, y, u2, p);
+  gmp_printf("chk v2: %ZX\n", v);
+  mpz_mul(v, v, u1);
+  mpz_mod(v, v, p);
+  gmp_printf("chk v3: %ZX\n", v);
+  mpz_mod(v, v, q);
+  gmp_printf("chk v: %ZX\n", v);
+}
+
+int main(int argc, char **argv)
+{
+  mpz_t rs;
+  mpz_t p,q,g,x;
+  mpz_t k, k1;
+  mpz_init_set_str(p, "12026070341127085754893097835098576041235013569186796331441953314639277634647572425804266039236571162321832835547137", 10); /* 383 bits */
+  mpz_init_set_str(q, "2815108457795990843", 10); /* 62 bits */
+  mpz_init_set_str(g, "5465993646111629703441036423232576827352108800055160689939983550682370032756410525809260221877924847568552733696072", 10); /* 382 bits */
+  mpz_init_set_str(x, "937562526148170002", 10); /* 60 bits */
+
+  if(argc<3) {
+    printf("usage: %s <firstkeynumber> <lastkeynumber>\n", argv[0]);
+    return 0;
+  }
+
+  mpz_init_set_str(k, argv[1], 10);
+  mpz_init_set_str(k1, argv[2], 10);
+  mpz_init(rs);
+  do {
+    gen_key_ciphertext(rs, p, q, g, x, k);
+#ifdef VERBOSE
+    check_key(rs, p, q, g, x);
+#endif
+    gen_printable_key(rs);
+    mpz_add_ui(k, k, 1);
+  } while(mpz_cmp(k, k1) <= 0);
+
+  return 0;
+}
+

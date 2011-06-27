@@ -1,0 +1,183 @@
+freq = {}
+total = 0
+
+dualcodes = false
+
+ascii_base = 60
+ascii_base2 = 83
+ascii_base3 = 63
+
+function schar(x)
+	assert(x>=32)
+	assert(x<127)
+	return string.char(x)
+end
+
+function walk_tree(hufftbl,codelen,codes,node,depth,bits)
+	if hufftbl[node].code then
+		codes[hufftbl[node].code] = bits
+		codelen[hufftbl[node].code] = depth
+	else
+		walk_tree(hufftbl,codelen,codes,hufftbl[node].l, depth+1, bits..'0')
+		walk_tree(hufftbl,codelen,codes,hufftbl[node].r, depth+1, bits..'1')
+	end
+	return codes,codelen
+end
+
+function min_weight(hufftree)
+	local min1,min2
+	for i,v in ipairs(hufftree) do
+		if v.weight then
+			if not min1 then min1=i
+			elseif v.weight < hufftree[min1].weight then
+				min2=min1
+				min1=i
+			elseif not min2 then min2 = i
+			elseif v.weight < hufftree[min2].weight then
+				min2=i
+			end
+		end
+	end
+	return min1,min2
+end
+
+function build_tree(freq)
+	local hufftree = {}
+	for k,v in pairs(freq) do
+		table.insert(hufftree, {code=k, weight=v})
+	end
+	local treebase=table.getn(hufftree)
+	print(table.getn(hufftree)..' total unique codes')
+	while true do
+		local n1,n2 = min_weight(hufftree)
+		if not n1 or not n2 then 
+			print(table.getn(hufftree)..' total tree nodes')
+			return hufftree,treebase 
+		end
+		table.insert(hufftree, {l=n1,r=n2,weight=hufftree[n1].weight+hufftree[n2].weight})
+		hufftree[n1].weight = nil
+		hufftree[n2].weight = nil
+	end
+	-- not reached
+end
+
+function inc_freq(image,...)
+	local k = table.concat(arg, ' ')
+	freq[k] = (freq[k] or 0)+1
+	table.insert(image,k)
+	total = total + 1
+end
+
+function add_bit(codebuf, bit)
+	codebuf.n = codebuf.n or 1
+	codebuf.b = (codebuf.b or 0)
+	codebuf[codebuf.n] = (bit*(2^codebuf.b))+(codebuf[codebuf.n] or 0)
+	codebuf.b = codebuf.b + 1
+	if(codebuf.b >= 6) then
+		--print('ok: '..codebuf[codebuf.n])
+		codebuf[codebuf.n] = schar(ascii_base+codebuf[codebuf.n])
+		codebuf.n = codebuf.n+1
+		codebuf.b = 0
+	end
+end
+
+function flush_bits(codebuf)
+	codebuf.totalbits = (codebuf.n-1)*6+codebuf.b
+	while codebuf.b ~= 0 do add_bit(codebuf,0) end
+	codebuf.n=nil
+end
+
+function add_code(codebuf, code)
+	--print('code: '..code)
+	for i=1,string.len(code) do
+		add_bit(codebuf,tonumber(string.sub(code,i,i)))
+	end
+end
+
+image = {}
+for line in io.lines() do
+	line = string.gsub(line, "%s*$", "") -- strip trailing space
+	while(string.len(line)>0) do
+		local b,e,spaces,nonspaces = string.find(line, "^(%s*)(%S*)")
+		--print(b,e)
+		local s,n = string.len(spaces),string.len(nonspaces)
+		if dualcodes then
+			inc_freq(image,s,n)
+		else
+			inc_freq(image,s)
+			inc_freq(image,n)
+		end
+		line=string.sub(line, e+1)
+	end
+	inc_freq(image,0)
+end
+
+print(total..' total codes')
+
+local entropy = 0
+for k,v in pairs(freq) do
+	local bits = -v*math.log(v/total)/math.log(2)
+	entropy = entropy + bits
+	print(k,v,bits)
+end
+
+print('entropy = '..entropy)
+
+hufftbl,treebase = build_tree(freq)
+treeroot = table.getn(hufftbl)-1
+codes,codelen = walk_tree(hufftbl,{},{},table.getn(hufftbl),0,"")
+
+function lefthalf(s) return string.gsub(s,"%s+%S+$","") end
+function righthalf(s) return string.gsub(s,"^%S+%s+","") end
+
+_l,_r,_c = {},{},{}
+for i,v in ipairs(hufftbl) do
+	if dualcodes then
+		table.insert(_l, schar((v.l and v.l-1 or lefthalf(v.code))+ascii_base2))
+		table.insert(_r, schar((v.r and v.r-1 or righthalf(v.code))+ascii_base2))
+	else
+		if v.l then
+			table.insert(_l, schar(v.l-1+ascii_base2-treebase))
+			table.insert(_r, schar(v.r-1+ascii_base2-treebase))
+		else
+			table.insert(_c, schar(tonumber(v.code)+ascii_base3))
+		end
+	end
+end
+
+if dualcodes then
+	print("l: "..string.format("%q",table.concat(_l))..'[q]-'..ascii_base2)
+	print("r: "..string.format("%q",table.concat(_r))..'[q]-'..ascii_base2)
+else
+	print("l: "..string.format("%q",table.concat(_l))..'[q]-'..ascii_base2)
+	print("r: "..string.format("%q",table.concat(_r))..'[q]-'..ascii_base2)
+	print("c: "..string.format("%q",table.concat(_c))..'[q+'..treebase..']-'..ascii_base3)
+end
+
+hufflen=0
+for k,v in pairs(codelen) do
+	hufflen = hufflen + v*freq[k]
+	print("code "..k..": len "..v.." code "..codes[k])
+end
+
+print("total hufflen: "..hufflen..', '..hufflen-entropy..' bits from optimal.')
+print("total coding bytes: "..math.ceil(hufflen/6)+table.getn(_l)+table.getn(_r)+table.getn(_c))
+
+imagebuf = {}
+for i,v in ipairs(image) do
+	add_code(imagebuf, codes[v])
+end
+flush_bits(imagebuf)
+
+--print("image: "..string.format("%q", table.concat(imagebuf)))
+print(imagebuf.totalbits..' total bits in image')
+
+print("here's the code:\n\n")
+print("p(n,c){while(n--)putchar(c);}main(_,q,c,s){")
+print("for(q="..(treeroot-treebase)..',s=35,_=0;'..(hufflen+1)..'>_;){')
+print(string.format("if(0>q)c=%q[q+%d]-%d,p(c?c:1,c?s^=3:10),q=%d;", 
+	table.concat(_c), treebase, ascii_base3, treeroot-treebase))
+print(string.format("else q=(%q[_/6]-%d>>_++%%6&1?%q[q]:%q[q])-%d;}}",
+	table.concat(imagebuf), ascii_base,
+	table.concat(_r), table.concat(_l), ascii_base2))
+

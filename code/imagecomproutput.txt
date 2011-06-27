@@ -1,0 +1,47 @@
+224 total codes
+1       2       13.614709844115
+0       20      69.708536543405
+3       89      118.51431270712
+2       34      92.476330747447
+5       7       35
+4       21      71.715787484856
+7       21      71.715787484856
+6       7       35
+9       10      44.854268271702
+24      1       7.8073549220576
+22      2       13.614709844115
+8       4       23.22941968823
+21      1       7.8073549220576
+11      3       18.667177264009
+10      2       13.614709844115
+entropy = 637.34045956808
+15 total unique codes
+29 total tree nodes
+l: "MDRQTHVLYIZ[]F"[q]-83
+r: "PNSOUKWXEJG\\^_"[q]-83
+c: "@?BADCFEHWUGTJI"[q+15]-63
+code 1: len 7 code 1100100
+code 0: len 4 code 1101
+code 3: len 1 code 0
+code 2: len 3 code 101
+code 5: len 5 code 10010
+code 4: len 4 code 1110
+code 7: len 4 code 1111
+code 6: len 5 code 10011
+code 9: len 4 code 1000
+code 8: len 6 code 110001
+code 22: len 7 code 1100101
+code 24: len 8 code 11001110
+code 21: len 8 code 11001111
+code 11: len 6 code 110000
+code 10: len 7 code 1100110
+total hufflen: 649, 11.659540431917 bits from optimal.
+total coding bytes: 152
+649 total bits in image
+here's the code:
+
+
+p(n,c){while(n--)putchar(c);}main(_,q,c,s){
+for(q=13,s=35,_=0;650>_;){
+if(0>q)c="@?BADCFEHWUGTJI"[q+15]-63,p(c?c:1,c?s^=3:10),q=13;
+else q=("wjwj[HcLi{lP]frSnP]sznbStikhpIzekb`rSbmG@q`pzNJqeCyfV{=JqeJQi{\\UqeJQikhJgJqefyaQ]OYfV[U<ydSQwGotA^fszZsIzekT="[_/6]-60>>_++%6&1?"PNSOUKWXEJG\\^_"[q]:"MDRQTHVLYIZ[]F"[q])-83;}}
