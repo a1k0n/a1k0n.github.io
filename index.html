@@ -1,16 +1,56 @@
 ---
 layout: default
-title: Andy Sloane's weblog
+title: a1k0n.net
 ---
 <head>
+  <link rel="stylesheet" href="/style.css" type="text/css" media="all" /> 
   <title>a1k0n</title>
 </head>
 <body>
-  <h1>Blog Posts</h1>
+  <div width=100% style="background-color: #daf2ff; text-align: center; color: #1d3542; font-size: 12pt;">a1k0n : Andy Sloane's site</div>
+  <h3>Blog Posts</h3>
   <ul class="posts">
     {% for post in site.posts %}
     <li><span>{{ post.date | date_to_string }}</span> &raquo; <a href="{{ post.url }}">{{ post.title }}</a></li>
     {% endfor %}
   </ul>
+
+<h3>Other stuff</h3>
+<ul class="posts">
+<li><a href="code/texture/">Texture synthesis</a> 
+<li><a href="code/flag.html">Flag thing</a> (also: <a
+  href="code/oflag.html">Obama version</a>); requires browser
+supporting canvas tag (FF3, Chrome, Safari/Webkit, Opera)
+ 
+<li><a href="http://app.a1k0n.net/jsrpg/">jsrpg</a>.  Silly multiplayer
+<a href="http://en.wikipedia.org/wiki/Roguelike">roguelike</a> using <a
+  href="http://en.wikipedia.org/wiki/Comet_(programming)">Comet</a>.
+I also have an <a href="/jsrpg/">earlier single-player version</a> 
+which just lets you wander around on the (effectively infinite) map.
+ 
+<li><a href="projects/coleco/">ColecoVision composite audio/video
+modification</a>.  Probably overkill; uses a LM384 where a 2N3904
+would probably do.
+ 
+<li><a href="code/gsynth/">gsynth</a> - all the old code is gone, but
+the latest is available on sourceforge.
+ 
+<li>Portable OKI 66201/207/301 assembler and disassembler - <a
+href="http://sourceforge.net/projects/pgmfi/">asm662 at
+sourceforge/projects/pgmfi</a></li> 
+ 
+<li><a href="lallocprof/">Lua 5.0 allocation profiler</a>.  Kinda
+dumb, but it works.
+ 
+<li><a href="code/donut.c.txt">Have a donut</a>.
+(and <a href="code/donutmk2.c.txt">Donut Mk II</a>)
+</ul>
+ 
+<pre> 
+_=0;k;main(){while(_&lt;641){for(k=0;"##K#8(38D-##C]L5870.X7\\M_b;90\\"
+"MC-M/NZGB6Q,I0VGB6a0FbN&lt;VG.6Q\\bNb7^@`X=N@`XQaOVX:^]NX=:Z8PY]B`:&gt;P"
+"NY8^$#SM):XA"[_/6]-35&gt;&gt;_++%6&1;k++);putchar(k[" _/\\\n,`)('&lt;-"]);}}
+</pre> 
+
 </body>
 
