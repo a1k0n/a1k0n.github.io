@@ -1,0 +1,73 @@
+---
+layout: post
+title: Hacker challenge: Can you make a keygen?
+---
+<p>I like to reverse-engineer things, and I like number theory.  These
+hobbies happen to intersect in the art of reverse-engineering software
+license keys.</p>
+
+<p>I won't lie: I've cracked programs.  I've created key generators for
+programs.  But I also never distribute them.  I do it for the
+challenge, not for the program.</p>
+
+<p>But from a warez d00d perspective, it is infinitely preferable if you
+can create a key generator instead of cracking, because then you can
+typically get further software updates, and things are just easier for
+everyone. </p>
+
+<p>It is sometimes shockingly easy to create a key generator.  Often a
+program that checks a license key is structured like this:  </p>
+
+<pre>
+  licensestr = get_license_key_modal_dialog()
+  validlicensestr = make_valid_license(licensestr);
+  if(licensestr == validlicensestr) { ... }
+</pre>
+  
+<p>So now all I have to do is extract your make_valid_license code, feed
+it random garbage, and I have a key generator for your program.  One
+time I just replaced the call to strcmp() with puts() in a program and
+turned it into its own key generator.</p>
+
+<p>Other key generators cycle through a hash of some sort (the hash is
+sometimes srand() / rand()) and ensure some check digits, or whatever.
+Any way you slice it, it's security through obscurity: you're giving
+the end user the code, and if end user can read and understand that
+code, they can break it.</p>
+
+<p>It doesn't have to be this way.  I have created a self-contained
+license key decoder, and I'm distributing the source code to it.  In
+my next post, I will reveal all the details and how to create keys for
+it.  For now, I want to see whether anyone can break it without having
+the "official" key generator.  If so, there's a flaw in my reasoning.
+It uses a well-known, public-domain algorithm; that's all I'm going to
+say for now.</p>
+
+<p>The code is here:</p>
+
+<p><a href="http://a1k0n.net/code/keydecode.cpp.txt">keydecode.cpp</a> - key
+decoder</p>
+
+<p><a href="http://a1k0n.net/code/bn.h.txt">bn.h</a> - quick and dirty bignums</p>
+
+<p>(The web host I'm using has the wrong MIME types on .cpp and .h, so they're
+.txts - sorry)</p>
+
+<p>I would like to open up a <a
+href="http://www.reddit.com/r/programming/comments/890yf/hacker_challenge_can_you_make_a_key_generator/">discussion
+on reddit</a>.  Undoubtedly many people there will recognize the
+algorithm and maybe poke holes in what I'm doing.</p>
+
+<p><b>Update</b>: "maybe poke holes in what I'm doing".  Ha.  More like
+drive a cement mixer through it in minutes.  I was pleasantly
+surprised to find that this reached #1 on the programming subreddit.
+LoneStar309 found a gaping hole which I patched, and tharkban also
+found a bug in the final if statement, also fixed.  It's fair game to
+make keys that way for the challenge I proposed, I suppose, but I
+wanted to see whether the idea would work, not necessarily my poor
+implementation of it.  Turns out: no, it won't, and unsurprisingly
+it's been done before.  Part 2 coming later.</p>
+
+<p><b>Update 2</b>: <a href="/2009/04/03/hacker-challenge-2.html">Hacker
+challenge part 2</a> has been posted.</p>
+

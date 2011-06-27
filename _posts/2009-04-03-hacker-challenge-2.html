@@ -1,0 +1,134 @@
+---
+layout: post
+title: Hacker challenge part 2
+---
+<p>Well, I guess I'm not quitting my day job to become a cryptographer
+any time soon.</p>
+
+<p>As was instantly ascertained on reddit, the key algorithm in my "<a
+href="http://a1k0n.net/blah/archives/2009/03/31/index.html#e2009-03-31T18_50_59.txt">Hacker
+Challenge</a>" is <a href="http://en.wikipedia.org/wiki/RSA">RSA</a>.
+I was hoping that it would take at least an hour to crack the private
+key, but alas, I had severely underestimated the time that modern
+elliptic-curve and number field sieve integer factorizers would take.
+It factored in under a second, which means the key would have to be
+many orders of magnitude larger to offer any kind of security.</p>
+
+<p>So within an hour a factorization of <i>n</i> was <a
+href="http://www.reddit.com/r/programming/comments/890yf/hacker_challenge_can_you_make_a_key_generator/c08l4rh">posted
+to reddit by c0dep0et</a>.  Even so, <a
+href="http://www.reddit.com/r/programming/comments/890yf/hacker_challenge_can_you_make_a_key_generator/c08l4mg">LoneStar309
+pointed out an embarassing implementation mistake</a> which
+significantly weakened it (given a valid key, you could generate
+several other valid encodings of the same key); I patched this, as I
+mentioned in my update.  And then <a
+  href="http://www.reddit.com/r/programming/comments/890yf/hacker_challenge_can_you_make_a_key_generator/c08l9k1">teraflop
+  demonstrated posession of a working keygen</a> a couple hours
+later.</p>
+
+<p>I wanted the key generator challenge to be possible, and it
+definitely wasn't trivial, but it was still far easier than I had
+hoped.  Still, I couldn't be happier with the result, and I would like
+to thank my fellow programming.redditors for a great discussion.</p>
+
+<p>For those who haven't studied how RSA works in sufficient detail to go
+from a factored <i>n</i> to a key generator, go take a moment to read
+up on Wikipedia.  Basically the public and private keys, <i>e</i> and
+<i>d</i>, are <a
+  href="http://en.wikipedia.org/wiki/Modular_multiplicative_inverse">multiplicative
+  inverses</a> mod <i>&phi;(n)</i> where <i>&phi;(n)</i> is <a
+  href="http://en.wikipedia.org/wiki/Euler's_totient_function">Euler's
+  totient function</a>.  In the case of <i>n</i>=<i>pq</i> where
+<i>p</i> and <i>q</i> are prime, <i>&phi;(n)</i> = (<i>p</i> -
+1)(<i>q</i> - 1).  So you use the <a
+  href="http://en.wikipedia.org/wiki/Extended_Euclidean_algorithm">extended
+  euclidean algorithm</a> to find <i>e</i> from <i>d</i> and
+<i>&phi;(n)</i>.  If you're using <a href="http://gmplib.org/">GMP</a>
+(I am), you can just call <tt>mpz_invert</tt> to do that.</p>
+
+<p>Once you've recovered <i>e</i> from <i>d</i>, you just RSA-encrypt the
+message <i>m</i> = 12345678 + <tt>check_mod</tt>*<i>N</i> where
+<i>N</i> is the key number of your choosing and 12345678 is a
+<a
+  href="http://en.wikipedia.org/wiki/Nothing_up_my_sleeve_number">"nothing
+  up my sleeve" number</a> I chose for validating a decryption.
+The ciphertext is thus <i>m</i><sup><i>e</i></sup> (mod <i>n</i>),
+calculated using <a
+  href="http://en.wikipedia.org/wiki/Exponentiation_by_squaring">exponentiation
+  by squaring</a>, mod <i>n</i> at each step (which is what
+<tt>expmod</tt> does in <tt>bn.h</tt>), and then you do the reverse of
+<tt>decode</tt> to turn the number into a string.</p>
+
+<p>The code I used for generating RSA private key pairs is <a
+  href="/code/rsa_genpriv.c.txt">rsa_genpriv.c</a> and for generating
+license keys is <a href="/code/rsa_genlic.c.txt">rsa_genlic.c</a>.
+These require <a href="http://gmplib.org/">libgmp</a>; the job is just
+too big for poor little <tt>bn.h</tt>.</p>
+
+<p>(All my code here is MIT-licensed, by the way, so feel free to
+steal it for your own purposes.  By all means, use it instead of some
+silly easy-to-duplicate hashing scheme for your application...)</p>
+
+<p>So, will RSA-based license schemes work?  Not with such a short key
+length.  Can we just make the key length longer?  Well, that depends.
+Your ciphertext is always going to be a number between 2 and <i>n</i>,
+if <i>n</i> is 512 bits then so is your ciphertext.  1024 bits is
+probably the smallest reasonably secure size you'd want to use for
+RSA, which is 205 characters in the A-Y,1-9 code I'm using.  So if
+your users are pasting keys out of an email, that's probably fine, but
+if they're typing it in by hand off of a CD case, forget it.</p>
+
+<p>Also, this scheme, though cryptographically weak, has some points
+in its favor.  If a theoretical cracker disassembles the code, he
+absolutely <b>must</b> understand RSA at some level, extract <i>n</i>,
+and factor it in order to create a key generator.  I probably wouldn't
+have the patience to do it if the least bit of obfuscation were used
+in conjunction.  It's totally self-contained (so you don't have to
+link in libcrypto or libopenssl or libgmp), so it's pretty much a
+drop-in replacement for whatever hashing scheme that most software
+tends to use.</p>
+
+<p>And, though the backbone of the challenge was quickly broken, only
+one person demonstrated a keygen.  I guess one is all it takes.</p>
+
+<p>Can we do better?  Yes, I think we can do much better.  RSA's
+security derives from the difficulty of the integer factorization
+problem.  There are two other commonly used classes of asymmetric key
+cryptosystems based on harder problems: discrete logarithm and
+elliptic curve discrete logarithm.  Each provides more "strengh" per
+bit of key than the last.</p>
+
+<p><a href="http://www.reddit.com/r/programming/comments/890yf/hacker_challenge_can_you_make_a_key_generator/c08l6dl">james_block
+  brings up some good points</a> along these lines.  It may not be
+possible to create a software license scheme with both short license
+codes and enough security to withstand a large, coordinated effort to
+break it.  But it's far better to use a license key scheme that could
+be broken with a large effort than one that will definitely be broken
+with a small effort, when the former is an easy drop-in replacement
+for the latter.  Truly uncrackable (in the cryptographic sense)
+security will require longer keys and users who paste keys out of
+emails.</p>
+
+<p>So here is challenge #2.  I've used another common algorithm which
+is no longer encumbered by a patent.  The ciphertext is still slightly
+less than 125 bits.  It is not impossible to crack by any means, but
+it is much harder (in terms of CPU time necessary) than the previous
+one.  And there's always the possibility that I screwed something up
+and left a big back door in it, which is a good reason for proposing
+the challenge in the first place.</p>
+
+<p>The code:
+<br /><a href="/code/keydecode2.cpp.txt">keydecode2.cpp</a> - challenge #2 decoder
+<br /><a href="/code/bn.h.txt">bn.h</a> - quick and dirty bignums (updated from
+last time)</p>
+
+<p>I plan on issuing one further challenge next week, and there's a
+good chance that this one will be broken before then if it receives
+the same level of attention as the first one did.</p>
+
+<p><a
+href="http://www.reddit.com/r/programming/comments/89vma/hacker_challenge_part_2_solution_to_part_1_and_a/">Here</a>
+is the reddit thread for part 2.</p>
+
+<p><b>Update</b>: <a href="/2009/11/17/hacker-challenge-2-solution.html">The
+  solution to part 2</a> has been posted.</p>

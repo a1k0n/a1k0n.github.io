@@ -1,0 +1,25 @@
+TITLE: An introductory note.
+AUTHOR: a1k0n
+DATE: Fri Nov  4 15:46:27 CST 2005
+DESC: Why?  Why not.
+-----
+BODY:
+My uncle <a href="http://www.sloaneassociates.com/">Ron</a> asked me,
+"Do you know what a blog is?  I have a blog, and I don't even know
+what the hell it is."
+
+I feigned ignorance.
+
+But at last, I broke down and made one of my own.  Will it have any
+purpose?  Who knows!  I think it might help me flesh out new ideas if
+I actually decide to write them down.  It might also take lots of time
+away from me, as I write about pointless tangents when I'm supposed to
+be working.
+
+Alas, this, my first entry, shall contain no new ideas.  But what I
+will do is convert some of the old stuff on my site into retroactive
+entries, which is sort of cheating but whatever.  
+
+So anything below this post was written prior to this post, but
+reformatted for the blog afterwards.
+END-----

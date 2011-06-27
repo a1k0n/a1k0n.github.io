@@ -1,0 +1,26 @@
+TITLE: Auto-generating ASDF defsystems given a bunch of .lisp files
+AUTHOR: a1k0n
+DATE: Wed Nov 16 15:28:05 CST 2005
+DESC: asdfgen
+FORMAT: autobr
+-----
+BODY:
+I hacked together a really simple ASDF defsystem generator.  What it
+does is scan through a set of source files for any DEF* form, assuming
+that when it sees <tt>(defblargh foo)</tt> it's defining a "blargh"
+named foo, and anytime it subsequently sees "foo" it knows which .lisp
+file "foo" was defined in, and thus adds it as a :depends-on clause to
+the .lisp file which used "foo".
+
+It has a lot of shortcomings.  Firstly, it simply uses the Lisp
+reader, which tries to intern symbols it sees - but into which
+package?  If it sees, for instance, <tt>clsql:connect</tt>, then it
+will bork unless CLSQL has been loaded first.  Which is why the first
+thing <tt>make-asdf</tt> does is load all the systems your new system
+depends on, which should really be ASDF's job.  By the same token, if
+your system uses multiple packages then it won't work at all because
+the defpackage forms will never be evaluated before they're needed.
+
+Anyway, <a href="/lisp/asdfgen.lisp.html">here is the first rudimentary
+version of the code</a>.
+END-----

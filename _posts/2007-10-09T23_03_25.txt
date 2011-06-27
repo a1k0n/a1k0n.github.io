@@ -1,0 +1,68 @@
+TITLE: Updates!
+AUTHOR: a1k0n
+DATE: Tue Oct  9 23:03:25 CDT 2007
+DESC: 
+FORMAT: autobr
+-----
+BODY:
+I sure don't update this blog very often.  So, let's see...
+
+Since I've posted last:
+
+John has replaced fear.incarnate.net, our long-standing webserver,
+with a new box.  This one has 750gig mirrored disks, whereas the old
+one was constantly running out of space.  Of course, since they're
+John's disks, one of them died already.  (Vendetta's DB server's hot
+spare disk was DOA, and fear's two mirrored disks have died at the
+same time in the past, and then there was the Micropolis disk
+debacle.. in short, John has the worst luck with hard disks)
+Apparently the warranty on them is good until 2012, so that's good.
+
+Nanoblogger has been upgraded, and as a result my site got a little
+facelift.  Woo.  It's.. uglier, I think.
+
+I found out that my wife's coworker Jen's husband <a
+href="http://www.damonpayne.com/">Damon</a> works at CarSpot.com,
+where <a href="http://superpants.com">Nick Purvis</a> worked until
+recently.  I think Nick was a cofounder.  Jen and Damon live right
+down the street from us; the first time I met them was at their
+wedding.  Small world, I guess.
+
+I also want to point out, belatedly, that I made it to 26th on the <a
+href="http://www.icfpcontest.org/submits/scoreboard">ICFP 2007
+contest</a>, and with Ray's help our combined Guild Software effort
+made it to 22nd.  I didn't get to spend much time at all on this
+contest as I was busy that weekend, but I'm pleased with how well we
+did given the effort.  (A sort of post-mortem is <a
+href="http://programming.reddit.com/info/28xdp/comments/c28zc7">here</a>).
+
+Speaking of programming contests, Damon's site reminded me of <a
+href="http://projecteuler.net">Project Euler</a>.  It's pretty fun,
+highly recommended.  (see <a
+href="http://projecteuler.net/index.php?section=profile&profile=3464">my
+profile</a> - but you must be logged in for that).  
+
+I was also in the ~200s ranking (nothing to write home about) on the
+<a href="http://netflixprize.com">Netflix Prize</a> back in March but
+I've fallen even lower (607 as of this writing - now that's
+embarassing) since then.  I used a maximum-likelihood singular value
+decomposition approach except with a conjugate gradient optimizer
+(L-BFGS, to be specific, a quasi-Newton method), which is a hell of a
+lot more efficient than any gradient descent method with learning
+rates that a lot of other people are using.  But I didn't devote all
+that much CPU time to it, and I need to do a fair amount of
+preprocessing of the data to be more competitive.  Seems a lot of
+people are getting a handle on this very interesting problem.  
+
+The Netflix challenge been very educational for me as I've been able
+to put a lot of stuff I learned from <a
+href="http://www.inference.phy.cam.ac.uk/mackay/itila/book.html">David
+MacKay's excellent book</a> into context.  If I come back to the
+problem I'll probably try Hamiltonian Monte Carlo or Gibbs sampling in
+order to get more than one sample to marginalize over.
+
+Also, watch for the IOCCC 2006 results announcement in November...
+
+If one of the two people who actually read this blog would like
+elaboration on any topic I would be happy to oblige.
+END-----

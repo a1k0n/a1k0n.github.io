@@ -1,0 +1,84 @@
+---
+layout: post
+title: Hacker challenge part 2 solution
+---
+<p>Because I am lazy and easily sidetracked, the promised update to
+the "Hacker challenge" (<a
+href="http://a1k0n.net/blah/archives/2009/03/index.html#e2009-03-31T18_50_59.txt">part
+1</a>, <a
+href="http://a1k0n.net/blah/archives/2009/04/index.html#e2009-04-03T21_36_15.txt">part
+2</a>) is now over seven months late.  So I might as well post the
+solution to part 2, which was solved by three individuals on
+<a
+href="http://www.reddit.com/r/programming/comments/89vma/hacker_challenge_part_2_solution_to_part_1_and_a/">
+reddit (bobdole, c0dep0et, and xahtep)</a>.</p>
+
+<p>Part 2 used <a href="http://en.wikipedia.org/wiki/Digital_Signature_Algorithm">DSA</a>,
+which was fairly obvious; as before I made no effort to hide it.  Instead of
+decrypting to a particular value, it verifies a message signature hash of
+12345678 with various "random per-message values" or <a
+  href="http://en.wikipedia.org/wiki/Cryptographic_nonce">nonces</a>.</p>
+
+<p>The parameters for the algorithm were encoded in 32-bit chunks.  The nice
+thing about DSA is that you can use huge <i>p</i> and <i>y</i> values (see
+Wikipedia for the terminology) without making the license key any bigger;
+unfortunately that doesn't buy you a lot, because the underlying group order is
+only <i>q</i>, so that's how big the search space theoretically is -- it
+doesn't increase security, it just makes it marginally slower to factor.</p>
+
+<p>So I chose <i>p</i>, <i>y</i>, and <i>g</i> to be on the order of 384 bits,
+but <i>q</i> and <i>x</i> are only on the order of 64 bits.  In fact <i>p</i>
+is just a 64-bit number shifted left 320 bits and then incremented.</p>
+
+<p>The security of DSA derives from the difficulty of determining <i>x</i> from
+<i>y = g<sup>x</sup></i> mod <i>p</i>, which is known as the <a
+href="http://en.wikipedia.org/wiki/Discrete_logarithm">discrete logarithm
+problem</a>, which is harder than factoring primes.</p>
+
+<p>So after you reconstruct the parameters from the hexadecimal encoding you find:</p>
+
+<i>p</i> = 12026070341127085754893097835098576041235013569186796331<br />
+441953314639277634647572425804266039236571162321832835547137<br />
+<i>g</i> = 54659936461116297034410364232325768273521088000551606899<br />
+39983550682370032756410525809260221877924847568552733696072<br />
+<i>y</i> = 27434965696578515868290246727046666462183462061939529180<br />
+41150093730722092239431092724025892380242699544101134561292<br />
+
+<p>You can plug these numbers into a <a
+  href="http://www.alpertron.com.ar/DILOG.HTM">discrete log solver</a> and find
+<i>x</i> (it will also deduce <i>q</i> as the subgroup size after a few
+seconds).  This takes about three hours on my MacBook Pro, IIRC.</p>
+
+<p>Once you have <i>x</i> the challenge collapses into reimplementing
+DSA (with a small twist: <i>s</i> is inverted in the generator, not in
+the validator; I can't see any reason this would affect security and
+it makes the validator simpler):</p>
+
+<li />let <i>H</i> = 12345678 (the supposed message hash)
+<li />choose a nonce <i>k</i>
+<li />compute <i>r</i> = (<i>g<sup>k</sup></i> mod <i>p</i>) mod <i>q</i>
+<li />compute <i>k</i><sup>-1</sup> (mod <i>q</i>) using the modular multiplicative inverse (<tt>mpz_invert</tt> with <a href="http://gmplib.org/">GMP</a>)
+<li />compute <i>s</i> = (<i>k</i><sup>-1</sup>(<i>H</i> + <i>x r</i>)) mod <i>q</i>
+<li />let <i>w</i> = <i>s</i><sup>-1</sup> (mod <i>q</i>)
+<li />combine (<i>r,w</i>) into <i>K</i> = <i>r q</i> + <i>w</i>
+<li />convert <i>K</i> into a base32-ish key string
+
+<p>I think this scheme is actually pretty good, as it's non-trivial to solve,
+but it's still crackable with the newest discrete log solver methods.  It did
+confound some dedicated redditors for a couple days, at least, with all the
+details laid bare.</p>
+
+<p>The obvious next step is to move on to elliptic curve cryptography, and that
+is the reason this post is so late.  When I started writing the first hacker
+challenge I was completely ignorant of ECC.  Immediately after writing the
+previous post, I bought a book on the subject, and while I understand the
+basics now I still don't understand it well enough to write a toy
+implementation suitable for a "Hacker Challenge".  So I will leave
+that for another day, or perhaps for another person.</p>
+
+<p>Source code for the DSA private key generator and license generator:</p>
+<li /><a href="http://a1k0n.net/code/keydecode2.cpp.txt">keydecode2.cpp</a> - the challenge code from the last post (for reference)<br />
+<li /><a href="http://a1k0n.net/code/bn.h.txt">bn.h</a> - quick and dirty bignum template<br />
+<li /><a href="http://a1k0n.net/code/dl_genpriv.c.txt">dl_genpriv.c</a> - discrete log private/public key pair generator<br />
+<li /><a href="http://a1k0n.net/code/dsa_genlic.c.txt">dsa_genlic.c</a> - license generator (key parameters hardcoded)<br />
+
