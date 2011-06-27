@@ -30,11 +30,11 @@ read on.</p>
 <p>I encourage you to play with the constants in the code: S+=V+=(1-S)/10-V/5
 is the underdamped control system for the animation -- S is scale (=1/zoom), V
 is velocity, and 1/10 and 1/5 are the <a
-  href="http://en.wikipedia.org/wiki/PID_controller">PD constants</a> [TODO:
-check this link].  S=0 corresponds to infinite zoom on the first frame.  S&lt;0
-is funny.  F is the frame counter.  The 1.16 controls the scale of the polygon
-rendering (68 is an approximation of 79/1.16 so you have to adjust that too),
-and 136/84/92033 define the ellipse.  The 14.64 is not a tunable parameter,
+  href="http://en.wikipedia.org/wiki/PID_controller">PD constants</a>.  S=0
+corresponds to infinite zoom on the first frame.  S&lt;0 is funny.  F is the
+frame counter.  The 1.16 controls the scale of the polygon rendering (68 is an
+approximation of 79/1.16 so you have to adjust that too), and 136/84/92033
+define the ellipse.  The 14.64 is not a tunable parameter,
 though (it's 46/pi, and for a good reason).</p>
 
 <p>The antialiasing is simple: each character consists of three
