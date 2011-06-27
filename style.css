@@ -43,3 +43,11 @@ h4, h5, h6 {
   line-height:120%;
 }
 
+span.feed {
+  font-size: 14px;
+}
+
+a.feed {
+  text-decoration:none;
+}
+

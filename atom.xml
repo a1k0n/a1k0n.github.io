@@ -1,0 +1,31 @@
+---
+layout: nil
+---
+<?xml version="1.0"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+ 
+  <title>a1k0n.net</title>
+  <link href="http://a1k0n.net/"/>
+  <link type="application/atom+xml" rel="self" href="http://a1k0n.net/atom.xml"/>
+  <updated>{{ site.time | date_to_xmlschema }}</updated>
+  <id>http://a1k0n.net/</id>
+  <author>
+    <name>Andy Sloane</name>
+    <email>andy@a1k0n.net</email>
+  </author>
+
+  {% for post in site.posts %}
+  <entry>
+    <id>http://a1k0n.net{{ post.id }}</id>
+    <link type="text/html" rel="alternate" href="http://a1k0n.net{{ post.url }}"/>
+    <title>{{ post.title }}</title>
+    <updated>{{ post.date | date_to_xmlschema }}</updated>
+    <author>
+      <name>Andy Sloane</name>
+      <uri>http://a1k0n.net/</uri>
+    </author>
+    <content type="html">{{ post.content | xml_escape }}</content>
+  </entry>
+  {% endfor %}
+ 
+</feed>
