@@ -2,11 +2,53 @@
 layout: post
 title: Yahoo! Logo ASCII Animation in six lines of C
 ---
+<p>[<b>Update 6/28/2011:</b> added Javascript version; press button below to see the
+output without compiling the code.]</p>
+
 <p>Last week I put together another obfuscated C program and have been urged by
 my coworkers to post it publicly.  I've made some refinements since posting it
 to our internal list, so here is the final version (to those who had seen it
 already: it's one line shorter now, and the angles are less screwy, and the
 animation is 2 seconds instead of 3).  Go ahead, try it:</p>
+
+<script>
+var F,S,V;
+var tmr;
+var doframe = function()
+{
+  var o = document.getElementById('output');
+  S+=V+=(1-S)/10-V/4;
+  var i,j,c,n,x,y,a,b,k,out=[];
+  for(j=0;j<24;j++) {
+    for(i=0;i<73;i++) {
+      c=0;
+      for(n=0;n<3;n++) {
+        x=S*(i-27);
+        y=S*(j*3+n-36);
+        c^=(136*x*x+84*y*y<92033)<<n;
+        for(k=0,p=6,m=0;m<8;) {
+          a=("O:85!fI,wfO8!yZfO8!f*hXK3&fO;:O;#hP;\"i".charCodeAt(k)-79)/14.6423;
+          b="<[\\]O=IKNAL;KNRbF8EbGEROQ@BSXXtG!#t3!^".charCodeAt(k++)-79;
+          if(x*Math.cos(a)+y*Math.sin(a) < b/1.165) { k=p; p = "<AFJPTX".charCodeAt(m++)-50; }
+          else if(k == p) { c ^= 1<<n; m=8; }
+        }
+      }
+      out.push(" ''\".$u$"[c]);
+    }
+    out.push("\n");
+  }
+  o.innerHTML = out.join("");
+  if(!F--){clearInterval(tmr); tmr = undefined;}
+}
+
+function animate()
+{
+  F=40,S=0,V=0;
+  if(tmr === undefined) {
+    tmr = setInterval(doframe, 50);
+  }
+}
+</script>
 
 <pre>
 $ cat &gt;yanim.c
@@ -20,7 +62,9 @@ m=8:0)a=(k["O:85!fI,wfO8!yZfO8!f*hXK3&fO;:O;#hP;\"i[by asloane"]-79)/14.64;}
 $ gcc -o yanim yanim.c -lm
 [warnings which real programmers ignore]
 $ ./yanim
-[you'll see]
+[you'll see - <button onclick="animate();">show the animation</button>]
+</pre>
+<pre id="output" style="background:#000; color:#ccc;">
 </pre>
 
 <p>It's a 20fps, antialiased ASCII art animation of the Yahoo! logo.  If you
