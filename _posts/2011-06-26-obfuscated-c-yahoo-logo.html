@@ -12,42 +12,8 @@ already: it's one line shorter now, and the angles are less screwy, and the
 animation is 2 seconds instead of 3).  Go ahead, try it:</p>
 
 <script>
-var F,S,V;
-var tmr;
-var doframe = function()
-{
-  var o = document.getElementById('output');
-  S+=V+=(1-S)/10-V/4;
-  var i,j,c,n,x,y,a,b,k,out=[];
-  for(j=0;j<24;j++) {
-    for(i=0;i<73;i++) {
-      c=0;
-      for(n=0;n<3;n++) {
-        x=S*(i-27);
-        y=S*(j*3+n-36);
-        c^=(136*x*x+84*y*y<92033)<<n;
-        for(k=0,p=6,m=0;m<8;) {
-          a=("O:85!fI,wfO8!yZfO8!f*hXK3&fO;:O;#hP;\"i".charCodeAt(k)-79)/14.6423;
-          b="<[\\]O=IKNAL;KNRbF8EbGEROQ@BSXXtG!#t3!^".charCodeAt(k++)-79;
-          if(x*Math.cos(a)+y*Math.sin(a) < b/1.165) { k=p; p = "<AFJPTX".charCodeAt(m++)-50; }
-          else if(k == p) { c ^= 1<<n; m=8; }
-        }
-      }
-      out.push(" ''\".$u$"[c]);
-    }
-    out.push("\n");
-  }
-  o.innerHTML = out.join("");
-  if(!F--){clearInterval(tmr); tmr = undefined;}
-}
-
-function animate()
-{
-  F=40,S=0,V=0;
-  if(tmr === undefined) {
-    tmr = setInterval(doframe, 50);
-  }
-}
+var F,S,V,tmr,doframe=function(){var k=document.getElementById("output"),c,d,e,a,f,g,h,j,b,i=[];S+=V+=(1-S)/10-V/4;for(d=0;d<24;d++){for(c=0;c<73;c++){for(a=e=0;a<3;a++){f=S*(c-27);g=S*(d*3+a-36);e^=(136*f*f+84*g*g<92033)<<a;b=0;p=6;for(m=0;m<8;){h=('O:85!fI,wfO8!yZfO8!f*hXK3&fO;:O;#hP;"i'.charCodeAt(b)-79)/14.6423;j="<[\\]O=IKNAL;KNRbF8EbGEROQ@BSXXtG!#t3!^".charCodeAt(b++)-79;if(f*Math.cos(h)+g*Math.sin(h)<j/1.165){b=p;p="<AFJPTX".charCodeAt(m++)-50}else if(b==p){e^=1<<a;m=8}}}i.push(" ''\".$u$"[e])}i.push("\n")}k.innerHTML=
+i.join("");if(!F--){clearInterval(tmr);tmr=undefined}};function animate(){F=40;V=S=0;if(tmr===undefined)tmr=setInterval(doframe,50)};
 </script>
 
 <pre>
@@ -79,7 +45,7 @@ corresponds to infinite zoom on the first frame.  S&lt;0 is funny.  F is the
 frame counter.  The 1.16 controls the scale of the polygon rendering (68 is an
 approximation of 79/1.16 so you have to adjust that too), and 136/84/92033
 define the ellipse.  The 14.64 is not a tunable parameter,
-though (it's 46/pi, and for a good reason).</p>
+though (it's 46/&pi;, and for a good reason).</p>
 
 <p>The antialiasing is simple: each character consists of three
 vertically-arranged samples and an 8-character lookup table for each
@@ -88,7 +54,7 @@ or 73x72 pixels.  The 73 horizontal choice was somewhat arbitrary; I suppose I
 could have gone up to 79.</p>
 
 <p>The logo is rendered as an ellipse and eight convex polygons using a fairly
-neat method (I thought) with no frame buffer and sub-pixel precision.  It
+neat method (I thought) with sub-pixel precision and no frame buffer.  It
 required some design tradeoffs to fit into two printable-character arrays, but
 it's much less code than rendering triangles to a framebuffer, which is the
 typical way polygon rasterization is done.</p>
@@ -128,12 +94,31 @@ polygon, and the dashed line is <i>ax</i> + <i>by</i> = <i>c</i>.</p>
 
 <p>(<i>a</i>,<i>b</i>) form a vector orthogonal to the line segment they
 represent pointing towards the inside of the polygon, so we can get them
-directly from the points defining the line segment by flipping <i>x</i> and
-<i>y</i> and negating <i>y</i>.  (<i>x<sub>t</sub></i>, <i>y<sub>t</sub></i>)
-is the midpoint between the points making up the line segment &mdash; I use
-this instead of either side of the line segment when solving for <i>c</i>
-because the angle can be slightly off after we quantize to one of 94 angles,
-and this evens the errors out across the side of the polygon.</p>
+directly from the points defining the line segment by taking the vector
+defining the side &mdash;
+(<i>x<sub>1</sub></i> - <i>x<sub>0</sub></i>, <i>y<sub>0</sub></i> - <i>y<sub>1</sub></i>)
+&mdash;
+and rotating it 90 degrees,
+<!--(you think of it as multiplying <i>x</i>+<i>yi</i> by <i>i</i> or as multiplying the vector with the matrix [<table cellspacing=2 cellpadding=0 border=0 style="display: inline; margin: 0px; font-size: x-small; margin-bottom: 0px">
+  <tr><td>0</td><td>1</td></tr><tr><td>-1</td><td>0</td></tr></table>])  -this is unclear and looks like crap  -->
+resulting in (<i>a</i>, <i>b</i>) = (<i>y<sub>1</sub></i> -
+<i>y<sub>0</sub></i>, <i>x<sub>0</sub></i> - <i>x<sub>1</sub></i>).  Then we
+normalize (<i>a</i>, <i>b</i>) as the actual magnitude doesn't matter, but it
+will be 1 when we decode the angle and we can compensate with our choice of
+<i>c</i> later (if <i>ax</i>+<i>by</i>&gt;<i>c</i>, then
+<i>sax</i>+<i>sby</i>&gt;<i>sc</i> for some scale <i>s</i>&gt;0).  Then compute
+<i>&theta;</i> = <tt><a
+    href="http://en.wikipedia.org/wiki/Atan2">atan2</a></tt>(<i>a</i>,<i>b</i>),
+quantize to one of our 94 angles, and get our new (<i>a</i>,<i>b</i>) =
+(<tt>cos</tt>(<i>&theta;</i>), <tt>sin</tt>(<i>&theta;</i>)).</p>
+
+<p><i>c</i> is easy to get by directly substituting any of the points making up
+the line on the side of the polygon into <i>c</i> = <i>ax</i>+<i>by</i>.  I use
+the midpoint of the line segment on the side, (<i>x<sub>t</sub></i>,
+<i>y<sub>t</sub></i>) = ((<i>x<sub>0</sub></i> + <i>x<sub>1</sub></i>)/2,
+(<i>y<sub>0</sub></i> + <i>y<sub>1</sub></i>)/2), because the angle of the side
+can be slightly off after we quantize &theta;, and this evens the errors out
+across the length of the side.</p>
 
 <p>You'll notice on the first couple frames (you can pause with ^S, resume with
 ^Q -- xon/xoff) that the bottom section of the 'Y' has little bites taken out
@@ -154,9 +139,9 @@ about it.</p>
 
 <p>And then I shrunk the code down by arranging it into clever <tt>for</tt>
 loops and taking unorthodox advantage of commas, conditionals, and globals
-being <tt>int</tt>s by default in C (which all par for the course in obfuscated
-C code).  And that pretty much reveals all the secrets as to how it was
-done.</p>
+being <tt>int</tt>s by default in C (which is all par for the course in
+obfuscated C code).  And that pretty much reveals all the secrets as to how it
+was done.</p>
 
 <p>It would be fairly easy to enhance this with a different movement sequence,
 or rotation (or any kind of 3D transform, as it's basically just ray-tracing
@@ -166,4 +151,3 @@ short and sweet.</p>
 
 <p>I apologize in advance for the various sign errors I'm sure to have made
 when typing this up, but you get the idea.</p>
-
