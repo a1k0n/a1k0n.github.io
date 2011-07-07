@@ -1,0 +1,91 @@
+
+<script>
+var CTXLL;
+var img = new Image();
+img.onload = function() {
+  var s = "", 
+      c = document.createElement("canvas"),
+      t = c.getContext("2d"),
+      w = img.width,
+      h = img.height;
+  c.width  = c.style.width  = w;
+  c.height = c.style.height = h; 
+  t.drawImage(img, 0, 0);
+  CTXLL = t.getImageData( 0, 0, w, h ).data;
+
+  var out = document.getElementById('o');
+  var i = document.getElementById('i');
+  i.disabled = false;
+  i.value = "";
+  i.focus();
+  var o=[];
+  for(var i=0;i<16;i++) o.push(CTXLL[i*4]);
+  out.innerHTML = "loaded; initial data: " + o.join(" ");
+  
+};
+img.src = 'langmodel.png';
+
+var tmr;
+function kp()
+{
+  if(tmr) clearTimeout(tmr);
+  tmr=setTimeout(rerun, 50);
+}
+
+function get_ctx_hash(str, begin, len)
+{
+  var h=0;
+  for(var i=0;i<len;i++) {
+    h=((h+str.charCodeAt(begin+i)-96)*27)&0xffff;
+  }
+  return h;
+}
+
+var NGRAM=5;
+function segment(str)
+{
+  var len = str.length;
+  if(!len) return "";
+  var split=[], LL=[0,0,0,0,0], LL_=[];
+  for(var i=len-1;i>=0;i--) {
+    for(var k=0;k<Math.min(i+1,NGRAM);k++) {
+      var kp1 = Math.min(NGRAM-1, k+1);
+      var LLc = CTXLL[4*((get_ctx_hash(str, i-k, k)+str.charCodeAt(i)-96)&0xffff)];
+      var LLw = CTXLL[4*get_ctx_hash(str, i+1-kp1, kp1)];
+      var LL1 = LLc + LLw + LL[0];
+      var LL2 = LLc + LL[kp1];
+      LL_[k] = Math.min(LL1,LL2);
+      split[i*NGRAM+k] = LL1 < LL2;
+    }
+    for(k=0;k<NGRAM;k++) LL[k]=LL_[k];
+  }
+  var result = [Math.floor(LL[0]/len)];
+  for(i=0;i<len;) {
+    var wordlen=0, k=0;
+    while((i+wordlen) < len) {
+      wordlen++;
+      if(split[(i+wordlen-1)*NGRAM+k])
+        break;
+      k = Math.min(NGRAM-1, k+1);
+    }
+    result.push(str.substring(i, i+wordlen));
+    i += wordlen;
+  }
+  return result.join(" ");
+}
+
+function rerun()
+{
+  tmr=0;
+  var i = document.getElementById('i');
+  var out = document.getElementById('o');
+  var str = ((i.value).toLowerCase()).replace(/[^a-z]/g, "");
+  out.innerHTML = segment(str);
+}
+
+</script>
+
+<p>type some stuff:</p>
+<input type=text size=80 id=i onkeyup="kp();" value="(loading...)" disabled=true />
+<pre id=o></pre>
+
