@@ -1,0 +1,111 @@
+-----
+
+On Segmentation of English Words
+
+I discovered a neat little algorithm recently, and I wanted to share it.
+
+Say you're given a chunk of lowercase text with no spaces or punctuation in it.
+Say you want to write a program to find what actual words are in it, at least
+to some good approximation.
+
+For example,
+"thisisabunchoftextwithnospacesorpunctuationandiwanttoknowwhatwordsareinit"
+should become "this is a bunch of text with no spaces or punctuation and i want
+to know what words are in it".
+
+ - essential ambiguity: expertsexchange, thepenismightier
+
+There isn't necessarily a unique solution to this problem, in general: consider
+"<tt>expertsexchange</tt>" or "<tt>thepenismightier</tt>".  So we want to find
+the <i>most likely</i> solution.
+
+So the problem becomes this: for each letter in our input string, is it more
+likely that a space comes after it or not?  Obviously, making a choice in one
+part of the string can affect the rest of the string: If we see "germ", the
+most likely parsing depends on whether the following characters are "an" (but
+probably not "and", unless the string is "germandictionary").
+
+To get this done requires solving two major subproblems: the algorithmic
+problem of finding the global maximum, and the engineering problem of
+representing the likelihood of a letter in a phrase.
+
+Finding the global maximum
+--------------------------
+
+For now, let's take it as read that we know the approximate probability of
+seeing a letter in a context (e.g. the preceeding letters of the word).  For
+example, if we have seen "the" in a randomly chosen section of English text, it
+is very likely that this is the end of the word, but it is also pretty likely
+that the next letter is 'r'.
+
+Note that a greedy approach won't work: if we just run through the sentence one
+letter at a time and pick "space" or "no space" based on which is more likely,
+we won't be able to resolve the above "germ(an| and)" example correctly.
+
+We have to go through the sentence and try it both ways -- is the entire
+sentence more likely if we put a space here, or not?  We could try all 2<sup>N</sup>
+combinations through a backtracking search and keep only the maximum.  That
+would get the right answer, but very, very slowly.
+
+L_i = P(ctx_i) * max( P(wordending_i) * P(L_i+1 | wordending_i), P(L_i+1 | not wordending_i) )
+
+However, note that this is equivalent to asking whether the probability of the
+sentence prior to this letter, times the probability of this letter, times the
+probability of the rest of the sentence is greater than the same probability if
+we put a space in here.
+
+expertsexchange
+-----^---------
+  |  |    |
+
+If we put a space after the 't', we have the probability of "expert" appearing in
+a word, times the probability of "expert" being an entire word, times the
+probability of the rest of the phrase "sexchange" after we recursively figure
+out what the best spacing for that is.
+
+If we don't put a space after the 't', we have the probability of "expert"
+appearing in a word, times the probability of "sexchange" being the rest of the
+phrase (the next recursion of which is the probability of the word "experts").
+
+Programmers experienced in floating-point arithmetic might be somewhat
+concerned by the implications of the last couple paragraphs.  If you keep
+multiplying small (<1) numbers together, you're eventually going to underflow
+your floating point register and get 0.  This is really easy to handle: we will
+be adding up the logarithms of the probabilities rather than multiplying them
+directly, which makes the arithmetic a lot nicer but doesn't change the
+underlying theory at all.  (If a > b, log(a) > log(b); log(ab) = log(a) + log(b)).
+
+Because it can be decomposed in this way (namely, we are summing up
+log-probabilities as we recurse through the solution space, rather than
+evaluating the whole probability after having made all the decisions), we can
+solve this problem in polynomial time instead of exponential time through a
+technique known as dynamic programming.
+
+Consider the choices that need to be made on the last character: either a space
+goes after it or not, and whether we put a space there depends on what the
+context from the previous characters (up to the last space) is.  If our context
+representation is relatively simple, like the last M characters, then there are
+M possible answers here -- one for the last space being between 1 and M
+characters ago (if it was M characters ago or more, it isn't visible within the
+context, so these possibilities are all considered the same).  Therefore, we
+can pre-compute all M answers for the last character, and then use those
+results when computing the M possible answers for the second-last character,
+and so on.  The complete algorithm runs in O(MN) for N characters and a context
+length of M.  If we choose a fixed context length for our representation of
+character probabilities, then M is a constant and the algorithm runs in linear
+time.
+
+I didn't explain that very well.  I should probably make a table.  Like this:
+http://blog.ezyang.com/2010/11/dp-zoo-tour/
+
+
+Representing word probabilities
+-------------------------------
+
+ - full representation w/ ctx=5, 26 letters
+ - aside: dirichlet distribution with observed counts
+ - log probability instead of 0-1 probability
+ - approximation is ok due to global maximum
+ - hashed representation
+ - quantization into 8-bit tables
+
