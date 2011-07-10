@@ -1,2 +1,8 @@
 auto: false
 server: false
+pygments: true
+markdown: maruku
+maruku:
+  use_tex: true
+  png_dir: img/latex
+  png_url: /img/latex/
