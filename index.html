@@ -8,7 +8,8 @@ title: a1k0n.net
 </head>
 <body>
   <div width=100% style="background-color: #daf2ff; text-align: center; color: #1d3542; font-size: 12pt;">a1k0n : Andy Sloane's site</div>
-  <h3>Blog Posts &mdash; <span class=feed>(<a href="/atom.xml" class=feed><img src="/img/feed-icon-14x14.png" />Atom</a>)</span></h3>
+  <h3>Blog Posts
+<span class=feed><a href="/atom.xml" class=feed><img src="/img/feed-icon-14x14.png" /></a></span></h3>
   <ul class="posts">
     {% for post in site.posts %}
     <li><span style="display: inline-block; min-width: 6em">{{ post.date | date_to_string }}</span> &raquo; <a href="{{ post.url }}">{{ post.title }}</a></li>
@@ -18,8 +19,7 @@ title: a1k0n.net
 <h3>Other stuff</h3>
 <ul class="posts">
 <li><a href="code/texture/">Texture synthesis</a> 
-<li><a href="code/flag.html">Flag thing</a> (also: <a
-  href="code/oflag.html">Obama version</a>); requires browser
+<li><a href="code/flag.html">Flag thing</a>; requires browser
 supporting canvas tag (FF3, Chrome, Safari/Webkit, Opera)
  
 <!--<li><a href="http://app.a1k0n.net/jsrpg/">jsrpg</a>.  Silly multiplayer
@@ -35,13 +35,14 @@ which just lets you wander around on the (effectively infinite) map.
 <li><a href="/code/hilbert.html">Hilbert curves</a>
  
 <li><a href="projects/coleco/">ColecoVision composite audio/video
-modification</a>.  Probably overkill; uses a LM384 where a 2N3904
-would probably do.
+modification</a>.  Overkill in terms of complexity; uses an opamp chip where a
+single transistor would probably do, but it does work.
+
+<li><a href="code/gsynth/">gsynth</a> - defunct TB303 emulator/tracker project
+- all the old code is gone, but the latest is available on sourceforge.
  
-<li><a href="code/gsynth/">gsynth</a> - all the old code is gone, but
-the latest is available on sourceforge.
- 
-<li>Portable OKI 66201/207/301 assembler and disassembler - <a
+<li>Portable OKI 66201/207/301 (the CPU used in Honda engine computers)
+assembler and disassembler - <a
 href="http://sourceforge.net/projects/pgmfi/">asm662 at
 sourceforge/projects/pgmfi</a></li> 
  
