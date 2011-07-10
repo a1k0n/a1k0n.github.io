@@ -5,6 +5,11 @@ title: Yahoo! Logo ASCII Animation in six lines of C
 <p>[<b>Update 6/28/2011:</b> added Javascript version; press button below to see the
 output without compiling the code.]</p>
 
+<p>[<b>Update 7/9/2011:</b> if you're using a compiler other than gcc, you
+might need to put a <tt>#include &lt;math.h&gt;</tt> at the top for it to work
+correctly -- I seem to be depending on the builtin behavior of <tt>sin</tt> and
+<tt>cos</tt> w.r.t. their return types when undeclared.]</p>
+
 <p>Last week I put together another obfuscated C program and have been urged by
 my coworkers to post it publicly.  I've made some refinements since posting it
 to our internal list, so here is the final version (to those who had seen it
@@ -62,7 +67,9 @@ typical way polygon rasterization is done.</p>
 <p>To produce this, first I had to vectorize the "Y!" logo.  I did this by
 taking some measurements of a reference image and writing coordinates down on
 graph paper.  Then I wrote a utility program which takes the points and polygon
-definitions and turns them into angles and offsets as defined below.</p>
+definitions and turns them into angles and offsets as defined below.  [I put <a
+  href="http://pastebin.com/tNqrGszq">the generator code on pastebin</a> until
+I get can some code highlighting stuff set up for my blog].</p>
 
 <p>The ellipse is fairly standard high-school math:
 <i>x</i><sup>2</sup>/<i>a</i><sup>2</sup> +
@@ -96,7 +103,7 @@ polygon, and the dashed line is <i>ax</i> + <i>by</i> = <i>c</i>.</p>
 represent pointing towards the inside of the polygon, so we can get them
 directly from the points defining the line segment by taking the vector
 defining the side &mdash;
-(<i>x<sub>1</sub></i> - <i>x<sub>0</sub></i>, <i>y<sub>0</sub></i> - <i>y<sub>1</sub></i>)
+(<i>x<sub>1</sub></i> - <i>x<sub>0</sub></i>, <i>y<sub>1</sub></i> - <i>y<sub>0</sub></i>)
 &mdash;
 and rotating it 90 degrees,
 <!--(you think of it as multiplying <i>x</i>+<i>yi</i> by <i>i</i> or as multiplying the vector with the matrix [<table cellspacing=2 cellpadding=0 border=0 style="display: inline; margin: 0px; font-size: x-small; margin-bottom: 0px">
