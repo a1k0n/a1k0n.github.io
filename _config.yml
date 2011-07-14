@@ -6,3 +6,4 @@ maruku:
   use_tex: true
   png_dir: img/latex
   png_url: /img/latex/
+#  use_divs: true
