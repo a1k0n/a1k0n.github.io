@@ -1,4 +1,114 @@
-var k,l,m,n;(function(){var a=new Image;a.onload=function(){var g=document.createElement("canvas"),e=g.getContext("2d"),h=a.width,c=a.height;g.width=g.style.width=h;g.height=g.style.height=c;e.drawImage(a,0,0);k=e.getImageData(0,0,h,c).data;l=document.getElementById("o");m=document.getElementById("i");m.disabled=false;m.value="";m.focus()};a.src="/img/langmodel.png"})();
-function kp(){n&&clearTimeout(n);n=setTimeout(function(){n=0;var a=m.value.toLowerCase().replace(/[^a-z]/g,""),g=l;var e=a.length;if(e){for(var h=[],c=[0,0,0,0,0],i=[],d=e-1;d>=0;d--){for(var b=0;Math.min(d+1,5)>b;b++){var j=Math.min(4,b+1),p=k[4*(o(a,d-b,b)+a.charCodeAt(d)-96&65535)],f=p+k[4*o(a,d+1-j,j)]+c[0];j=p+c[j];i[b]=Math.min(f,j);h[d*5+b]=j>f}for(b=0;5>b;b++)c[b]=i[b]}c=[Math.floor(c[0]/e)];for(d=i=0;e>d;){for(b=f=0;e>d+f;){f++;if(h[(d+f-1)*5+b])break;b=Math.min(4,b+1)}if(i+f>80){c.push("\n  ");
-i=0}c.push(a.substring(d,d+f));d+=f;i+=f}a=c.join(" ")}else a="";g.innerHTML=a},50)}function o(a,g,e){for(var h=0,c=0;e>c;c++)h=(h+a.charCodeAt(g+c)-96)*27&65535;return h}
+var NGRAM=5; // context size in the model (constant)
+var ctxLL;   // context log-likelihood data (aka language model)
+var tmr;     // output refresh timer
+var outtag, intag; // our input and output html tags
+
+// Load up our language model image data
+(function(){
+  var img = new Image();
+  img.onload = function() {
+    var s = "", 
+        c = document.createElement("canvas"),
+        t = c.getContext("2d"),
+        w = img.width,
+        h = img.height;
+    c.width  = c.style.width  = w;
+    c.height = c.style.height = h; 
+    t.drawImage(img, 0, 0);
+    ctxLL = t.getImageData( 0, 0, w, h ).data;
+
+    outtag = document.getElementById('o');
+    intag = document.getElementById('i');
+    intag.disabled = false;
+    intag.value = "";
+    intag.focus();
+  };
+  img.src = '/img/langmodel.png';
+})();
+
+// On keypress, set a 50ms timer to refresh our word segmentation output
+window['kp']=function() {
+  // if we don't have our context likelihood data, give up
+  if(ctxLL === undefined)
+    return;
+
+  if(tmr) clearTimeout(tmr);
+  tmr=setTimeout(function(){
+      tmr=0;
+      var str = ((intag.value).toLowerCase()).replace(/[^a-z]/g, "");
+      outtag.innerHTML = segment(str);
+    }, 50);
+}
+
+// This extremely bad hash function happens to work better than a bunch of
+// other things I tried, probably because 27 is both prime and the number of
+// unique symbols we are encoding so it doesn't collide very much.  Still,
+// you'd expect a mixing step at the end to be necessary before the final mod
+// 2^16 but it actually makes things (very slightly) worse.
+function get_ctx_hash(str, begin, len)
+{
+  var h=0;
+  for(var i=0;i<len;i++) {
+    h=((h+str.charCodeAt(begin+i)-96)*27)&0xffff;
+  }
+  return h;
+}
+
+function segment(str)
+{
+  var len = str.length;
+
+  // trivial segmentation is trivial
+  if(!len) return "";
+
+  // split is the NGRAM x len array of bools: whether or not to split in a given context
+  // LL is the log-likelihoods of the previous letter at all context sizes
+  // and it's initialized with the likelihoods at the end of the string, where
+  // there is definitely a word ending
+  var split=[], LL=[0,1e6,1e6,1e6,1e6], LL_=[];
+  // Work from the end of the string back towards the beginning
+  for(var i=len-1;i>=0;i--) {
+    // Try all possible prefix lengths from 0 to NGRAM
+    for(var k=0;k<Math.min(i+1,NGRAM);k++) {
+      var kp1 = Math.min(NGRAM-1, k+1);
+
+      // LLc = -log likelihood of current character in current context
+      var LLc = ctxLL[4*((get_ctx_hash(str, i-k, k)+str.charCodeAt(i)-96)&0xffff)];
+      // LLw = -log likelihood of ending a word after this letter
+      var LLw = ctxLL[4*get_ctx_hash(str, i+1-kp1, kp1)];
+      var LL1 = LLc + LLw + LL[0]; // choice #1: we extend the word by one letter end it there, and start a new word with 0 preceeding characters
+      var LL2 = LLc + LL[kp1];     // choice #2: we extend the word by one letter
+      LL_[k] = Math.min(LL1,LL2);  // Result for this context is the better of the two
+      split[i*NGRAM+k] = LL1 < LL2; // and we split here if choice #1 was better
+    }
+    for(k=0;k<NGRAM;k++) LL[k]=LL_[k];
+  }
+
+  // The first result is the average per-character confusion (confusion =
+  // negative log-likelihood), which gives us a rough guess as to whether or
+  // not we are doing anything useful here (a high value means the input
+  // probably isn't English by our definition)
+  var result = [Math.floor(LL[0]/len)];
+  var linelen=0;
+  for(i=0;i<len;) {
+    var wordlen=0, k=0;
+    while((i+wordlen) < len) {
+      wordlen++;
+      if(split[(i+wordlen-1)*NGRAM+k])
+        break;
+      k = Math.min(NGRAM-1, k+1);
+    }
+    if(linelen+wordlen > 80) { result.push("\n  "); linelen=0; }
+    result.push(str.substring(i, i+wordlen));
+    i += wordlen;
+    linelen += wordlen;
+  }
+  return result.join(" ");
+}
+
+function drawthingy()
+{
+  var c = document.getElementById('dpdiag'),
+      t = c.getContext("2d");
+}
 

@@ -125,17 +125,25 @@ choose the *n*-gram model, we get a very simple polynomial time algorithm
 (technically a linear time algorithm since *n* is fixed), and it's this
 algorithm I want to write about.
 
+
+
 \[
   P_{i,j} = P(word_{i,j}) \cdot \max\left( P(wordending_{i,j}) \cdot P(L_{i+1} | wordending_i), P(L_{i+1} | not wordending_i) \right)
 \]
 
+<canvas id="dpdiag" width="200" height="200">
+</canvas>
+
 ### Representing probabilities
 
-As a quick aside, let me point out that etc etc
+As a quick aside, let me point out that etc etc take the log
 
 ### Representing letter likelihoods
 
-In many machine learning problems, once you get through the math and start an
-implementation, it often comes down to nothing more than churning through lots
-of data and counting stuff.
+The easiest way to find out how likely a letter is after a particular context
+is to run over a large amount of English words, count the number of times each
+context occurs, tally up each letter following each context, and make a big
+lookup table you can query.  If a word began with "th" 1000 times and then "e"
+followed afterward 800 times, then the probability estimate of "e" given "th"
+is 800/1000 = 0.8.
 
