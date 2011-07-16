@@ -15,6 +15,7 @@ layout: nil
   </author>
 
   {% for post in site.posts %}
+  {% if post.hide == null %}
   <entry>
     <id>http://a1k0n.net{{ post.id }}</id>
     <link type="text/html" rel="alternate" href="http://a1k0n.net{{ post.url }}"/>
@@ -26,6 +27,7 @@ layout: nil
     </author>
     <content type="html">{{ post.content | xml_escape }}</content>
   </entry>
+  {% endif %}
   {% endfor %}
  
 </feed>

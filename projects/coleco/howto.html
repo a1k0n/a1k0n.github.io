@@ -1,17 +1,21 @@
 <html>
-
+<head>
+<link rel="stylesheet" href="/style.css" type="text/css" media="all" /> 
 <title>colecovision A/V outs</title>
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-24584703-1']);
+  _gaq.push(['_trackPageview']);
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+</head>
 <body bgcolor=#ffffff>
-<center><a href="/">a1k0n</a> : <a href="/projects/">projects</a> : <a href="/projects/coleco/">colecovision A/V output modification</a> : instructions</center>
+<center><a href="/">a1k0n</a> : <a href="/projects/coleco/">colecovision A/V output modification</a> : instructions</center>
 <br>
-Before you embark on this journey, you must realize that you are doing this
-at your own risk and that<a href="mailto:andy+coleco@a1k0n.net"> I </a>cannot 
-be held responsible for your broken colecovision or anything else you break for 
-that matter.  I am <a href="mailto:andy+coleco@a1k0n.net">willing to help</a> 
-you figure out what's wrong if it doesn't work, however.  Also, Colecovisions 
-can be <a href="http://superpants.com/coleco/IMAGE017.jpg">replaced</a>.
-Please read through the directions entirely before beginning.
-<br><br>
 You will need:
 <pre>
  - assembled video amp board (<a href="sch.html">schematic</a>, <a href="pcb.html">circuit layout</a>)
@@ -33,24 +37,23 @@ The video amp board requires the following parts:
  - 2x 10k resistors (R1,R2)
  - 2x 150 ohm resistors (R3,R4)
  - 27pF capacitor (C1)
- - >1uF capacitor (C2 - see <a href="sch.html">schematic</a>)
+ - &gt;1uF capacitor (C2 - see <a href="sch.html">schematic</a>)
  - 47uF capacitor (C3)
 </pre>
 
 <ul>
-<li>First step: Open up the colecovision's plastic case and shield.  I'm not 
-actually very experienced with this, so I'm going to have to have Nick write
-this step for me.
+<li>First step: Open up the colecovision's plastic case and metal shield.  This
+is a pain.
 <li>Next: Drill some 1/4" holes where you want your A/V jacks.  You'll need to 
 put them just above the mainboard so that they don't interfere with anything.  
 the finished project will look something like this:
 <a name="finished">
-<center><img src="http://superpants.com/coleco/IMAGE012.jpg"></center>
+<center><img src="IMAGE012.jpg"></center>
 so plan accordingly.
 <li>Then mount the RCA jacks in the holes using the supplied nuts and washers.
 <li>Locate the power connection and solder a wire to ground and a wire to 
 <b>switched</b> +12V.
-<center><img src="http://superpants.com/coleco/IMAGE003.jpg"></center>
+<center><img src="IMAGE003.jpg"></center>
 On the other side of the board is the power switch.  The bottom wire is
 soldered to the switch's ground connection and the top wire is soldered to
 the +12V post-switch.  If you have a multimeter, it's a good idea to plug in
@@ -63,7 +66,7 @@ supply power to the video amplifier circuit.
 (just pop the top of the shield off).  It's the third pin from the end and it
 has a test pad adjacent to it (there's a "1" labelling pin 1, so it's really
 pin 6 on the connector).  see diagram:
-<center><img src="http://superpants.com/coleco/IMAGE004.jpg"></center>
+<center><img src="IMAGE004.jpg"></center>
 <li>Strip some of the RCA cable, separate the shield, and strip the inner 
 conductor.  Twist the strands of both the ground shield and the signal wire 
 and tin them both.  Solder the RCA cable ground shield to the existing ground 
@@ -76,7 +79,7 @@ modulator section.
 center of the motherboard.  Pin 7 is the audio output, and, conveniently, pin
 8 is ground.  Cut another ~6in RCA cable and strip and tin it, then solder
 the ground to 8 and the signal to 7.  like so:
-<center><img src="http://superpants.com/coleco/IMAGE006.jpg"></center>
+<center><img src="IMAGE006.jpg"></center>
 Unfortunately, the actual solder connection is a little blurry in that picture.
 This one is tricky, and tinning the wire is essential.
 <li>Now you can connect everything up.  Power, ground, and video in connect to 
@@ -84,7 +87,7 @@ your <a href="pcb.html">video amp board</a> as shown.  The RCA cable from the
 audio chip goes right to the RCA jack (the SN76489 will drive up to 10mA).
 You'll need another ~5in length of RCA cable to connect the video out on the
 amplifier board to the video output RCA jack.
-<center><img src="http://superpants.com/coleco/IMAGE010.jpg"></center>
+<center><img src="IMAGE010.jpg"></center>
 <li>You are now finished electrically.  cover up the bottom of the video amp 
 board with a piece of paper, hook up a monitor, a cartridge, controller, and 
 power, and try it out.  If it doesn't work, your voltmeter and/or oscilloscope 
@@ -98,17 +101,16 @@ shield to allow the video signal wire to escape.  (This is shown
 <a href="#finished">above</a>)
 <li>Cut a little piece out of the top shield to allow the audio/video RCA 
 cables out.
-<center><img src="http://superpants.com/coleco/IMAGE014.jpg"></center>
+<center><img src="IMAGE014.jpg"></center>
 Note: Not all colecovisions have large holes in the shield like this one, so
 you may need to improvise with tinsnips or a small saw.  Otherwise, it may
 have been smart to just string the cable through the existing holes to begin
 with!
 <li>Put the top shield back on and string the power and ground connections next
 to the switch:
-<center><img src="http://superpants.com/coleco/IMAGE016.jpg"></center>
+<center><img src="IMAGE016.jpg"></center>
 <li>Then put the case back together and you are in business.
-<center><img src="http://superpants.com/coleco/IMAGE019.jpg"></center>
-<center><img src="http://a1k0n.net/projects/coleco/1231_016.jpg"></center>
+<center><img src="IMAGE019.jpg"></center>
 </ul>
 
 </html>

@@ -8,6 +8,8 @@ hide: true
 <script src="/js/wordseg.js">
 </script>
 
+*Oops, sorry, this post isn't ready yet.  It accidentally showed up in the atom feed.*
+
 I discovered a neat little algorithm recently, and I wanted to share it.
 
 Say you're given a chunk of lowercase text with no spaces or punctuation in it.
