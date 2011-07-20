@@ -3,7 +3,7 @@ title: Donut math&#58; how donut.c works
 layout: post
 
 # not ready for public distribution yet
-#hide: true
+hide: true
 ---
 <script src="/js/donut.js">
 </script>
@@ -15,16 +15,17 @@ not exactly fresh in my memory, so I will reconstruct it from scratch, in great
 detail, and hopefully get approximately the same result.
 
 Here it is in Javascript:
-<button onclick="anim();">toggle animation</button>
+<button onclick="anim1();">toggle animation</button>
 <pre id="d" style="background-color:#000; color:#ccc;">
 </pre>
 
 At its core, it's a framebuffer and a Z-buffer into which I render pixels.
-Since it's just rendering relatively low-resolution ASCII art, all it does is
-plot pixels along the surface of the torus at fixed-angle increments, and does
-it densely enough that the final result looks solid.  The "pixels" it plots are
-ASCII characters corresponding to the illumination value of the surface at each
-point: `.,-~:;=!*#$@` from dimmest to brightest.
+Since it's just rendering relatively low-resolution ASCII art, I massively
+cheat.  All it does is plot pixels along the surface of the torus at
+fixed-angle increments, and does it densely enough that the final result looks
+solid.  The "pixels" it plots are ASCII characters corresponding to the
+illumination value of the surface at each point: `.,-~:;=!*#$@` from dimmest to
+brightest.  No raytracing required.
 
 So how do we do that?  Well, let's start with the basic math behind 3D
 perspective rendering.  The following diagram is a side view of a person
@@ -53,6 +54,20 @@ So to project a 3D coordinate to 2D, we scale a coordinate by the screen
 distance *z'* (which we can choose as an arbitrary scaling constant, so I will
 now rename it to *K*) and divide by *z*.  Simple.  $(x',y') = (\frac{K x}{z},
 \frac{K y}{z})$.
+
+But when we're plotting a bunch of points, we might end up plotting different
+points at the same (*x'*,*y'*) location but at different depths, so we maintain
+a <a href="http://en.wikipedia.org/wiki/Z-buffering">z-buffer</a> which
+stores the *z* coordinate of everything we draw.  If we need to plot a
+location, we first check to see whether we're plotting in front of what's there
+already.  It also helps to compute *z*<sup>-1</sup> $= \frac{1}{z}$ and use
+that when depth buffering because:
+
+ * *z*<sup>-1</sup> = 0 corresponds to infinite depth, so we can pre-initialize
+   our z-buffer to 0
+ * we can re-use *z*<sup>-1</sup> when computing *x'* and *y'*:
+   Dividing once and multiplying by *z*<sup>-1</sup> twice is cheaper than
+   dividing by *z* twice.
 
 Now, how do we draw a donut, AKA <a
 href="http://en.wikipedia.org/wiki/Torus">torus</a>?  Well, a torus is a <a
@@ -95,10 +110,10 @@ R_1 \sin \theta, &
 \]
 
 But wait: we also want the whole donut to spin around on at least two more axes
-for the animation.  They were called *A* and *B* in the original code.  I
-believe I did a rotation about the *x*-axis by *A* and another rotation about
-the *y*-axis by *B*.  This is a bit hairier, so I'm not even going write the
-result yet, but it's a bunch of matrix multiplies.
+for the animation.  They were called *A* and *B* in the original code: it was a
+rotation about the *x*-axis by *A* and a rotation about the *z*-axis by *B*.
+This is a bit hairier, so I'm not even going write the result yet, but it's a
+bunch of matrix multiplies.
 
 \[
 \left( \begin{matrix}
@@ -117,9 +132,9 @@ R_1 \sin \theta, &
 0 & -\sin A & \cos A \end{matrix} \right)
 \cdot
 \left( \begin{matrix}
-\cos B & 0 & \sin B \\
-0 & 1 & 0 \\
--\sin B & 0 & \cos B \end{matrix} \right)
+\cos B & \sin B & 0 \\
+-\sin B & \cos B & 0 \\
+0 & 0 & 1 \end{matrix} \right)
 \]
 
 Churning through the above gets us an (*x*,*y*,*z*) point on the surface of our
@@ -146,26 +161,24 @@ for simplification.  So let's multiply it out.  Churning through a bunch of
 algebra (thanks Mathematica!), the full result is:
 
 \[
-\begin{aligned}
-x' &=
-\frac{(K_1 (\cos B \cos \phi (R_2 + R_1 \cos \theta) - 
-   \sin B (\cos A (R_2 + R_1 \cos \theta) \sin \phi + R_1 \sin A \sin \theta)))}
-{(K_2 + 
- \cos \phi (R_2 + R_1 \cos \theta) \sin B + 
- \cos B (\cos A (R_2 + R_1 \cos \theta) \sin \phi + R_1 \sin A \sin \theta))}
-\\
-y' &=
-\frac{
-(K_1 ((-R_2 - R_1 \cos \theta) \sin A \sin \phi + R_1 \cos A \sin \theta))}
-{(K_2 + 
- \cos \phi (R_2 + R_1 \cos \theta) \sin B + 
- \cos B (\cos A (R_2 + R_1 \cos \theta) \sin \phi + R_1 \sin A \sin \theta))}
-\end{aligned}
+\left( \begin{matrix} x \\ y \\ z \end{matrix} \right) =
+\left( \begin{matrix}
+ (R_2 + R_1 \cos \theta) (\cos B \cos \phi + \sin A \sin B \sin \phi) - 
+   R_1 \cos A \sin B \sin \theta \\
+
+ (R_2 + R_1 \cos \theta) (\cos \phi \sin B - \cos B \sin A \sin \phi) + 
+   R_1 \cos A \cos B \sin \theta \\
+ \cos A (R_2 + R_1 \cos \theta) \sin \phi + R_1 \sin A \sin \theta
+\end{matrix} \right)
 \]
 
-Well, that looks pretty hideous, but we we can precompute a bunch of common
-subexpressions (e.g. $R_2 + R_1 \cos \theta$ and $R_1 \sin A \sin \theta$) and
-reuse them in the code.
+Well, that looks pretty hideous, but we we can precompute some common
+subexpressions (e.g. all the sines and cosines, and $R_2 + R_1 \cos \theta$)
+and reuse them in the code.  In fact I came up with a completely different
+factoring in the original code but that's left as an exercise for the reader.
+(The original code also swaps the sines and cosines of A, effectively rotating
+by 90 degrees, so I guess my initial derivation was a bit different but that's
+OK.)
 
 Now we know where to put the pixel, but we still haven't even considered which
 shade to plot.  To calculate illumination, we need to know the <a
@@ -184,9 +197,9 @@ circle, rotate it around the torus's central axis, and then make two more
 rotations.  The surface normal of the point on the circle is fairly obvious:
 it's the same as the point on a unit (radius=1) circle centered at the origin.
 
-So our surface normal (*N<sub>x</sub>*, *N<sub>y</sub>*, *N<sub>z</sub>*) is derived the same as
-above, except the point we start with is just (cos *&theta;*, sin *&theta;*,
-0).  Then we apply the same rotations:
+So our surface normal (*N<sub>x</sub>*, *N<sub>y</sub>*, *N<sub>z</sub>*) is
+derived the same as above, except the point we start with is just (cos
+*&theta;*, sin *&theta;*, 0).  Then we apply the same rotations:
 
 \[
 \left( \begin{matrix}
@@ -210,9 +223,9 @@ N_z \end{matrix} \right)
 0 & -\sin A & \cos A \end{matrix} \right)
 \cdot
 \left( \begin{matrix}
-\cos B & 0 & \sin B \\
-0 & 1 & 0 \\
--\sin B & 0 & \cos B \end{matrix} \right)
+\cos B & \sin B & 0 \\
+-\sin B & \cos B & 0 \\
+0 & 0 & 1 \end{matrix} \right)
 \]
 
 So which lighting direction should we choose?  How about we light up surfaces
@@ -234,9 +247,35 @@ N_z \end{matrix} \right)
 1, &
 -1 \end{matrix} \right)
 \\
-&= -\cos \theta (\cos \phi \sin B + (-\cos A \cos B + \sin A) \sin \phi) + (\cos A +
-     \cos B \sin A) \sin \theta
+&= 
+\cos \phi \cos \theta \sin B - \cos A \cos \theta \sin \phi - \sin A \sin \theta + 
+ \cos B ( \cos A \sin \theta - \cos \theta \sin A \sin \phi)
 \end{aligned}
 \]
 
+Again, not too pretty, but not terrible once we've precomputed all the sines
+and cosines.
+
+So now all that's left to do is to pick some values for *R*<sub>1</sub>,
+*R*<sub>2</sub>, *K*<sub>1</sub>, and *K*<sub>2</sub>.  In the original donut
+code I chose *R*<sub>1</sub>=1 and *R*<sub>2</sub>=2, so it has the same
+geometry as my cross-section diagram above.  *K<sub>1</sub>* controls the
+scale, which depends on our pixel resolution and is in fact different for *x*
+and *y* in the ASCII animation.  *K*<sub>2</sub>, the distance from the viewer
+to the donut, was chosen to be 5.
+
+I've taken the above equations and written a quick and dirty canvas
+implementation here, just plotting the pixels and the lighting values from the
+equations above.  The result is not exactly the same as the original as some of
+my rotations are in opposite directions or off by 90 degrees, but it is
+qualitatively doing the same thing.
+
+Here it is: <button onclick="anim2();">toggle animation</button>
+
+<canvas id="canvasdonut" width="300" height="240">
+</canvas>
+
+It's slightly mind-bending because you can see right through the torus, but the
+math does work!  Convert that to an ASCII rendering and you've got yourself a
+clever little program.
 
