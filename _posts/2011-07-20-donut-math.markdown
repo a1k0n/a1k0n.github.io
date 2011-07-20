@@ -1,9 +1,6 @@
 ---
 title: Donut math&#58; how donut.c works
 layout: post
-
-# not ready for public distribution yet
-hide: true
 ---
 <script src="/js/donut.js">
 </script>
@@ -14,10 +11,38 @@ had a couple requests to explain this one.  It's been five years now, so it's
 not exactly fresh in my memory, so I will reconstruct it from scratch, in great
 detail, and hopefully get approximately the same result.
 
-Here it is in Javascript:
+This is the code and the output, animated in Javascript:
 <button onclick="anim1();">toggle animation</button>
+<table border="0" cellspacing="0" cellpadding="0"><tr>
+<td style="background-color:#000">
+<pre style="background-color:#000; color:#ccc;">
+             k;double sin()
+         ,cos();main(){float A=
+       0,B=0,i,j,z[1760];char b[
+     1760];printf("\x1b[2J");for(;;
+  ){memset(b,32,1760);memset(z,0,7040)
+  ;for(j=0;6.28&gt;j;j+=0.07)for(i=0;6.28
+ &gt;i;i+=0.02){float c=sin(i),d=cos(j),e=
+ sin(A),f=sin(j),g=cos(A),h=d+2,D=1/(c*
+ h*e+f*g+5),l=cos      (i),m=cos(B),n=s\
+in(B),t=c*h*g-f*        e;int x=40+30*D*
+(l*h*m-t*n),y=            12+15*D*(l*h*n
++t*m),o=x+80*y,          N=8*((f*e-c*d*g
+ )*m-c*d*e-f*g-l        *d*n);if(22&gt;y&amp;&amp;
+ y&gt;0&amp;&amp;x&gt;0&amp;&amp;80&gt;x&amp;&amp;D&gt;z[o]){z[o]=D;;;b[o]=
+ ".,-~:;=!*#$@"[N&gt;0?N:0];}}/*#****!!-*/
+  printf("\x1b[H");for(k=0;1761&gt;k;k++)
+   putchar(k%80?b[k]:10);A+=0.04;B+=
+     0.02;}}/*****####*******!!=;:~
+       ~::==!!!**********!!!==::-
+         .,~~;;;========;;;:~-.
+             ..,--------,*/
+</pre>
+</td>
+<td style="background-color:#000">
 <pre id="d" style="background-color:#000; color:#ccc;">
 </pre>
+</td></tr></table>
 
 At its core, it's a framebuffer and a Z-buffer into which I render pixels.
 Since it's just rendering relatively low-resolution ASCII art, I massively
@@ -51,20 +76,26 @@ y' &= \frac{y z'}{z}.
  \]
 
 So to project a 3D coordinate to 2D, we scale a coordinate by the screen
-distance *z'* (which we can choose as an arbitrary scaling constant, so I will
-now rename it to *K*) and divide by *z*.  Simple.  $(x',y') = (\frac{K x}{z},
-\frac{K y}{z})$.
+distance *z'*.  Since *z'* is a fixed constant, and not functionally a
+coordinate, let's rename it to *K<sub>1</sub>*, so our projection equation
+becomes $(x',y') = (\frac{K_1 x}{z}, \frac{K_1 y}{z})$.  We can choose
+*K<sub>1</sub>* arbitrarily based on the field of view we want to show in our
+2D window.  For example, if we have a 100x100 window of pixels, then the view
+is centered at (50,50); and if we want to see an object which is 10 units wide
+in our 3D space, set back 5 units from the viewer, then *K<sub>1</sub>* should
+be chosen so that the projection of the point *x*=10, *z*=5 is still on the
+screen with *x'* < 50: 10*K<sub>1</sub>*/5 < 50, or *K<sub>1</sub>* < 25.
 
-But when we're plotting a bunch of points, we might end up plotting different
+When we're plotting a bunch of points, we might end up plotting different
 points at the same (*x'*,*y'*) location but at different depths, so we maintain
-a <a href="http://en.wikipedia.org/wiki/Z-buffering">z-buffer</a> which
-stores the *z* coordinate of everything we draw.  If we need to plot a
-location, we first check to see whether we're plotting in front of what's there
-already.  It also helps to compute *z*<sup>-1</sup> $= \frac{1}{z}$ and use
-that when depth buffering because:
+a <a href="http://en.wikipedia.org/wiki/Z-buffering">z-buffer</a> which stores
+the *z* coordinate of everything we draw.  If we need to plot a location, we
+first check to see whether we're plotting in front of what's there already.  It
+also helps to compute *z*<sup>-1</sup> $= \frac{1}{z}$ and use that when depth
+buffering because:
 
  * *z*<sup>-1</sup> = 0 corresponds to infinite depth, so we can pre-initialize
-   our z-buffer to 0
+   our z-buffer to 0 and have the background be infinitely far away
  * we can re-use *z*<sup>-1</sup> when computing *x'* and *y'*:
    Dividing once and multiplying by *z*<sup>-1</sup> twice is cheaper than
    dividing by *z* twice.
@@ -153,6 +184,9 @@ of the donut from the viewer, and our projection now looks like:
 =
 \left( \frac{K_1 x}{K_2 + z} , \frac{K_1 y}{K_2 + z} \right)
 \]
+
+*K*<sub>1</sub> and *K*<sub>2</sub> can be tweaked together to change the field
+of view and flatten or exaggerate the depth of the object.
 
 Now, we could implement a 3x3 matrix multiplication routine in our code and
 implement the above in a straightforward way.  But if our goal is to shrink the
@@ -276,6 +310,90 @@ Here it is: <button onclick="anim2();">toggle animation</button>
 </canvas>
 
 It's slightly mind-bending because you can see right through the torus, but the
-math does work!  Convert that to an ASCII rendering and you've got yourself a
-clever little program.
+math does work!  Convert that to an ASCII rendering with *z*-buffering, and
+you've got yourself a clever little program.
+
+Now, we have all the pieces, but how do we write the code?  Roughly like this
+(some pseudocode liberties have been taken with 2D arrays):
+
+    const float theta_spacing = 0.07;
+    const float phi_spacing   = 0.02;
+
+    const float R1 = 1;
+    const float R2 = 2;
+    const float K2 = 5;
+    // Calculate K1 based on screen size: the maximum x-distance occurs roughly at
+    // the edge of the torus, which is at x=R1+R2, z=0.  we want that to be
+    // displaced 3/8ths of the width of the screen, which is 3/4th of the way from
+    // the center to the side of the screen.
+    // screen_width*3/8 = K1*(R1+R2)/(K2+0)
+    // screen_width*K2*3/(8*(R1+R2)) = K1
+    const float K1 = screen_width*K2*3/(8*(R1+R2));
+
+    render_frame(float A, float B) {
+      // precompute sines and cosines of A and B
+      float cosA = cos(A), sinA = sin(A);
+      float cosB = cos(B), sinB = sin(B);
+
+      char output[0..screen_width, 0..screen_height] = ' ';
+      float zbuffer[0..screen_width, 0..screen_height] = 0;
+
+      // theta goes around the cross-sectional circle of a torus
+      for(float theta=0; theta &lt; 2*pi; theta += theta_spacing) {
+        // precompute sines and cosines of theta
+        float costheta = cos(theta), sintheta = sin(theta);
+
+        // phi goes around the center of revolution of a torus
+        for(float phi=0; phi &lt; 2*pi; phi += phi_spacing) {
+          // precompute sines and cosines of phi
+          float cosphi = cos(phi), sinphi = sin(phi);
+        
+          // the x,y coordinate of the circle, before revolving (factored out of the above equations)
+          float circlex = R2 + R1*costheta;
+          float circley = R1*sintheta;
+
+          // final 3D (x,y,z) coordinate after rotations, directly from our math above
+          float x = circlex*(cosB*cosphi + sinA*sinB*sinphi) - circley*cosA*sinB; 
+          float y = circlex*(sinB*cosphi - sinA*cosB*sinphi) + circley*cosA*cosB;
+          float z = K2 + cosA*circlex*sinphi + circley*sinA;
+          float ooz = 1/z;  // "one over z"
+          
+          // x and y projection.  note that y is negated here, because y goes up in
+          // 3D space but down on 2D displays.
+          int xp = (int) (screen_width/2 + K1*ooz*x);
+          int yp = (int) (screen_height/2 - K1*ooz*y);
+          
+          // calculate luminance.  ugly, but correct.
+          float L = cosphi*costheta*sinB - cosA*costheta*sinphi - sinA*sintheta + cosB*(cosA*sintheta - costheta*sinA*sinphi);
+          // L ranges from -sqrt(2) to +sqrt(2).  If it's &lt; 0, the surface is
+          // pointing away from us, so we won't bother trying to plot it.
+          if(L>0) {
+            // test against the z-buffer.  larger 1/z means the pixel is closer to
+            // the viewer than what's already plotted.
+            if(ooz > zbuffer[xp,yp]) {
+              zbuffer[xp,yp] = ooz;
+              int luminance_index = L*8; // this brings L into the range 0..11 (8*sqrt(2) = 11.3)
+              // now we lookup the character corresponding to the luminance and plot it in our output:
+              output[xp,yp] = ".,-~:;=!*#$@"[luminance_index];
+            }
+          }
+        }
+      }
+
+      // now, dump output[] to the screen.
+      // bring cursor to "home" location, in just about any currently-used terminal
+      // emulation mode
+      printf("\x1b[H");
+      for(int j=0;j&lt;screen_height;j++) {
+        for(int i=0;i&lt;screen_width;i++) {
+          putchar(output[i,j]);
+        }
+        putchar('\n');
+      }
+      
+    }
+
+
+The Javascript source for both the ASCII and canvas rendering is <a
+href="/js/donut.js">right here</a>.
 

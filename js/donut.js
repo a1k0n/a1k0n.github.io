@@ -1,4 +1,8 @@
+(function() {
+var _body = document.getElementsByTagName('body')[0];
+var _prev_onload = _body.onload;
 document.getElementsByTagName('body')[0].onload = function() {
+  _prev_onload && _prev_onload();
   var pretag = document.getElementById('d');
   var canvastag = document.getElementById('canvasdonut');
 
@@ -101,4 +105,4 @@ document.getElementsByTagName('body')[0].onload = function() {
   asciiframe();
   canvasframe();
 }
-
+})();
