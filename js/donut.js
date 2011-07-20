@@ -56,7 +56,7 @@ document.getElementsByTagName('body')[0].onload = function() {
   // This is a reimplementation according to my math derivation on the page
   var R1 = 1;
   var R2 = 2;
-  var K1 = 100;
+  var K1 = 150;
   var K2 = 5;
   var canvasframe=function() {
     var ctx = canvastag.getContext('2d');
@@ -104,5 +104,6 @@ document.getElementsByTagName('body')[0].onload = function() {
 
   asciiframe();
   canvasframe();
+  window.prettyPrint();
 }
 })();
