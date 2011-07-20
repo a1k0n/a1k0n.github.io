@@ -13,6 +13,7 @@ layout: default
     ga.src = 'http://www.google-analytics.com/ga.js';
     var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
   })();
+<!--
   var disqus_shortname = 'a1k0n';
   var disqus_identifier = '{{ page.id }}';
   var disqus_url = 'http://a1k0n.net{{ page.url }}';
@@ -21,6 +22,7 @@ layout: default
     dsq.src = 'http://a1k0n.disqus.com/embed.js';
     document.getElementsByTagName('head')[0].appendChild(dsq);
   })();
+-->
 </script>
 </head>
 <body>
@@ -30,5 +32,7 @@ layout: default
 <hr>
 <a href='{{ post.url }}'>permalink</a> | 
 <a href="/atom.xml" class=feed><img src="/img/feed-icon-14x14.png" /></a> | <a href="/">a1k0n.net</a><br />
+<!--
 <div id="disqus_thread"></div>
+<-->
 </body>
