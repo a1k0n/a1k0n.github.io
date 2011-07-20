@@ -64,13 +64,12 @@ document.getElementsByTagName('body')[0].onload = function() {
       B += 0.03;
     }
     // precompute cosines and sines of A, B, theta, phi, same as before
-    // and use the same step size as before for theta and phi
     var cA=Math.cos(A), sA=Math.sin(A),
         cB=Math.cos(B), sB=Math.sin(B);
     for(var j=0;j<6.28;j+=0.3) { // j <=> theta
-      var ct=Math.cos(j),st=Math.sin(j);
+      var ct=Math.cos(j),st=Math.sin(j); // cosine theta, sine theta
       for(i=0;i<6.28;i+=0.1) {   // i <=> phi
-        var sp=Math.sin(i),cp=Math.cos(i);
+        var sp=Math.sin(i),cp=Math.cos(i); // cosine phi, sine phi
         var ox = R2 + R1*ct, // object x, y = (R2,0,0) + (R1 cos theta, R1 sin theta, 0)
             oy = R1*st;
 
