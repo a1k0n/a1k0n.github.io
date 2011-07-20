@@ -10,8 +10,16 @@ layout: default
   _gaq.push(['_trackPageview']);
   (function() {
     var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    ga.src = 'http://www.google-analytics.com/ga.js';
     var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+  var disqus_shortname = 'a1k0n';
+  var disqus_identifier = '{{ page.id }}';
+  var disqus_url = 'http://a1k0n.net{{ page.url }}';
+  (function() {
+    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+    dsq.src = 'http://a1k0n.disqus.com/embed.js';
+    document.getElementsByTagName('head')[0].appendChild(dsq);
   })();
 </script>
 </head>
@@ -23,14 +31,4 @@ layout: default
 <a href='{{ post.url }}'>permalink</a> | 
 <a href="/atom.xml" class=feed><img src="/img/feed-icon-14x14.png" /></a> | <a href="/">a1k0n.net</a><br />
 <div id="disqus_thread"></div>
-<script type="text/javascript">
-  var disqus_shortname = 'a1k0n';
-  var disqus_identifier = '{{ page.id }}';
-  var disqus_url = 'http://a1k0n.net{{ page.url }}';
-  (function() {
-      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
-      dsq.src = 'http://a1k0n.disqus.com/embed.js';
-      document.getElementsByTagName('head')[0].appendChild(dsq);
-  })();
-</script>
 </body>
