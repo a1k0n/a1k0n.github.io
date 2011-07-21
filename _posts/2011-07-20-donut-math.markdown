@@ -73,7 +73,7 @@ Thus the relative proportions are maintained:
 
 \[
 \begin{aligned}
-\frac{y'}{z'} &= \frac{y}{z},
+\frac{y'}{z'} &= \frac{y}{z}
 \\
 y' &= \frac{y z'}{z}.
 \end{aligned}
@@ -369,7 +369,8 @@ render_frame(float A, float B) {
       int yp = (int) (screen_height/2 - K1*ooz*y);
       
       // calculate luminance.  ugly, but correct.
-      float L = cosphi*costheta*sinB - cosA*costheta*sinphi - sinA*sintheta + cosB*(cosA*sintheta - costheta*sinA*sinphi);
+      float L = cosphi*costheta*sinB - cosA*costheta*sinphi - sinA*sintheta + 
+                cosB*(cosA*sintheta - costheta*sinA*sinphi);
       // L ranges from -sqrt(2) to +sqrt(2).  If it's &lt; 0, the surface is
       // pointing away from us, so we won't bother trying to plot it.
       if(L>0) {

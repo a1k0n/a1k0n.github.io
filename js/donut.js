@@ -1,8 +1,5 @@
 (function() {
-var _body = document.getElementsByTagName('body')[0];
-var _prev_onload = _body.onload;
-document.getElementsByTagName('body')[0].onload = function() {
-  _prev_onload && _prev_onload();
+var _onload = function() {
   var pretag = document.getElementById('d');
   var canvastag = document.getElementById('canvasdonut');
 
@@ -34,7 +31,7 @@ document.getElementsByTagName('body')[0].onload = function() {
             y=0|(12+15*D*(cp*h*sB+t*cB)),
             o=x+80*y,
             N=0|(8*((st*sA-sp*ct*cA)*cB-sp*ct*sA-st*cA-cp*ct*sB));
-        if(y<22 && y>0 && x>0 && x<79 && D>z[o])
+        if(y<22 && y>=0 && x>=0 && x<79 && D>z[o])
         {
           z[o]=D;
           b[o]=".,-~:;=!*#$@"[N>0?N:0];
@@ -106,4 +103,9 @@ document.getElementsByTagName('body')[0].onload = function() {
   canvasframe();
   window.prettyPrint();
 }
+
+if(document.all)
+  window.attachEvent('onload',_onload);
+else
+  window.addEventListener("load",_onload,false);
 })();
