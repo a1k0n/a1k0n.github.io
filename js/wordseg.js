@@ -1,10 +1,12 @@
+(function(){
+
 var NGRAM=5; // context size in the model (constant)
 var ctxLL;   // context log-likelihood data (aka language model)
 var tmr;     // output refresh timer
 var outtag, intag; // our input and output html tags
 
 // Load up our language model image data
-(function(){
+function loadmodel() {
   var img = new Image();
   img.onload = function() {
     var s = "", 
@@ -24,7 +26,7 @@ var outtag, intag; // our input and output html tags
     intag.focus();
   };
   img.src = '/img/langmodel.png';
-})();
+}
 
 // On keypress, set a 50ms timer to refresh our word segmentation output
 window['kp']=function() {
@@ -106,9 +108,33 @@ function segment(str)
   return result.join(" ");
 }
 
-function drawthingy()
+function drawdiagram()
 {
   var c = document.getElementById('dpdiag'),
       t = c.getContext("2d");
+  t.fillStyle='#fff';
+  t.clearRect(0,0, t.canvas.width, t.canvas.height);
+
+  var teststr = "somewords";
+  var len = teststr.length;
+  // draw len x 5 array of boxes (or just the lines between them), with teststr arranged on top
+  // grey out bottom left diagonal
+  // compute entire array, as above
+  // show maximum likelihood path with arrows (maybe I can just highlight it and do this with a table?)
+  // on mouseover each cell, show maximum likelihood path from there, with a
+  // sidebar on the right showing the implied context and the implied
+  // continuation
+  // a table would definitely make this easier, but i can't do arrows; oh well.
 }
 
+function _onload() {
+  loadmodel();
+  drawdiagram();
+}
+
+if(document.all)
+  window.attachEvent('onload',_onload);
+else
+  window.addEventListener("load",_onload,false);
+
+})();

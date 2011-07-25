@@ -128,12 +128,21 @@ choose the *n*-gram model, we get a very simple polynomial time algorithm
 algorithm I want to write about.
 
 
-
 \[
   P_{i,j} = P(word_{i,j}) \cdot \max\left( P(wordending_{i,j}) \cdot P(L_{i+1} | wordending_i), P(L_{i+1} | not wordending_i) \right)
 \]
 
-<canvas id="dpdiag" width="200" height="200">
+However, I'm having great difficulty coming up with a good prose explanation of
+how we can do this in sub-exponential time.  The basic answer is that the
+problem decomposes right-to-left, and so we can wave the magic wand of dynamic
+programming.  So in the style of the <a
+href="http://blog.ezyang.com/2010/11/dp-zoo-tour/">DP Zoo Tour</a>, here is an
+interactive diagram of how the dynamic programming algorithm works &mdash; as
+Edward Z. Yang points out in the previous link, it might as well be called a
+*table-filling algorithm*.  (Like the demo above, this also uses canvas tags in
+Javascript)
+
+<canvas id="dpdiag" width="400" height="200">
 </canvas>
 
 ### Representing probabilities
