@@ -1,0 +1,9 @@
+ - ASCII art compression and Kolmogorov complexity
+   - entropy coding + information theory
+   - Huffman  (regular tree building, but also Moffat & Turpin paper, via cbloomrants)
+   - RLE
+   - 1-run coding
+
+ - Bassline synthesis and z-transforms
+
+ - minimal VM + something?
