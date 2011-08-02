@@ -259,7 +259,7 @@ vertices but do not traverse them (<a
 Now, explore space recursively for each adjacent cut vertex.  If child
 <i>j</i>'s space is <i>not</i> a battlefront, then our potential value is the
 sum of the current chamber size and child <i>j</i>'s value.  Otherwise, it
-<i>is</i> a bottlefront, and we ignore the current chamber's size but add only
+<i>is</i> a battlefront, and we ignore the current chamber's size but add only
 the number of steps it takes to enter the child chamber (I don't have a good
 formal reason for this, it just seemed intuitively right).  After computing
 this potential value for each child, we return the maximum of them as the
