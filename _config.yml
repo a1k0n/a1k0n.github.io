@@ -1,5 +1,3 @@
-auto: false
-server: false
 pygments: true
 markdown: maruku
 maruku:
