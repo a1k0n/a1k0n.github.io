@@ -24,6 +24,7 @@ function loadmodel() {
     intag.disabled = false;
     intag.value = "";
     intag.focus();
+    drawdiagram();
   };
   img.src = '/img/langmodel.png';
 }
@@ -110,26 +111,46 @@ function segment(str)
 
 function drawdiagram()
 {
-  var c = document.getElementById('dpdiag'),
-      t = c.getContext("2d");
-  t.fillStyle='#fff';
-  t.clearRect(0,0, t.canvas.width, t.canvas.height);
+  var table = document.getElementById('dpdiag');
+  var str = "somewords";
+  var len = str.length;
 
-  var teststr = "somewords";
-  var len = teststr.length;
-  // draw len x 5 array of boxes (or just the lines between them), with teststr arranged on top
-  // grey out bottom left diagonal
-  // compute entire array, as above
-  // show maximum likelihood path with arrows (maybe I can just highlight it and do this with a table?)
-  // on mouseover each cell, show maximum likelihood path from there, with a
-  // sidebar on the right showing the implied context and the implied
-  // continuation
-  // a table would definitely make this easier, but i can't do arrows; oh well.
+  var cells = [];
+  for(var j=0;j<1+NGRAM;j++) cells[j] = [];
+  for(var i=0;i<len;i++) {
+    cells[0][i] = str[i];
+    for(var j=1;j<1+NGRAM;j++)
+      cells[j][i] = "x";
+  }
+  
+  // blah, copy-pasted from above, as i need to subtly reimplement this to draw the diagram
+  var split=[], LL=[0,1e6,1e6,1e6,1e6], LL_=[];
+  // Work from the end of the string back towards the beginning
+  for(var i=len-1;i>=0;i--) {
+    // Try all possible prefix lengths from 0 to NGRAM
+    for(var k=0;k<Math.min(i+1,NGRAM);k++) {
+      var kp1 = Math.min(NGRAM-1, k+1);
+
+      // LLc = -log likelihood of current character in current context
+      var LLc = ctxLL[4*((get_ctx_hash(str, i-k, k)+str.charCodeAt(i)-96)&0xffff)];
+      // LLw = -log likelihood of ending a word after this letter
+      var LLw = ctxLL[4*get_ctx_hash(str, i+1-kp1, kp1)];
+      var LL1 = LLc + LLw + LL[0]; // choice #1: we extend the word by one letter end it there, and start a new word with 0 preceeding characters
+      var LL2 = LLc + LL[kp1];     // choice #2: we extend the word by one letter
+      LL_[k] = Math.min(LL1,LL2);  // Result for this context is the better of the two
+      cells[k+1][i] = LL_[k];
+      split[i*NGRAM+k] = LL1 < LL2; // and we split here if choice #1 was better
+    }
+    for(k=0;k<NGRAM;k++) LL[k]=LL_[k];
+  }
+
+ 
+  for(var j=0;j<NGRAM+1;j++) cells[j] = "<td>" + cells[j].join("</td><td>") + "</td>";
+  table.innerHTML = "<tr>" + cells.join("</tr><tr>") + "</tr>";
 }
 
 function _onload() {
   loadmodel();
-  drawdiagram();
 }
 
 if(document.all)

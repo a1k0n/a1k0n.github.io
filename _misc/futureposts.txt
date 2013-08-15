@@ -5,5 +5,9 @@
    - 1-run coding
 
  - Bassline synthesis and z-transforms
+   - javascript <audio> tag sucks.  we can generate audio by making a wave file
+     in base64 and "loading" that... but you can't stream sound.  so we'll have
+     to synth a simple bassline or something; we can't do realtime without
+     flash.
 
  - minimal VM + something?

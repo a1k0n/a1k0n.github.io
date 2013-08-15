@@ -13,15 +13,15 @@ hide: true
 I discovered a neat little algorithm recently, and I wanted to share it.
 
 Say you're given a chunk of lowercase text with no spaces or punctuation in it.
-Say you want to write a program to find what actual words are in it, at least
-to some good approximation.  This problem is a little contrived in English but
+You want to write a program to find what actual words are in it, at least to
+some good approximation.  This problem is a little contrived in English but
 it's definitely not contrived for many languages which don't have spaces
 between words, e.g. Chinese or Japanese or (especially hard to parse) Thai.
 
-For example,
+For example, the input
 "thisisabunchoftextwithnospacesorpunctuationandiwanttoknowwhatwordsareinit"
-should become "this is a bunch of text with no spaces or punctuation and i want
-to know what words are in it".
+should produce the output "this is a bunch of text with no spaces or
+punctuation and i want to know what words are in it".
 
 Try typing words into the box here without spaces (or paste the above example
 in, if you want).  Because of some hackery which I will explain later, this
@@ -49,11 +49,11 @@ problem, so the question becomes: What is the *most likely* solution, and
 what does our program need to know about English to know whether one decoding
 is more likely than another?
 
-Breaking it down further: for each letter in our input string, is it more
-likely that a space comes after it or not?  Obviously, making a choice in one
-part of the string can affect the rest of the string: If we see "orient", the
-most likely parsing depends on whether the following string is "al" (as in
-"oriental") or "er" (as in "or i enter").
+For each letter in our input string, is it more likely that a space comes after
+it or not?  Making a choice in one part of the string can affect the rest of
+the string: If we see "segmenta", the most likely parsing depends on whether
+the following string is "tion" (as in "segmentation") or "coin" (as in "segment
+a coin").
 
 To get this done requires solving two major subproblems: the algorithmic
 problem of finding the global maximum, and the engineering problem of
@@ -69,21 +69,21 @@ likely that the next letter is "`r`".
 
 Note that a greedy approach won't work: if we just run through the sentence one
 letter at a time and choose whether or not a space appears after the letter
-based on which is more likely, we won't be able to resolve the above "orient..."
-vs. "or i ent..." example correctly.
+based on which is more likely, we won't be able to resolve the above "segmenta..."
+vs. "segment a..." example correctly.
 
 We have to go through the sentence and try it both ways -- is the entire
 sentence more likely if we put a space here, or not?  We could try all
 2<sup>N</sup> combinations through a backtracking search and keep only the
 maximum.  That would get the right answer, but very, very slowly.
 
-It turns out we can do better.  To see how, let's formalize the problem
-mathematically.  A "phrase" is a particular output of the algorithm with spaces
-between some of the input characters &mdash; a set of words separated by
-spaces.  The probability of a phrase is the product of the probability of each
-word in it, and the probability of a word is the product of the probability of
-each letter given the previous letters, and the probability of ending the word
-on the last letter.
+We can do better.  To see how, let's formalize the problem mathematically.  A
+"phrase" is a particular output of the algorithm with spaces between some of
+the input characters &mdash; a set of words separated by spaces.  The
+probability of a phrase is the product of the probability of each word in it,
+and the probability of a word is the product of the probability of each letter
+given the previous letters, and the probability of ending the word on the last
+letter.
 
 For instance, the word "the" is the probability of seeing a word start with
 "t", times the probability of "h" following "t", times the probability of "e"
@@ -127,7 +127,6 @@ choose the *n*-gram model, we get a very simple polynomial time algorithm
 (technically a linear time algorithm since *n* is fixed), and it's this
 algorithm I want to write about.
 
-
 \[
   P_{i,j} = P(word_{i,j}) \cdot \max\left( P(wordending_{i,j}) \cdot P(L_{i+1} | wordending_i), P(L_{i+1} | not wordending_i) \right)
 \]
@@ -142,8 +141,8 @@ Edward Z. Yang points out in the previous link, it might as well be called a
 *table-filling algorithm*.  (Like the demo above, this also uses canvas tags in
 Javascript)
 
-<canvas id="dpdiag" width="400" height="200">
-</canvas>
+<table id="dpdiag" cellspacing="0" cellpadding="1" border="1">
+</table>
 
 ### Representing probabilities
 
