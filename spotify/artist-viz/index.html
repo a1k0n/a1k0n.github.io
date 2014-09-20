@@ -1,0 +1,226 @@
+<body onload="init()">
+<script src="coords.json"></script>
+<script>
+var canvas;
+var w,h;
+
+// http://paulirish.com/2011/requestanimationframe-for-smart-animating/
+// http://my.opera.com/emoller/blog/2011/12/20/requestanimationframe-for-smart-er-animating
+// requestAnimationFrame polyfill by Erik Möller. fixes from Paul Irish and Tino Zijdel
+// MIT license
+(function () {
+  var lastTime = 0;
+  var vendors = ['ms', 'moz', 'webkit', 'o'];
+  for(var x = 0; x < vendors.length && !window.requestAnimationFrame; ++x) {
+    window.requestAnimationFrame = window[vendors[x] + 'RequestAnimationFrame'];
+    window.cancelAnimationFrame = window[vendors[x] + 'CancelAnimationFrame'] || window[vendors[x] + 'CancelRequestAnimationFrame'];
+  }
+  if(!window.requestAnimationFrame)
+    window.requestAnimationFrame = function (callback, element) {
+      var currTime = new Date().getTime();
+      var timeToCall = Math.max(0, 16 - (currTime - lastTime));
+      var id = window.setTimeout(function () {
+        callback(currTime + timeToCall);
+      },
+      timeToCall);
+      lastTime = currTime + timeToCall;
+      return id;
+  };
+  if(!window.cancelAnimationFrame)
+    window.cancelAnimationFrame = function (id) {
+      clearTimeout(id);
+  };
+}());
+
+var mouseX, mouseY;
+window.onmousemove = function(event) {
+  event = event || window.event;
+  mouseX = event.clientX;
+  mouseY = event.clientY;
+}
+
+window.onmouseup = function(event) {
+}
+
+function init() {
+  canvas = document.createElement('canvas');
+
+  document.body.appendChild(canvas);
+  animate();
+}
+
+function cross(a, b) {
+  return [
+    a[1]*b[2] - a[2]*b[1],
+    a[2]*b[0] - a[0]*b[2],
+    a[0]*b[1] - a[1]*b[0]];
+}
+
+// destructively normalizes v
+function normalize(v) {
+  var norm = Math.sqrt(v[0]*v[0] + v[1]*v[1] + v[2]*v[2]);
+  if (norm < 1e-6) return v;
+  norm = 1.0/norm;
+  v[0] *= norm;
+  v[1] *= norm;
+  v[2] *= norm;
+  return v;
+}
+
+// amount is 0..1 for an interpolation
+function rotate_quat(vector, src, dest, amount) {
+  // form a quaternion from the cross product (= sin(angle) * axis vector),
+  // scaled down by 'amount'
+  var raxis = cross(src, dest);
+  // a b c d are components of the quaternion
+  var b=raxis[0]*amount, c=raxis[1]*amount, d=raxis[2]*amount;
+  var a = Math.sqrt(1 - b*b - c*c - d*d);
+  // now build up the rotation matrix and multiply through by vector
+  var x = (vector[0] * (a*a + b*b - c*c - d*d) +
+           vector[1] * 2 * (b*c - a*d) +
+           vector[2] * 2 * (b*d + a*c));
+  var y = (vector[0] * 2 * (b*c + a*d) +
+           vector[1] * (a*a - b*b + c*c - d*d) +
+           vector[2] * 2 * (c*d - a*b));
+  var z = (vector[0] * 2 * (b*d - a*c) +
+           vector[1] * 2 * (c*d + a*b) +
+           vector[2] * (a*a - b*b - c*c + d*d));
+  return [x,y,z];
+}
+
+var xvector = [1,0,0];
+var yvector = [0,1,0];
+var zvector = [0,0,1];
+
+// destructively updates vectors to keep the whole thing orthonormal
+function orthonormalize() {
+  normalize(zvector);
+  normalize(yvector);
+  xvector = normalize(cross(yvector, zvector));
+  yvector = normalize(cross(zvector, xvector));
+}
+
+function transform(point) {
+  return [
+    point[0]*xvector[0] + point[1]*xvector[1] + point[2]*xvector[2],
+    point[0]*yvector[0] + point[1]*yvector[1] + point[2]*yvector[2],
+    point[0]*zvector[0] + point[1]*zvector[1] + point[2]*zvector[2]];
+}
+
+function untransform(point) {
+  return [
+    point[0]*xvector[0] + point[1]*yvector[0] + point[2]*zvector[0],
+    point[0]*xvector[1] + point[1]*yvector[1] + point[2]*zvector[1],
+    point[0]*xvector[2] + point[1]*yvector[2] + point[2]*zvector[2]];
+}
+
+var frame = 0;
+var visible_topics = {};
+function animate() {
+  requestAnimationFrame(animate);
+
+  w = window.innerWidth;
+  h = window.innerHeight;
+  canvas.width = w;
+  canvas.height = h;
+  if (mouseX === undefined) {
+    mouseX = w/2; mouseY = h/2;
+  }
+
+  var lastframe = frame;
+  frame = new Date().getTime();
+  var ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0,0,w,h);
+
+  ctx.strokeStyle = '#000000';
+
+  var fsize = 18;
+  ctx.font = fsize+"px Helvetica";
+
+  var up = untransform([0,0,1]);
+  var mouse = normalize(untransform([w/2 - mouseX, -h/2 + mouseY, 10*w]))
+  zvector = rotate_quat(zvector, up, mouse, (frame - lastframe) * 0.003);
+  //zvector = rotate_toward(zvector, normalize([1, 0, 20]), 0.1);
+  console.log(zvector);
+  orthonormalize();
+
+  var limit = 1000; //Math.floor(600 + 400 * Math.cos(frame*0.0001));
+  limited_data = []
+  for (var i = 0; i < limit; i++) {
+    var p = transform(data[i]);
+    limited_data[i] = data[i].slice(0);
+    limited_data[i][0] = p[0];
+    limited_data[i][1] = p[1];
+    limited_data[i][2] = p[2];
+  }
+  limited_data.sort(function(y,x) { return x[2] - y[2]; })
+  /*
+  shown_topics = {}
+  for (var i = 0; i < 10; i++) {
+    var artistid = limited_data[i][4];
+    var t = artist_topics[artistid];
+    for (var j = 0; j < t.length; j++) {
+      shown_topics[t[j]] = 1;
+    }
+  }
+  */
+
+  var center_item = -1, best_centerdist = 1e6;
+  for (var i = 0; i < limit; i++) {
+    var p = limited_data[i];
+    ctx.beginPath();
+    var z = p[2];
+    // if (z > 0) continue;
+    var xp = w*0.5 + 2*p[0] * w / (z + 5);
+    var yp = h*0.5 - 2*p[1] * w / (z + 5);
+    var centerdist = (xp-mouseX)*(xp-mouseX) + (yp-mouseY)*(yp-mouseY);
+    var sz = 50/(z+5);
+    if (z < 0 && centerdist < best_centerdist) {
+      center_item = [p[4], xp, yp, sz];
+      best_centerdist = centerdist;
+    }
+    if (sz > 100) sz = 100;
+    if (sz < 1) sz = 1;
+    ctx.arc(xp, yp, sz, 0, 2*Math.PI, false);
+    ctx.fillStyle = limited_data[i][3];
+    ctx.globalAlpha = Math.min(1, sz*0.07);
+    ctx.fill();
+    ctx.stroke();
+    ctx.fillStyle = '#000000';
+    ctx.fillText(limited_data[i][5], xp + sz*1.1, yp + fsize/3);
+  }
+  ctx.globalAlpha = 1.0;
+  ctx.fillStyle = '#cceeff';
+  ctx.fillRect(5,0, 200, 28);
+  ctx.fillStyle = '#000000';
+  ctx.fillText("Showing " + limit + " artists", 20, 20);
+
+  var topics = artist_topics[center_item[0]];
+  if (!topics) return;
+  var leftmargin = 5;
+  for (var tidx = 0; tidx < topics.length; tidx++) {
+    var t = topics[tidx];
+
+    ctx.strokeStyle = '#225566';
+    var sz = center_item[3];
+    ctx.strokeRect(center_item[1]-sz, center_item[2]-sz, 2*sz, 2*sz);
+
+    ctx.fillStyle = '#cceeff';
+    ctx.fillRect(leftmargin,40, 200, 8 + (topic_artists[t].length + 1) * 16);
+    ctx.font = "14px Helvetica";
+    ctx.fillStyle = '#000000';
+    ctx.fillText("topic " + t, leftmargin+15, 56);
+    for (var i = 0 ; i < topic_artists[t].length; i++) {
+      var a = topic_artists[t][i];
+      ctx.fillStyle = '#666666';
+      if (center_item[0] == a) {
+        ctx.fillStyle = '#000000';
+      }
+      ctx.fillText(data[a][5], leftmargin+19, 56 + 16*(i+1));
+    }
+    leftmargin += 208;
+  }
+}
+</script>
+</body>

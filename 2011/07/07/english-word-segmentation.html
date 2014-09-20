@@ -1,0 +1,84 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en"> 
+  <head>
+<link rel="stylesheet" href="/style.css" type="text/css" media="all" /> 
+<title>On segmentation of English words -- a1k0n</title>
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-24584703-1']);
+  _gaq.push(['_trackPageview']);
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = 'http://www.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+<!--
+  var disqus_shortname = 'a1k0n';
+  var disqus_identifier = '/2011/07/07/english-word-segmentation';
+  var disqus_url = 'http://a1k0n.net/2011/07/07/english-word-segmentation.html';
+  (function() {
+    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+    dsq.src = 'http://a1k0n.disqus.com/embed.js';
+    document.getElementsByTagName('head')[0].appendChild(dsq);
+  })();
+-->
+</script>
+</head>
+<body>
+<div style="width: 100%; background-color: #daf2ff; text-align: center; font-size: 12pt;"><a href="/" style="color: #1d3542;">a1k0n : Andy Sloane's weblog</a></div>
+<h1>On segmentation of English words</h1>
+<script src='/js/wordseg.js'>
+</script>
+<p><em>Oops, sorry, this post isn&#8217;t ready yet. It accidentally showed up in the atom feed.</em></p>
+
+<p>I discovered a neat little algorithm recently, and I wanted to share it.</p>
+
+<p>Say you&#8217;re given a chunk of lowercase text with no spaces or punctuation in it. You want to write a program to find what actual words are in it, at least to some good approximation. This problem is a little contrived in English but it&#8217;s definitely not contrived for many languages which don&#8217;t have spaces between words, e.g. Chinese or Japanese or (especially hard to parse) Thai.</p>
+
+<p>For example, the input &#8220;thisisabunchoftextwithnospacesorpunctuationandiwanttoknowwhatwordsareinit&#8221; should produce the output &#8220;this is a bunch of text with no spaces or punctuation and i want to know what words are in it&#8221;.</p>
+
+<p>Try typing words into the box here without spaces (or paste the above example in, if you want). Because of some hackery which I will explain later, this requires a Canvas-enabled browser &#8212; Firefox, Safari, Chrome, Opera, and maybe IE 9 &#8212; to work. A little bit of Javascript code will strip out all the spaces and non-alphabetical characters, down-case everything, and then attempt to put spaces in where they belong, provided the input is in English. (It&#8217;s not making requests to my server; your browser is doing the work)</p>
+<textarea id='i' rows='5' cols='50' onkeyup='kp();' type='text' disabled='true'>(loading...)</textarea><pre id='o' style='border: solid 1px'>
+</pre>
+<p>With a little bit of experimentation you&#8217;ll see that it works pretty well, but not perfectly by any means. This is mostly because of a design tradeoff I made &#8212; for my demo your browser is loading a <a href='/img/langmodel.png'>60-kilobyte PNG</a> which encodes a lossily-compressed English language model (the language model is lossy, not the image compression), and you can get better performance with a larger model, but there&#8217;s no reason to download a huge amount of data for a simple demonstration of the idea here.</p>
+
+<p>But it&#8217;s also because there isn&#8217;t necessary a unique solution to the problem, so the question becomes: What is the <em>most likely</em> solution, and what does our program need to know about English to know whether one decoding is more likely than another?</p>
+
+<p>For each letter in our input string, is it more likely that a space comes after it or not? Making a choice in one part of the string can affect the rest of the string: If we see &#8220;segmenta&#8221;, the most likely parsing depends on whether the following string is &#8220;tion&#8221; (as in &#8220;segmentation&#8221;) or &#8220;coin&#8221; (as in &#8220;segment a coin&#8221;).</p>
+
+<p>To get this done requires solving two major subproblems: the algorithmic problem of finding the global maximum, and the engineering problem of representing the likelihood of a letter in a phrase.</p>
+
+<h3 id='finding_the_global_maximum'>Finding the global maximum</h3>
+
+<p>For now, let&#8217;s take it as read that we know the approximate probability of seeing a letter or a space after some number of preceeding letters. For example, if we have seen &#8221;<code>the</code>&#8221; in a randomly chosen section of English text, it is very likely that this is the end of the word, but it is also pretty likely that the next letter is &#8221;<code>r</code>&#8221;.</p>
+
+<p>Note that a greedy approach won&#8217;t work: if we just run through the sentence one letter at a time and choose whether or not a space appears after the letter based on which is more likely, we won&#8217;t be able to resolve the above &#8220;segmenta&#8230;&#8221; vs. &#8220;segment a&#8230;&#8221; example correctly.</p>
+
+<p>We have to go through the sentence and try it both ways &#8211; is the entire sentence more likely if we put a space here, or not? We could try all 2<sup>N</sup> combinations through a backtracking search and keep only the maximum. That would get the right answer, but very, very slowly.</p>
+
+<p>We can do better. To see how, let&#8217;s formalize the problem mathematically. A &#8220;phrase&#8221; is a particular output of the algorithm with spaces between some of the input characters &#8212; a set of words separated by spaces. The probability of a phrase is the product of the probability of each word in it, and the probability of a word is the product of the probability of each letter given the previous letters, and the probability of ending the word on the last letter.</p>
+
+<p>For instance, the word &#8220;the&#8221; is the probability of seeing a word start with &#8220;t&#8221;, times the probability of &#8220;h&#8221; following &#8220;t&#8221;, times the probability of &#8220;e&#8221; following &#8220;th&#8221;, times the probability of the word ending after &#8220;the&#8221;. I hope it&#8217;s clear that by this definition, the phrase &#8220;t he words&#8221; is less probable than &#8220;the words&#8221;, because &#8220;t&#8221; is a relatively unlikely word (not because it starts with &#8220;t&#8221;, but because there is nothing but &#8220;t&#8221; before the word ending) and because &#8220;he&#8221; occurs less frequently than &#8220;the&#8221;.</p>
+
+<p>When we look at the probability of a particular parsing of a phase, we need to specify the probability of a letter <em>given a context</em>, where the context is 0 or more preceeding letters in the word. This could be implemented through a dictionary search in a <a href='http://en.wikipedia.org/wiki/Trie'>trie</a>, or through an <em>n</em>-gram language model where we only look at up to <em>n</em> letters at a time. For a 5-gram letter model, we&#8217;d only look at the &#8220;anism&#8221; at the end of &#8220;antidisestablishmentari<u>anism</u>&#8221; in order to determine the likelihood of the final &#8220;m&#8221; in the word.</p>
+
+<p>With a fully-specified dictionary, our algorithm stops working when we see a word we don&#8217;t recognize but which might be valid. With an <em>n</em>-gram model, we can at least make a pretty good guess in any context. Not only that: If we choose the <em>n</em>-gram model, we get a very simple polynomial time algorithm (technically a linear time algorithm since <em>n</em> is fixed), and it&#8217;s this algorithm I want to write about.</p>
+<div class='maruku-equation'><img alt='$P_{i,j} = P(word_{i,j}) \cdot \max\left( P(wordending_{i,j}) \cdot P(L_{i+1} | wordending_i), P(L_{i+1} | not wordending_i) \right)$' style='height: 2.44444444444444ex;' src='/img/latex/623cb0b0e2e75a07ffbcf2d2a33851fd.png' class='maruku-png' /><span class='maruku-eq-tex'><code style='display: none'>P_{i,j} = P(word_{i,j}) \cdot \max\left( P(wordending_{i,j}) \cdot P(L_{i+1} | wordending_i), P(L_{i+1} | not wordending_i) \right)</code></span></div>
+<p>However, I&#8217;m having great difficulty coming up with a good prose explanation of how we can do this in sub-exponential time. The basic answer is that the problem decomposes right-to-left, and so we can wave the magic wand of dynamic programming. So in the style of the <a href='http://blog.ezyang.com/2010/11/dp-zoo-tour/'>DP Zoo Tour</a>, here is an interactive diagram of how the dynamic programming algorithm works &#8212; as Edward Z. Yang points out in the previous link, it might as well be called a <em>table-filling algorithm</em>. (Like the demo above, this also uses canvas tags in Javascript)</p>
+<table cellpadding='1' cellspacing='0' id='dpdiag' border='1'>
+</table>
+<h3 id='representing_probabilities'>Representing probabilities</h3>
+
+<p>As a quick aside, let me point out that etc etc take the log</p>
+
+<h3 id='representing_letter_likelihoods'>Representing letter likelihoods</h3>
+
+<p>The easiest way to find out how likely a letter is after a particular context is to run over a large amount of English words, count the number of times each context occurs, tally up each letter following each context, and make a big lookup table you can query. If a word began with &#8220;th&#8221; 1000 times and then &#8220;e&#8221; followed afterward 800 times, then the probability estimate of &#8220;e&#8221; given &#8220;th&#8221; is 800/1000 = 0.8.</p>
+<hr>
+<a href=''>permalink</a> | 
+<a href="/atom.xml" class=feed><img src="/img/feed-icon-14x14.png" alt="RSS" /></a> | <a href="/">a1k0n.net</a><br />
+<!--
+<div id="disqus_thread"></div>
+<-->
+</body>
+
+</html>
