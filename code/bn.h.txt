@@ -1,0 +1,298 @@
+// Smallish extended-precision arithmetic C++ template.  Very quick
+// and very dirty, but functional.  Improvements welcome; I would
+// prefer to make this as small as possible, even if it's not fast.
+//
+// Algorithms from Handbook of Applied Cryptography chapter 14
+// http://www.cacr.math.uwaterloo.ca/hac/
+//
+// Copyright (c) 2009 Andy Sloane <andy@a1k0n.net>
+//
+// Permission is hereby granted, free of charge, to any person
+// obtaining a copy of this software and associated documentation
+// files (the "Software"), to deal in the Software without
+// restriction, including without limitation the rights to use,
+// copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the
+// Software is furnished to do so, subject to the following
+// conditions:
+//
+// The above copyright notice and this permission notice shall be
+// included in all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+// EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+// OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+// NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+// HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+// WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+// FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+// OTHER DEALINGS IN THE SOFTWARE.
+
+
+#include <string.h>
+#include <assert.h>
+
+// unsigned big integer class
+template <int N>
+struct ubint
+{
+  unsigned x[N]; // assumed to be 32-bit
+  ubint() {}
+  ubint(unsigned value) { memset(x,0,sizeof(x)); x[0] = value; }
+  template <int M> ubint(const ubint<M> &a) { copy(a); }
+
+  ubint<N>& operator=(unsigned value) { memset(x, 0, sizeof(x)); x[0] = value; return *this; }
+  template <int M> ubint<N>& operator=(const ubint<M> &a) { copy(a); return *this; }
+
+  template <int M> bool operator==(const ubint<M> &a) { 
+    if(N<=M) {
+      for(int i=M-1;i>=N;i--)
+        if(a[i]) return false;
+      for(int i=N-1;i>=0;i--)
+        if(a[i] != x[i]) return false;
+    } else {
+      for(int i=N-1;i>=M;i--)
+        if(a[i]) return false;
+      for(int i=M-1;i>=0;i--)
+        if(a[i] != x[i]) return false;
+    }
+    return true;
+  }
+
+  template <int M>
+    void copy(const ubint<M> &a) {
+      if(N<=M)
+        memcpy(x, a.x, sizeof(x));
+      else {
+        memcpy(x, a.x, N*sizeof(unsigned));
+        memset(x+M, 0, (N-M)*sizeof(unsigned));
+      }
+    }
+  
+  unsigned& operator[](size_t n) { return x[n]; }
+  unsigned operator[](size_t n) const { return x[n]; }
+  ubint<N>& operator>>=(int shift);
+
+  void set(unsigned *init) { memcpy(x, init, sizeof(x)); }
+
+  size_t maxb() const { for(int i=N-1;i>=0;i--) { if(x[i]) return i; } return 0; }
+  bool sign() const { return x[N-1]&0x8000000 ? true : false; }
+};
+
+template<int N>
+bool operator<(const ubint<N> &a, const ubint<N> &b) {
+  for(int i=N-1;i>=0;i--) {
+    if(a[i] < b[i]) return true;
+    if(a[i] > b[i]) return false;
+  }
+  return false;
+}
+
+template<int N>
+bool operator>(const ubint<N> &a, const ubint<N> &b) {
+  for(int i=N-1;i>=0;i--) {
+    if(a[i] > b[i]) return true;
+    if(a[i] < b[i]) return false;
+  }
+  return false;
+}
+
+template<int N>
+bool operator>=(const ubint<N> &a, const ubint<N> &b) { return !(a<b); }
+
+template<int N>
+bool operator<=(const ubint<N> &a, const ubint<N> &b) { return !(a>b); }
+
+template<int N>
+ubint<N> operator+(const ubint<N> &a, const ubint<N> &b) {
+  ubint<N> r;
+  unsigned c=0;
+  for(int i=0;i<N;i++) {
+    unsigned long long w = c;
+    w += a[i];
+    w += b[i];
+    c = (w >= (1ULL<<32)) ? 1 : 0;
+    r[i] = w&0xffffffff;
+  }
+  return r;
+}
+
+template<int N>
+ubint<N>& operator++(ubint<N> &a) {
+  for(int i=0;i<N;i++) {
+    a[i]++;
+    if(a[i]) break;
+  }
+  return a;
+}
+
+// unary minus: two's complement
+template<int N>
+ubint<N> operator-(const ubint<N> &a) {
+  ubint<N> r;
+  for(int i=0;i<N;i++)
+    r[i] = ~a[i];
+  ++r;
+  return r;
+}
+
+template<int N>
+ubint<N> operator-(const ubint<N> &a, const ubint<N> &b) {
+  return a+(-b);
+}
+
+template<int N>
+ubint<2*N> operator*(const ubint<N> &x, const ubint<N> &y) {
+  ubint<2*N> w;
+  memset(w.x, 0, sizeof(w.x));
+  size_t n = x.maxb(),
+         t = y.maxb();
+  for(size_t i=0;i<=t;i++) {
+    unsigned c=0;
+    unsigned long long uv=0;
+    for(size_t j=0;j<=n;j++) {
+      uv = x[j];
+      uv *= y[i];
+      uv += w[i+j];
+      uv += c;
+      w[i+j] = uv&0xffffffff;
+      c = uv>>32;
+    }
+    w[i+n+1] = uv>>32;
+  }
+  return w;
+}
+
+template <int N>
+ubint<N> operator+(const ubint<N> &a, unsigned b) {
+  ubint<N> r(b);
+  return a+r;
+}
+
+template <int N>
+ubint<N> operator*(const ubint<N> &a, unsigned b) {
+  ubint<N> r(b);
+  return a*r;
+}
+
+template<int N>
+ubint<N>& ubint<N>::operator>>=(int shift) {
+  assert(shift<32); // not needed, not implemented
+  unsigned c=0;
+  for(int i=N-1;i>=0;i--) {
+    unsigned cn=x[i]&((1<<shift)-1);
+    x[i] >>= shift;
+    x[i] |= c<<(32-shift);
+    c=cn;
+  }
+  return *this;
+}
+
+template<int N>
+ubint<N> operator<<(const ubint<N> &a, int shift) {
+  assert((shift&31) == 0); // not needed, not implemented
+  assert(shift>=0);
+  ubint<N> b;
+  shift >>= 5;
+  memset(b.x, 0, shift*sizeof(unsigned));
+  memcpy(b.x+shift, a.x, (N-shift)*sizeof(unsigned));
+  return b;
+}
+
+template<int N>
+ubint<N> operator>>(const ubint<N> &a, int shift) {
+  assert((shift&31) == 0);
+  assert(shift>=0);
+  ubint<N> b;
+  shift >>= 5;
+  memset(b.x+(N-shift), 0, shift*sizeof(unsigned));
+  memcpy(b.x, a.x+shift, (N-shift)*sizeof(unsigned));
+  return b;
+}
+
+template<int N>
+void div(ubint<2*N> &x, const ubint<N> &y, ubint<2*N> &q) {
+  size_t n = x.maxb(),
+         t = y.maxb();
+
+  if(t>n) return;
+
+  // 14.20 step 1
+  q = 0;
+
+  // 14.20 step 2
+  for(;;) {
+    ubint<2*N> yb = y;
+    yb = yb<<(n-t)*32; // yb <- y*b^(n-t)
+    if(x < yb) break;
+    q[n-t] ++;
+    x = x-yb;
+  }
+  for(size_t i=n;i>=(t+1);i--) {
+    // 14.20 step 3.1
+    if(x[i] == y[t])
+      q[i-t-1] = ~0;
+    else {
+      unsigned long long xb = x[i];
+      xb = ((xb<<32) + x[i-1]) / y[t];
+      q[i-t-1] = xb;
+    }
+    // 14.20 step 3.2
+    for(;;) {
+      ubint<2*N> lhs = q[i-t-1];
+      ubint<2*N> tmp = y[t];
+      tmp = (tmp<<32) + y[t-1];
+      lhs = lhs * tmp;
+
+      tmp = x[i];
+      tmp = tmp<<32;
+      tmp = tmp+x[i-1];
+      tmp = tmp<<32;
+      ubint<2*N> rhs = tmp+x[i-2];
+      if(lhs <= rhs) break;
+      q[i-t-1]--;
+    }
+    // 14.20 step 3.3
+    ubint<2*N> yb = y;
+    yb = yb<<((i-t-1)*32); // yb <- y*b^(n-t)
+    x = x - yb*q[i-t-1];
+    // 14.20 step 3.4
+    if(x.sign()) {
+      x = x+yb;
+      q[i-t-1]--;
+    }
+  }
+}
+
+
+template <int N>
+ubint<N> operator%(ubint<2*N> x, const ubint<N> &y) {
+  ubint<2*N> q;
+  div(x, y, q);
+  return x;
+}
+
+template <int N>
+ubint<2*N> operator/(ubint<2*N> x, const ubint<N> &y) {
+  ubint<2*N> q;
+  div(x, y, q);
+  return q;
+}
+
+template <int N>
+ubint<N> expmod(ubint<N> base, ubint<N> power, const ubint<N> &modulus) {
+  ubint<N> zero(0);
+  ubint<N> out(1);
+  ubint<2*N> tmp;
+  while(power > zero) {
+    if(power[0]&1) {
+      tmp = out*base % modulus;
+      out = tmp;
+    }
+    power >>= 1;
+    tmp = base*base % modulus;
+    base = tmp;
+  }
+  return out;
+}
+

@@ -1,0 +1,50 @@
+<script>
+
+var ctx;
+var moved=false;
+function hilbert(x, y, xi, xj, yi, yj, n)
+{
+  /* x and y are the coordinates of the bottom left corner */
+  /* xi & xj are the i & j components of the unit x vector of the frame */
+  /* similarly yi and yj */
+  if(n <= 0) {
+    if(moved) {
+      ctx.lineTo(x + (xi + yi)/2, y + (xj + yj)/2);
+    } else {
+      ctx.moveTo(x + (xi + yi)/2, y + (xj + yj)/2);
+      moved=1;
+    }
+  }
+  else
+  {
+    hilbert(x,           y,           yi/2, yj/2,  xi/2,  xj/2, n-1);
+    hilbert(x+xi/2,      y+xj/2 ,     xi/2, xj/2,  yi/2,  yj/2, n-1);
+    hilbert(x+xi/2+yi/2, y+xj/2+yj/2, xi/2, xj/2,  yi/2,  yj/2, n-1);
+    hilbert(x+xi/2+yi,   y+xj/2+yj,  -yi/2,-yj/2, -xi/2, -xj/2, n-1);
+  }
+}
+
+function draw()
+{
+  if(N.value > 6) { N.value = 6; }
+  moved = false;
+  ctx = R.getContext('2d');
+  ctx.strokeStyle='#000';
+  ctx.fillStyle='#fff';
+  ctx.fillRect(0,0,320,320);
+  ctx.lineWidth=3;
+  ctx.beginPath();
+  hilbert(0,320,320,0,0,-320,N.value);
+  ctx.stroke();
+}
+
+</script>
+
+<body onload="draw()">
+  <p>This draws a 2D <a href="http://en.wikipedia.org/wiki/Hilbert_curve">Hilbert curve</a>.  Pretty straightforward; view source for the javascript code.</p>
+  iterations: <input id=N type=number size=1 value=4> <button
+    onclick="draw()">update</button>
+  <br>
+  <canvas id=R width=320 height=320>
+</body>
+

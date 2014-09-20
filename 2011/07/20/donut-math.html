@@ -1,0 +1,381 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en"> 
+  <head>
+<link rel="stylesheet" href="/style.css" type="text/css" media="all" /> 
+<title>Donut math&#58; how donut.c works -- a1k0n</title>
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-24584703-1']);
+  _gaq.push(['_trackPageview']);
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = 'http://www.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+<!--
+  var disqus_shortname = 'a1k0n';
+  var disqus_identifier = '/2011/07/20/donut-math';
+  var disqus_url = 'http://a1k0n.net/2011/07/20/donut-math.html';
+  (function() {
+    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+    dsq.src = 'http://a1k0n.disqus.com/embed.js';
+    document.getElementsByTagName('head')[0].appendChild(dsq);
+  })();
+-->
+</script>
+</head>
+<body>
+<div width=100% style="background-color: #daf2ff; text-align: center; font-size: 12pt;"><a href="/" style="color: #1d3542;">a1k0n : Andy Sloane's weblog</a></div>
+<h1>Donut math&#58; how donut.c works</h1>
+<link href='/css/prettify.css' rel='stylesheet' type='text/css' /><script type='text/javascript' src='/js/prettify.js'>
+</script><script src='/js/donut.js'>
+</script>
+<p>There has been a sudden resurgence of interest in my <a href='/2006/09/15/obfuscated-c-donut.html'>"donut" code from 2006</a>, and I&#8217;ve had a couple requests to explain this one. It&#8217;s been five years now, so it&#8217;s not exactly fresh in my memory, so I will reconstruct it from scratch, in great detail, and hopefully get approximately the same result.</p>
+
+<p>This is the code and the output, animated in Javascript: <button onclick='anim1();'>toggle animation</button> <table cellspacing='0' border='0' cellpadding='0'><tr>
+<td style='background-color:#000'>
+<pre style='background-color:#000; color:#ccc;'>
+             k;double sin()
+         ,cos();main(){float A=
+       0,B=0,i,j,z[1760];char b[
+     1760];printf("\x1b[2J");for(;;
+  ){memset(b,32,1760);memset(z,0,7040)
+  ;for(j=0;6.28&gt;j;j+=0.07)for(i=0;6.28
+ &gt;i;i+=0.02){float c=sin(i),d=cos(j),e=
+ sin(A),f=sin(j),g=cos(A),h=d+2,D=1/(c*
+ h*e+f*g+5),l=cos      (i),m=cos(B),n=s\
+in(B),t=c*h*g-f*        e;int x=40+30*D*
+(l*h*m-t*n),y=            12+15*D*(l*h*n
++t*m),o=x+80*y,          N=8*((f*e-c*d*g
+ )*m-c*d*e-f*g-l        *d*n);if(22&gt;y&amp;&amp;
+ y&gt;0&amp;&amp;x&gt;0&amp;&amp;80&gt;x&amp;&amp;D&gt;z[o]){z[o]=D;;;b[o]=
+ ".,-~:;=!*#$@"[N&gt;0?N:0];}}/*#****!!-*/
+  printf("\x1b[H");for(k=0;1761&gt;k;k++)
+   putchar(k%80?b[k]:10);A+=0.04;B+=
+     0.02;}}/*****####*******!!=;:~
+       ~::==!!!**********!!!==::-
+         .,~~;;;========;;;:~-.
+             ..,--------,*/
+</pre>
+</td>
+<td style='background-color:#000'>
+<pre style='background-color:#000; color:#ccc;' id='d'>
+</pre>
+</td></tr></table></p>
+
+<p>At its core, it&#8217;s a framebuffer and a Z-buffer into which I render pixels. Since it&#8217;s just rendering relatively low-resolution ASCII art, I massively cheat. All it does is plot pixels along the surface of the torus at fixed-angle increments, and does it densely enough that the final result looks solid. The &#8220;pixels&#8221; it plots are ASCII characters corresponding to the illumination value of the surface at each point: <code>.,-~:;=!*#$@</code> from dimmest to brightest. No raytracing required.</p>
+
+<p>So how do we do that? Well, let&#8217;s start with the basic math behind 3D perspective rendering. The following diagram is a side view of a person sitting in front of a screen, viewing a 3D object behind it.</p>
+<center><img src='/img/perspective.png' /></center>
+<p>To render a 3D object onto a 2D screen, we project each point (<em>x</em>,<em>y</em>,<em>z</em>) in 3D-space onto a plane located <em>z&#8217;</em> units away from the viewer, so that the corresponding 2D position is (<em>x&#8217;</em>,<em>y&#8217;</em>). Since we&#8217;re looking from the side, we can only see the <em>y</em> and <em>z</em> axes, but the math works the same for the <em>x</em> axis (just pretend this is a top view instead). This projection is really easy to obtain: notice that the origin, the <em>y</em>-axis, and point (<em>x</em>,<em>y</em>,<em>z</em>) form a right triangle, and a similar right triangle is formed with (<em>x&#8217;</em>,<em>y&#8217;</em>,<em>z&#8217;</em>). Thus the relative proportions are maintained:</p>
+<div class='maruku-equation'><img style='height: 10.1111111111111ex;' alt='$\begin{aligned}
+\frac{y&apos;}{z&apos;} &amp;= \frac{y}{z}
+\\
+y&apos; &amp;= \frac{y z&apos;}{z}.
+\end{aligned}$' class='maruku-png' src='/img/latex/1b710772b17843b980f2e9ca46732e92.png' /><span class='maruku-eq-tex'><code style='display: none'>\begin{aligned}
+\frac{y'}{z'} &amp;= \frac{y}{z}
+\\
+y' &amp;= \frac{y z'}{z}.
+\end{aligned}</code></span></div>
+<p>So to project a 3D coordinate to 2D, we scale a coordinate by the screen distance <em>z&#8217;</em>. Since <em>z&#8217;</em> is a fixed constant, and not functionally a coordinate, let&#8217;s rename it to <em>K<sub>1</sub></em>, so our projection equation becomes <span class='maruku-inline'><img style='vertical-align: -0.777777777777778ex;height: 2.77777777777778ex;' alt='$(x&apos;,y&apos;) = (\frac{K_1 x}{z}, \frac{K_1 y}{z})$' class='maruku-png' src='/img/latex/177962348550aa653ef29eec5f04b1d6.png' /></span>. We can choose <em>K<sub>1</sub></em> arbitrarily based on the field of view we want to show in our 2D window. For example, if we have a 100x100 window of pixels, then the view is centered at (50,50); and if we want to see an object which is 10 units wide in our 3D space, set back 5 units from the viewer, then <em>K<sub>1</sub></em> should be chosen so that the projection of the point <em>x</em>=10, <em>z</em>=5 is still on the screen with <em>x&#8217;</em> &lt; 50: 10<em>K<sub>1</sub></em>/5 &lt; 50, or <em>K<sub>1</sub></em> &lt; 25.</p>
+
+<p>When we&#8217;re plotting a bunch of points, we might end up plotting different points at the same (<em>x&#8217;</em>,<em>y&#8217;</em>) location but at different depths, so we maintain a <a href='http://en.wikipedia.org/wiki/Z-buffering'>z-buffer</a> which stores the <em>z</em> coordinate of everything we draw. If we need to plot a location, we first check to see whether we&#8217;re plotting in front of what&#8217;s there already. It also helps to compute <em>z</em><sup>-1</sup> <span class='maruku-inline'><img style='vertical-align: -0.777777777777778ex;height: 2.66666666666667ex;' alt='$= \frac{1}{z}$' class='maruku-png' src='/img/latex/ed0a093882a4dfd48f6e83aea38313e7.png' /></span> and use that when depth buffering because:</p>
+
+<ul>
+<li><em>z</em><sup>-1</sup> = 0 corresponds to infinite depth, so we can pre-initialize our z-buffer to 0 and have the background be infinitely far away</li>
+
+<li>we can re-use <em>z</em><sup>-1</sup> when computing <em>x&#8217;</em> and <em>y&#8217;</em>: Dividing once and multiplying by <em>z</em><sup>-1</sup> twice is cheaper than dividing by <em>z</em> twice.</li>
+</ul>
+
+<p>Now, how do we draw a donut, AKA <a href='http://en.wikipedia.org/wiki/Torus'>torus</a>? Well, a torus is a <a href='http://en.wikipedia.org/wiki/Solid_of_revolution'>solid of
+revolution</a>, so one way to do it is to draw a 2D circle around some point in 3D space, and then rotate it around the central axis of the torus. Here is a cross-section through the center of a torus:</p>
+<center><img src='/img/torusxsec.png' /></center>
+<p>So we have a circle of radius <em>R</em><sub>1</sub> centered at point (<em>R</em><sub>2</sub>,0,0), drawn on the <em>xy</em>-plane. We can draw this by sweeping an angle &#8212; let&#8217;s call it <em>&#952;</em> &#8212; from 0 to 2&#960;:</p>
+<div class='maruku-equation'><img style='height: 2.33333333333333ex;' alt='$(x,y,z) = (R_2,0,0) + (R_1 \cos \theta, R_1 \sin \theta, 0)$' class='maruku-png' src='/img/latex/aca3f080178e9a3fe979c5f594e0beab.png' /><span class='maruku-eq-tex'><code style='display: none'>(x,y,z) = (R_2,0,0) + (R_1 \cos \theta, R_1 \sin \theta, 0)</code></span></div>
+<p>Now we take that circle and rotate it around the <em>y</em>-axis by another angle &#8212; let&#8217;s call it &#966;. To rotate an arbitrary 3D point around one of the cardinal axes, the standard technique is to multiply by a <a href='http://en.wikipedia.org/wiki/Rotation_matrix'>rotation matrix</a>. So if we take the previous points and rotate about the <em>y</em>-axis we get:</p>
+<div class='maruku-equation'><img style='height: 8.11111111111111ex;' alt='$\left( \begin{matrix}
+R_2 + R_1 \cos \theta, &amp;
+R_1 \sin \theta, &amp;
+0 \end{matrix} \right)
+\cdot
+\left( \begin{matrix}
+\cos \phi &amp; 0 &amp; \sin \phi \\
+0 &amp; 1 &amp; 0 \\
+-\sin \phi &amp; 0 &amp; \cos \phi \end{matrix} \right)
+=
+\left( \begin{matrix}
+(R_2 + R_1 \cos \theta)\cos \phi, &amp;
+R_1 \sin \theta, &amp;
+-(R_2 + R_1 \cos \theta)\sin \phi \end{matrix} \right)$' class='maruku-png' src='/img/latex/0efcfa79c88e4aaf636d09cc932908b1.png' /><span class='maruku-eq-tex'><code style='display: none'>\left( \begin{matrix}
+R_2 + R_1 \cos \theta, &amp;
+R_1 \sin \theta, &amp;
+0 \end{matrix} \right)
+\cdot
+\left( \begin{matrix}
+\cos \phi &amp; 0 &amp; \sin \phi \\
+0 &amp; 1 &amp; 0 \\
+-\sin \phi &amp; 0 &amp; \cos \phi \end{matrix} \right)
+=
+\left( \begin{matrix}
+(R_2 + R_1 \cos \theta)\cos \phi, &amp;
+R_1 \sin \theta, &amp;
+-(R_2 + R_1 \cos \theta)\sin \phi \end{matrix} \right)</code></span></div>
+<p>But wait: we also want the whole donut to spin around on at least two more axes for the animation. They were called <em>A</em> and <em>B</em> in the original code: it was a rotation about the <em>x</em>-axis by <em>A</em> and a rotation about the <em>z</em>-axis by <em>B</em>. This is a bit hairier, so I&#8217;m not even going write the result yet, but it&#8217;s a bunch of matrix multiplies.</p>
+<div class='maruku-equation'><img style='height: 8.11111111111111ex;' alt='$\left( \begin{matrix}
+R_2 + R_1 \cos \theta, &amp;
+R_1 \sin \theta, &amp;
+0 \end{matrix} \right)
+\cdot
+\left( \begin{matrix}
+\cos \phi &amp; 0 &amp; \sin \phi \\
+0 &amp; 1 &amp; 0 \\
+-\sin \phi &amp; 0 &amp; \cos \phi \end{matrix} \right)
+\cdot
+\left( \begin{matrix}
+1 &amp; 0 &amp; 0 \\
+0 &amp; \cos A &amp; \sin A \\
+0 &amp; -\sin A &amp; \cos A \end{matrix} \right)
+\cdot
+\left( \begin{matrix}
+\cos B &amp; \sin B &amp; 0 \\
+-\sin B &amp; \cos B &amp; 0 \\
+0 &amp; 0 &amp; 1 \end{matrix} \right)$' class='maruku-png' src='/img/latex/6c1370bb4d444fc1de289c06204d384c.png' /><span class='maruku-eq-tex'><code style='display: none'>\left( \begin{matrix}
+R_2 + R_1 \cos \theta, &amp;
+R_1 \sin \theta, &amp;
+0 \end{matrix} \right)
+\cdot
+\left( \begin{matrix}
+\cos \phi &amp; 0 &amp; \sin \phi \\
+0 &amp; 1 &amp; 0 \\
+-\sin \phi &amp; 0 &amp; \cos \phi \end{matrix} \right)
+\cdot
+\left( \begin{matrix}
+1 &amp; 0 &amp; 0 \\
+0 &amp; \cos A &amp; \sin A \\
+0 &amp; -\sin A &amp; \cos A \end{matrix} \right)
+\cdot
+\left( \begin{matrix}
+\cos B &amp; \sin B &amp; 0 \\
+-\sin B &amp; \cos B &amp; 0 \\
+0 &amp; 0 &amp; 1 \end{matrix} \right)</code></span></div>
+<p>Churning through the above gets us an (<em>x</em>,<em>y</em>,<em>z</em>) point on the surface of our torus, rotated around two axes, centered at the origin. To actually get screen coordinates, we need to:</p>
+
+<ul>
+<li>Move the torus somewhere in front of the viewer (the viewer is at the origin) &#8212; so we just add some constant to <em>z</em> to move it backward.</li>
+
+<li>Project from 3D onto our 2D screen.</li>
+</ul>
+
+<p>So we have another constant to pick, call it <em>K</em><sub>2</sub>, for the distance of the donut from the viewer, and our projection now looks like:</p>
+<div class='maruku-equation'><img style='height: 4.88888888888889ex;' alt='$\left( x&apos;, y&apos; \right)
+=
+\left( \frac{K_1 x}{K_2 + z} , \frac{K_1 y}{K_2 + z} \right)$' class='maruku-png' src='/img/latex/2919c373ab68c31e37685cab52fad45a.png' /><span class='maruku-eq-tex'><code style='display: none'>\left( x', y' \right)
+=
+\left( \frac{K_1 x}{K_2 + z} , \frac{K_1 y}{K_2 + z} \right)</code></span></div>
+<p><em>K</em><sub>1</sub> and <em>K</em><sub>2</sub> can be tweaked together to change the field of view and flatten or exaggerate the depth of the object.</p>
+
+<p>Now, we could implement a 3x3 matrix multiplication routine in our code and implement the above in a straightforward way. But if our goal is to shrink the code as much as possible, then every 0 in the matrices above is an opportunity for simplification. So let&#8217;s multiply it out. Churning through a bunch of algebra (thanks Mathematica!), the full result is:</p>
+<div class='maruku-equation'><img style='height: 8.11111111111111ex;' alt='$\left( \begin{matrix} x \\ y \\ z \end{matrix} \right) =
+\left( \begin{matrix}
+ (R_2 + R_1 \cos \theta) (\cos B \cos \phi + \sin A \sin B \sin \phi) - 
+   R_1 \cos A \sin B \sin \theta \\
+
+ (R_2 + R_1 \cos \theta) (\cos \phi \sin B - \cos B \sin A \sin \phi) + 
+   R_1 \cos A \cos B \sin \theta \\
+ \cos A (R_2 + R_1 \cos \theta) \sin \phi + R_1 \sin A \sin \theta
+\end{matrix} \right)$' class='maruku-png' src='/img/latex/30543268e7326534b0a18a1c84e24510.png' /><span class='maruku-eq-tex'><code style='display: none'>\left( \begin{matrix} x \\ y \\ z \end{matrix} \right) =
+\left( \begin{matrix}
+ (R_2 + R_1 \cos \theta) (\cos B \cos \phi + \sin A \sin B \sin \phi) - 
+   R_1 \cos A \sin B \sin \theta \\
+
+ (R_2 + R_1 \cos \theta) (\cos \phi \sin B - \cos B \sin A \sin \phi) + 
+   R_1 \cos A \cos B \sin \theta \\
+ \cos A (R_2 + R_1 \cos \theta) \sin \phi + R_1 \sin A \sin \theta
+\end{matrix} \right)</code></span></div>
+<p>Well, that looks pretty hideous, but we we can precompute some common subexpressions (e.g. all the sines and cosines, and <span class='maruku-inline'><img style='vertical-align: -0.444444444444444ex;height: 2.0ex;' alt='$R_2 + R_1 \cos \theta$' class='maruku-png' src='/img/latex/54482053911d43204d56b95e4b58ed4b.png' /></span>) and reuse them in the code. In fact I came up with a completely different factoring in the original code but that&#8217;s left as an exercise for the reader. (The original code also swaps the sines and cosines of A, effectively rotating by 90 degrees, so I guess my initial derivation was a bit different but that&#8217;s OK.)</p>
+
+<p>Now we know where to put the pixel, but we still haven&#8217;t even considered which shade to plot. To calculate illumination, we need to know the <a href='http://en.wikipedia.org/wiki/Surface_normal'>surface normal</a> &#8212; the direction perpendicular to the surface at each point. If we have that, then we can take the <a href='http://en.wikipedia.org/wiki/Dot_product'>dot
+product</a> of the surface normal with the light direction, which we can choose arbitrarily. That gives us the cosine of the angle between the light direction and the surface direction: If the dot product is &#62;0, the surface is facing the light and if it&#8217;s &#60;0, it faces away from the light. The higher the value, the more light falls on the surface.</p>
+
+<p>The derivation of the surface normal direction turns out to be pretty much the same as our derivation of the point in space. We start with a point on a circle, rotate it around the torus&#8217;s central axis, and then make two more rotations. The surface normal of the point on the circle is fairly obvious: it&#8217;s the same as the point on a unit (radius=1) circle centered at the origin.</p>
+
+<p>So our surface normal (<em>N<sub>x</sub></em>, <em>N<sub>y</sub></em>, <em>N<sub>z</sub></em>) is derived the same as above, except the point we start with is just (cos <em>&#952;</em>, sin <em>&#952;</em>, 0). Then we apply the same rotations:</p>
+<div class='maruku-equation'><img style='height: 8.11111111111111ex;' alt='$\left( \begin{matrix}
+N_x, &amp;
+N_y, &amp;
+N_z \end{matrix} \right)
+=
+\left( \begin{matrix}
+\cos \theta, &amp;
+\sin \theta, &amp;
+0 \end{matrix} \right)
+\cdot
+\left( \begin{matrix}
+\cos \phi &amp; 0 &amp; \sin \phi \\
+0 &amp; 1 &amp; 0 \\
+-\sin \phi &amp; 0 &amp; \cos \phi \end{matrix} \right)
+\cdot
+\left( \begin{matrix}
+1 &amp; 0 &amp; 0 \\
+0 &amp; \cos A &amp; \sin A \\
+0 &amp; -\sin A &amp; \cos A \end{matrix} \right)
+\cdot
+\left( \begin{matrix}
+\cos B &amp; \sin B &amp; 0 \\
+-\sin B &amp; \cos B &amp; 0 \\
+0 &amp; 0 &amp; 1 \end{matrix} \right)$' class='maruku-png' src='/img/latex/b75b5020836f6ba6428f2ec6373d5566.png' /><span class='maruku-eq-tex'><code style='display: none'>\left( \begin{matrix}
+N_x, &amp;
+N_y, &amp;
+N_z \end{matrix} \right)
+=
+\left( \begin{matrix}
+\cos \theta, &amp;
+\sin \theta, &amp;
+0 \end{matrix} \right)
+\cdot
+\left( \begin{matrix}
+\cos \phi &amp; 0 &amp; \sin \phi \\
+0 &amp; 1 &amp; 0 \\
+-\sin \phi &amp; 0 &amp; \cos \phi \end{matrix} \right)
+\cdot
+\left( \begin{matrix}
+1 &amp; 0 &amp; 0 \\
+0 &amp; \cos A &amp; \sin A \\
+0 &amp; -\sin A &amp; \cos A \end{matrix} \right)
+\cdot
+\left( \begin{matrix}
+\cos B &amp; \sin B &amp; 0 \\
+-\sin B &amp; \cos B &amp; 0 \\
+0 &amp; 0 &amp; 1 \end{matrix} \right)</code></span></div>
+<p>So which lighting direction should we choose? How about we light up surfaces facing behind and above the viewer: <span class='maruku-inline'><img style='vertical-align: -0.555555555555556ex;height: 2.33333333333333ex;' alt='$(0,1,-1)$' class='maruku-png' src='/img/latex/a630fbf79f8ae344d7f88ee29868f7b7.png' /></span>. Technically this should be a normalized unit vector, and this vector has a magnitude of &#8730;2. That&#8217;s okay &#8211; we will compensate later. Therefore we compute the above (<em>x</em>,<em>y</em>,<em>z</em>), throw away the <em>x</em> and get our luminance <em>L</em> = <em>y</em>-<em>z</em>.</p>
+<div class='maruku-equation'><img style='height: 5.66666666666667ex;' alt='$\begin{aligned}
+L &amp;=
+\left( \begin{matrix}
+N_x, &amp;
+N_y, &amp;
+N_z \end{matrix} \right)
+\cdot
+\left( \begin{matrix}
+0, &amp;
+1, &amp;
+-1 \end{matrix} \right)
+\\
+&amp;= 
+\cos \phi \cos \theta \sin B - \cos A \cos \theta \sin \phi - \sin A \sin \theta + 
+ \cos B ( \cos A \sin \theta - \cos \theta \sin A \sin \phi)
+\end{aligned}$' class='maruku-png' src='/img/latex/d2a3805a6edac7e522c8956b00ebf10f.png' /><span class='maruku-eq-tex'><code style='display: none'>\begin{aligned}
+L &amp;=
+\left( \begin{matrix}
+N_x, &amp;
+N_y, &amp;
+N_z \end{matrix} \right)
+\cdot
+\left( \begin{matrix}
+0, &amp;
+1, &amp;
+-1 \end{matrix} \right)
+\\
+&amp;= 
+\cos \phi \cos \theta \sin B - \cos A \cos \theta \sin \phi - \sin A \sin \theta + 
+ \cos B ( \cos A \sin \theta - \cos \theta \sin A \sin \phi)
+\end{aligned}</code></span></div>
+<p>Again, not too pretty, but not terrible once we&#8217;ve precomputed all the sines and cosines.</p>
+
+<p>So now all that&#8217;s left to do is to pick some values for <em>R</em><sub>1</sub>, <em>R</em><sub>2</sub>, <em>K</em><sub>1</sub>, and <em>K</em><sub>2</sub>. In the original donut code I chose <em>R</em><sub>1</sub>=1 and <em>R</em><sub>2</sub>=2, so it has the same geometry as my cross-section diagram above. <em>K<sub>1</sub></em> controls the scale, which depends on our pixel resolution and is in fact different for <em>x</em> and <em>y</em> in the ASCII animation. <em>K</em><sub>2</sub>, the distance from the viewer to the donut, was chosen to be 5.</p>
+
+<p>I&#8217;ve taken the above equations and written a quick and dirty canvas implementation here, just plotting the pixels and the lighting values from the equations above. The result is not exactly the same as the original as some of my rotations are in opposite directions or off by 90 degrees, but it is qualitatively doing the same thing.</p>
+
+<p>Here it is: <button onclick='anim2();'>toggle animation</button></p>
+<canvas height='240' width='300' id='canvasdonut'>
+</canvas>
+<p>It&#8217;s slightly mind-bending because you can see right through the torus, but the math does work! Convert that to an ASCII rendering with <em>z</em>-buffering, and you&#8217;ve got yourself a clever little program.</p>
+
+<p>Now, we have all the pieces, but how do we write the code? Roughly like this (some pseudocode liberties have been taken with 2D arrays):</p>
+<pre class='prettyprint'>
+const float theta_spacing = 0.07;
+const float phi_spacing   = 0.02;
+
+const float R1 = 1;
+const float R2 = 2;
+const float K2 = 5;
+// Calculate K1 based on screen size: the maximum x-distance occurs roughly at
+// the edge of the torus, which is at x=R1+R2, z=0.  we want that to be
+// displaced 3/8ths of the width of the screen, which is 3/4th of the way from
+// the center to the side of the screen.
+// screen_width*3/8 = K1*(R1+R2)/(K2+0)
+// screen_width*K2*3/(8*(R1+R2)) = K1
+const float K1 = screen_width*K2*3/(8*(R1+R2));
+
+render_frame(float A, float B) {
+  // precompute sines and cosines of A and B
+  float cosA = cos(A), sinA = sin(A);
+  float cosB = cos(B), sinB = sin(B);
+
+  char output[0..screen_width, 0..screen_height] = ' ';
+  float zbuffer[0..screen_width, 0..screen_height] = 0;
+
+  // theta goes around the cross-sectional circle of a torus
+  for(float theta=0; theta &lt; 2*pi; theta += theta_spacing) {
+    // precompute sines and cosines of theta
+    float costheta = cos(theta), sintheta = sin(theta);
+
+    // phi goes around the center of revolution of a torus
+    for(float phi=0; phi &lt; 2*pi; phi += phi_spacing) {
+      // precompute sines and cosines of phi
+      float cosphi = cos(phi), sinphi = sin(phi);
+    
+      // the x,y coordinate of the circle, before revolving (factored out of the above equations)
+      float circlex = R2 + R1*costheta;
+      float circley = R1*sintheta;
+
+      // final 3D (x,y,z) coordinate after rotations, directly from our math above
+      float x = circlex*(cosB*cosphi + sinA*sinB*sinphi) - circley*cosA*sinB; 
+      float y = circlex*(sinB*cosphi - sinA*cosB*sinphi) + circley*cosA*cosB;
+      float z = K2 + cosA*circlex*sinphi + circley*sinA;
+      float ooz = 1/z;  // "one over z"
+      
+      // x and y projection.  note that y is negated here, because y goes up in
+      // 3D space but down on 2D displays.
+      int xp = (int) (screen_width/2 + K1*ooz*x);
+      int yp = (int) (screen_height/2 - K1*ooz*y);
+      
+      // calculate luminance.  ugly, but correct.
+      float L = cosphi*costheta*sinB - cosA*costheta*sinphi - sinA*sintheta + 
+                cosB*(cosA*sintheta - costheta*sinA*sinphi);
+      // L ranges from -sqrt(2) to +sqrt(2).  If it's &lt; 0, the surface is
+      // pointing away from us, so we won't bother trying to plot it.
+      if(L>0) {
+        // test against the z-buffer.  larger 1/z means the pixel is closer to
+        // the viewer than what's already plotted.
+        if(ooz > zbuffer[xp,yp]) {
+          zbuffer[xp,yp] = ooz;
+          int luminance_index = L*8; // this brings L into the range 0..11 (8*sqrt(2) = 11.3)
+          // now we lookup the character corresponding to the luminance and plot it in our output:
+          output[xp,yp] = ".,-~:;=!*#$@"[luminance_index];
+        }
+      }
+    }
+  }
+
+  // now, dump output[] to the screen.
+  // bring cursor to "home" location, in just about any currently-used terminal
+  // emulation mode
+  printf("\x1b[H");
+  for(int j=0;j&lt;screen_height;j++) {
+    for(int i=0;i&lt;screen_width;i++) {
+      putchar(output[i,j]);
+    }
+    putchar('\n');
+  }
+  
+}
+</pre>
+<p>The Javascript source for both the ASCII and canvas rendering is <a href='/js/donut.js'>right here</a>.</p>
+<hr>
+<a href=''>permalink</a> | 
+<a href="/atom.xml" class=feed><img src="/img/feed-icon-14x14.png" /></a> | <a href="/">a1k0n.net</a><br />
+<!--
+<div id="disqus_thread"></div>
+<-->
+</body>
+
+</html>

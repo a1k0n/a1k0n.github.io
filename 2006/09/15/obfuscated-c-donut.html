@@ -1,0 +1,67 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en"> 
+  <head>
+<link rel="stylesheet" href="/style.css" type="text/css" media="all" /> 
+<title>Have a donut. -- a1k0n</title>
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-24584703-1']);
+  _gaq.push(['_trackPageview']);
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = 'http://www.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+<!--
+  var disqus_shortname = 'a1k0n';
+  var disqus_identifier = '/2006/09/15/obfuscated-c-donut';
+  var disqus_url = 'http://a1k0n.net/2006/09/15/obfuscated-c-donut.html';
+  (function() {
+    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+    dsq.src = 'http://a1k0n.disqus.com/embed.js';
+    document.getElementsByTagName('head')[0].appendChild(dsq);
+  })();
+-->
+</script>
+</head>
+<body>
+<div width=100% style="background-color: #daf2ff; text-align: center; font-size: 12pt;"><a href="/" style="color: #1d3542;">a1k0n : Andy Sloane's weblog</a></div>
+<h1>Have a donut.</h1>
+(compile with <tt>gcc -o donut donut.c -lm</tt>, and it needs ANSI- or
+VT100-like emulation)
+<pre>
+             k;double sin()
+         ,cos();main(){float A=
+       0,B=0,i,j,z[1760];char b[
+     1760];printf("\x1b[2J");for(;;
+  ){memset(b,32,1760);memset(z,0,7040)
+  ;for(j=0;6.28&gt;j;j+=0.07)for(i=0;6.28
+ &gt;i;i+=0.02){float c=sin(i),d=cos(j),e=
+ sin(A),f=sin(j),g=cos(A),h=d+2,D=1/(c*
+ h*e+f*g+5),l=cos      (i),m=cos(B),n=s\
+in(B),t=c*h*g-f*        e;int x=40+30*D*
+(l*h*m-t*n),y=            12+15*D*(l*h*n
++t*m),o=x+80*y,          N=8*((f*e-c*d*g
+ )*m-c*d*e-f*g-l        *d*n);if(22&gt;y&amp;&amp;
+ y&gt;0&amp;&amp;x&gt;0&amp;&amp;80&gt;x&amp;&amp;D&gt;z[o]){z[o]=D;;;b[o]=
+ ".,-~:;=!*#$@"[N&gt;0?N:0];}}/*#****!!-*/
+  printf("\x1b[H");for(k=0;1761&gt;k;k++)
+   putchar(k%80?b[k]:10);A+=0.04;B+=
+     0.02;}}/*****####*******!!=;:~
+       ~::==!!!**********!!!==::-
+         .,~~;;;========;;;:~-.
+             ..,--------,*/
+</pre>
+
+(This was my first attempt at obfuscated C and I feel it's pretty amateurish;
+see <a href="/2006/09/20/obfuscated-c-donut-2.html">Donut Mark II</a> for a more
+impressive demo &mdash; though this one is simple and elegant in comparison.)
+
+<hr>
+<a href=''>permalink</a> | 
+<a href="/atom.xml" class=feed><img src="/img/feed-icon-14x14.png" /></a> | <a href="/">a1k0n.net</a><br />
+<!--
+<div id="disqus_thread"></div>
+<-->
+</body>
+
+</html>

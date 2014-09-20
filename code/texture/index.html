@@ -1,0 +1,70 @@
+<html>
+<head>
+<link rel="stylesheet" href="/style.css" type="text/css" media="all" /> 
+<title>texture synthesis</title>
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-24584703-1']);
+  _gaq.push(['_trackPageview']);
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+</head>
+<body>
+<h1>texture synthesis</h1>
+<p>Given an example texture image, it generates a tileable image of
+any size that has the same texture.
+
+<p>The algorithm I'm using is per-pixel "k-coherence search", with a
+Cauchy metric.  See <a href="http://www.liyiwei.org/">Li-Yi Wei's
+  site</a> for lots of information on texture synthesis (you'll need
+to be familiar with the terminology to make any sense of my first
+sentence), and <a href="http://logarithmic.net/pfh/thesis">Paul
+  Harrison's thesis</a> for some specifics on the Cauchy metric (this
+is implemented in the <a
+  href="http://github.com/a1k0n/texturesynth/tree/cauchy">cauchy
+  branch in git</a>; the master branch uses a squared-error or
+Gaussian metric).
+
+<p>The source tiles are from <a
+  href="http://lostgarden.com/2005/03/game-post-mortem-hard-vacuum.html">Hard
+  Vacuum</a>.  They're 20x20, and shown here expanded to 32x32 tiles
+with the texture synthesis algorithm.  Click a link to see 8
+interchangable tiles and a randomly picked field of them.
+
+<li><a href="http://github.com/a1k0n/texturesynth">source code on
+  github</a>
+
+<p>
+<table>
+<tr><td><a href="crater/">crater</a></td><td> <img
+	src="crater/in.png"> -&gt; <img src="crater/out0.png"></td></tr>
+<tr><td><a href="sand/">sand</a></td><td> <img src="sand/in.png">
+	-&gt; <img src="sand/out0.png"></td></tr>
+<tr><td><a href="snow/">snow</a></td><td> <img
+	src="snow/in.png"> -&gt; <img
+	src="snow/out0.png"></td></tr>
+<tr><td><a href="mount/">mountain</a></td><td> <img
+	src="mount/in.png"> -&gt; <img
+	src="mount/out0.png"></td></tr>
+<tr><td><a href="stone/">stone</a></td><td> <img
+	src="stone/in.png"> -&gt; <img
+	src="stone/out0.png"></td></tr>
+<tr><td><a href="water/">water</a></td><td> <img
+	src="water/in.png"> -&gt; <img
+	src="water/out0.png"></td></tr>
+<tr><td><a href="lava/">lava</a></td><td> <img
+	src="lava/in.png"> -&gt; <img
+	src="lava/out0.png"></td></tr>
+<tr><td><a href="grass/">grass</a></td><td> <img
+	src="grass/in.png"> -&gt; <img
+	src="grass/out0.png"></td></tr>
+<tr><td><a href="ice/">ice</a></td><td> <img
+	src="ice/in.png"> -&gt; <img
+	src="ice/out0.png"></td></tr>
+</table>
+</body>
+</html>

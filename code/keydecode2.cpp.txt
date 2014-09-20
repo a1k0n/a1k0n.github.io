@@ -1,0 +1,96 @@
+// Challenge: keygen THIS #2
+// Andy Sloane <andy@a1k0n.net>
+//
+// Here's the code to a theoretical software license key check routine
+// inside some theoretical commercial application.  Can you make a key
+// generator for it?
+//
+// Here's a couple working keys to get you started:
+// JG4FJ-U8B4W-HAXOR-D5V8B-URJX3
+// PNDGS-YDK53-A1KON-LBP3W-V7WR6
+
+#include <stdio.h>
+#include <stdlib.h>
+#include "bn.h"
+
+// Turn a key formatted e.g. "12345-ABCDE-FGHIJ-KLMNO-PQRST" into a
+// 125-bit extended precision number
+unsigned char xlat[256];
+const char *codetable="123456789ABCDEFGHJKLMNOPRSTUVWXY";
+void init_codetbl()
+{
+  memset(xlat,255,sizeof(xlat));
+  for(int i=0;i<32;i++)
+    xlat[(int)codetable[i]] = i;
+  // to translate to canonical form: 0=Q=O, I=1, Z=2
+  xlat[(int)'0'] = xlat[(int)'O'];
+  xlat[(int)'Q'] = xlat[(int)'O'];
+  xlat[(int)'I'] = xlat[(int)'1'];
+  xlat[(int)'Z'] = xlat[(int)'2'];
+}
+
+ubint<4> decode(const char *code)
+{
+  int n=strlen(code);
+  ubint<4> k(0);
+  for(int i=n-1;i>=0;i--) {
+    unsigned char c = code[i];
+    unsigned x = xlat[(int)c];
+    if(x == 255) continue;
+    k=k*32+x;
+  }
+  return k;
+}
+
+bool validate_licensekey(const char *license)
+{
+  // Initialize some magic numbers
+  ubint<12> p(0),g,y;
+  ubint<2> q,z(0);
+  ubint<2> H(12345678);
+  p[0]=0x1; p[10]=0x5e416a76; p[11]=0x4e228c74;
+  q[0]=0x2f20b53b; q[1]=0x2711463a;
+  g[0]=0x608be048; g[1]=0x5b158fcd; g[2]=0x434abfd9; g[3]=0xd174e69f;
+  g[4]=0x887dc6f9; g[5]=0x67d97d37; g[6]=0x4a008f32; g[7]=0x73f5f34d;
+  g[8]=0x7a68ac24; g[9]=0x823989e3; g[10]=0xa16f6380; g[11]=0x23836624;
+  y[0]=0xaae0700c; y[1]=0x1d9fd0a6; y[2]=0x7f4a5861; y[3]=0xc306b628;
+  y[4]=0xc6080aef; y[5]=0x3232d3db; y[6]=0xf0473c91; y[7]=0x5c66b424;
+  y[8]=0x26570faf; y[9]=0xeb072aa; y[10]=0x4c88dcca; y[11]=0x11d329d2;
+
+  // Here's the math.
+  ubint<4> _r, rw = decode(license);
+  div(rw, q, _r);
+  ubint<2> w(rw),r(_r);
+
+  // make sure 0 < r,w < q
+  if(r >= q || w >= q || r == z || w == z)
+    return false;
+
+  ubint<12> u1, u2, v1, v2;
+  ubint<2> v;
+  u1 = H*w%q;
+  u2 = r*w%q;
+  v1 = expmod(g, u1, p);
+  v2 = expmod(y, u2, p);
+  v2 = v1*v2%p;
+  v1 = q; // extend q to 12*32 bits for the final mod
+  v = v2%v1;
+
+  // Here's the check.
+  return v == r;
+}
+
+int main(int argc, char **argv)
+{
+  if(argc<2) {
+    printf("usage: %s <keycode>\n", argv[0]);
+    return 0;
+  }
+
+  init_codetbl();
+
+  printf("%s\n", validate_licensekey(argv[1]) ? "ok" : "FAIL");
+
+  return 0;
+}
+

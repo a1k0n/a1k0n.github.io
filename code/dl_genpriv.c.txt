@@ -1,0 +1,122 @@
+// Generate a Discrete Logarithm public/private key pair suitable for use with
+// DSA, ElGamal, etc.
+
+#include <gmp.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+void print_decoder_key(const char *name, mpz_t value, int size, int skipzero)
+{
+  int i;
+  mpz_t v;
+  mpz_init_set(v, value);
+  printf("  ");
+  int n=0;
+  for(i=0;i<size;i++) {
+    unsigned x = mpz_get_ui(v);
+    mpz_tdiv_q_2exp(v, v, 32);
+    if(x || !skipzero) {
+      printf("%s[%d]=0x%x;", name, i, x);
+      n++;
+      if(i == size-1)
+        break;
+      if((n&3) == 0) printf("\n  ");
+      else if(n>0) printf(" ");
+    }
+  }
+  printf("\n");
+}
+
+void randomprime(mpz_t r1, gmp_randstate_t rs, int nbits)
+{
+  mpz_t rt, randmin;
+
+  // this is kind of a lame hack; we really should be drawing random numbers
+  // directly from /dev/random rather than just a seed, as this makes our key
+  // space a lot smaller
+  srandomdev(); 
+  gmp_randseed_ui(rs, random());
+
+  mpz_init(rt);
+  mpz_init(randmin);
+  mpz_ui_pow_ui(randmin, 2, nbits-1);
+  mpz_urandomb(r1, rs, nbits-1);
+  mpz_setbit(r1, 0);
+  mpz_add(r1, r1, randmin);
+  mpz_nextprime(r1, r1);
+  mpz_clear(rt);
+  mpz_clear(randmin);
+}
+
+int main(int argc, char **argv)
+{
+  gmp_randstate_t rs;
+  mpz_t p, q, h, g, x, y, f;
+
+  if(argc<3) {
+    printf("usage: %s <qbits> <pbits>\n", argv[0]);
+    printf("Generate a public-private key pair with qbits bits in q and pbits in p.\n");
+    printf("As a general guideline, there are 2.5 qbits for every character in the \"CD key\" code, and\n");
+    printf("pbits should be about 6*qbits for resilience against NFS.\n");
+    return 0;
+  }
+  int qbits = atoi(argv[1]);
+  int pbits = atoi(argv[2]);
+
+  gmp_randinit_mt(rs);
+
+  // generate random primes p and q
+  mpz_init(p);
+  mpz_init(q);
+  mpz_init(h);
+  mpz_init(g);
+  mpz_init_set_ui(f, 1);
+  mpz_mul_2exp(f, f, pbits-qbits);
+  do {
+    randomprime(q, rs, qbits);
+    mpz_mul_2exp(p, q, pbits-qbits);
+    mpz_add_ui(p, p, 1);
+  } while(!mpz_probab_prime_p(p, 10));
+  gmp_printf("p: %Zd (%d bits)\n", p, mpz_sizeinbase(p, 2));
+  gmp_printf("q: %Zd (%d bits)\n", q, mpz_sizeinbase(q, 2));
+  do {
+    mpz_urandomm(h, rs, p);
+    if(mpz_cmp_ui(h, 0) == 0) continue;
+    mpz_powm(g, h, f, p);
+
+    // ensure g is not 1
+    if(mpz_cmp_ui(g, 1) == 0)
+      continue;
+  } while(0);
+  gmp_printf("g: %Zd (%d bits)\n", g, mpz_sizeinbase(g, 2));
+
+  mpz_init(x);
+  mpz_init(y);
+  mpz_urandomm(x, rs, q);
+  mpz_powm(y, g, x, p);
+  gmp_printf("x: %Zd (%d bits)\n", x, mpz_sizeinbase(x, 2));
+  gmp_printf("y: %Zd (%d bits)\n", y, mpz_sizeinbase(y, 2));
+
+  printf("encoder keys:\n");
+  gmp_printf("  mpz_t p,q,g,x;\n");
+  gmp_printf("  mpz_init_set_str(p, \"%Zd\", 10); /* %d bits */\n", p, mpz_sizeinbase(p, 2));
+  gmp_printf("  mpz_init_set_str(q, \"%Zd\", 10); /* %d bits */\n", q, mpz_sizeinbase(q, 2));
+  gmp_printf("  mpz_init_set_str(g, \"%Zd\", 10); /* %d bits */\n", g, mpz_sizeinbase(g, 2));
+  gmp_printf("  mpz_init_set_str(x, \"%Zd\", 10); /* %d bits */\n", x, mpz_sizeinbase(x, 2));
+
+  {
+    int psize = 1+(mpz_sizeinbase(p, 2)/32);
+    int qsize = 1+(mpz_sizeinbase(q, 2)/32);
+    printf("decoder keys:\n");
+    printf("  ubint<%d> p(0),g,y;\n", psize);
+    printf("  ubint<%d> q;\n", qsize);
+    print_decoder_key("p", p, psize, 1);
+    print_decoder_key("q", q, qsize, 0);
+    print_decoder_key("g", g, psize, 1);
+    print_decoder_key("y", y, psize, 1);
+  }
+
+
+  return 0;
+}
+

@@ -1,0 +1,49 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en"> 
+  <head>
+<link rel="stylesheet" href="/style.css" type="text/css" media="all" /> 
+<title>Another short C program. -- a1k0n</title>
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-24584703-1']);
+  _gaq.push(['_trackPageview']);
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = 'http://www.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+<!--
+  var disqus_shortname = 'a1k0n';
+  var disqus_identifier = '/2007/08/24/obfuscated-c-fire';
+  var disqus_url = 'http://a1k0n.net/2007/08/24/obfuscated-c-fire.html';
+  (function() {
+    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+    dsq.src = 'http://a1k0n.disqus.com/embed.js';
+    document.getElementsByTagName('head')[0].appendChild(dsq);
+  })();
+-->
+</script>
+</head>
+<body>
+<div width=100% style="background-color: #daf2ff; text-align: center; font-size: 12pt;"><a href="/" style="color: #1d3542;">a1k0n : Andy Sloane's weblog</a></div>
+<h1>Another short C program.</h1>
+<pre>
+b[2080];main(j){for(;;){printf("\x1b[H");for(j=1;j&lt;2080;j++)b[j]=j&lt;
+2000?(b[j+79]+b[j+80]+b[j]+b[j-1]+b[j+81])/5:rand()%4?0:512,j&lt;1840?
+putchar((j%80)==79?'\n':" .:*#$H@"[b[j]&gt;&gt;5]):0;usleep(20000);}}
+</pre>
+
+<p>It's supposed to be the old fire demo effect but in ASCII.  It looks kinda
+like camoflauge instead.</p>
+
+<p>update: fixed a crashing bug.  It has other issues with uninitialized
+data, though.</p>
+
+<hr>
+<a href=''>permalink</a> | 
+<a href="/atom.xml" class=feed><img src="/img/feed-icon-14x14.png" /></a> | <a href="/">a1k0n.net</a><br />
+<!--
+<div id="disqus_thread"></div>
+<-->
+</body>
+
+</html>

@@ -1,0 +1,18 @@
+<script>
+a=9;
+S=Math.sin;
+function update()
+{
+  with(R.getContext('2d')){
+	drawImage(R,9,2,282,148,0,3,300,150);
+	fillStyle='rgba(10,0,39,1)';
+	fillRect(0,0,300,15);
+	  fillStyle='#730';
+	  for(a+=x=88;x--;fillRect(x*4,75+S(a+x/27+S(x/9)*S(a*2-x/15))*20,6,2)){}
+  }
+
+}
+</script>
+
+<body onload=setInterval(update,9)>
+	<canvas id=R>

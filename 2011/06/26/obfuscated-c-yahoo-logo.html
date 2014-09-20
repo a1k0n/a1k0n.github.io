@@ -1,0 +1,194 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en"> 
+  <head>
+<link rel="stylesheet" href="/style.css" type="text/css" media="all" /> 
+<title>Yahoo! Logo ASCII Animation in six lines of C -- a1k0n</title>
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-24584703-1']);
+  _gaq.push(['_trackPageview']);
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = 'http://www.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+<!--
+  var disqus_shortname = 'a1k0n';
+  var disqus_identifier = '/2011/06/26/obfuscated-c-yahoo-logo';
+  var disqus_url = 'http://a1k0n.net/2011/06/26/obfuscated-c-yahoo-logo.html';
+  (function() {
+    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+    dsq.src = 'http://a1k0n.disqus.com/embed.js';
+    document.getElementsByTagName('head')[0].appendChild(dsq);
+  })();
+-->
+</script>
+</head>
+<body>
+<div width=100% style="background-color: #daf2ff; text-align: center; font-size: 12pt;"><a href="/" style="color: #1d3542;">a1k0n : Andy Sloane's weblog</a></div>
+<h1>Yahoo! Logo ASCII Animation in six lines of C</h1>
+<p>[<b>Update 6/28/2011:</b> added Javascript version; press button below to see the
+output without compiling the code.]</p>
+
+<p>[<b>Update 7/9/2011:</b> if you're using a compiler other than gcc, you
+might need to put a <tt>#include &lt;math.h&gt;</tt> at the top for it to work
+correctly -- I seem to be depending on the builtin behavior of <tt>sin</tt> and
+<tt>cos</tt> w.r.t. their return types when undeclared.]</p>
+
+<p>Last week I put together another obfuscated C program and have been urged by
+my coworkers to post it publicly.  I've made some refinements since posting it
+to our internal list, so here is the final version (to those who had seen it
+already: it's one line shorter now, and the angles are less screwy, and the
+animation is 2 seconds instead of 3).  Go ahead, try it:</p>
+
+<script>
+var F,S,V,tmr,doframe=function(){var k=document.getElementById("output"),c,d,e,a,f,g,h,j,b,i=[];S+=V+=(1-S)/10-V/4;for(d=0;d<24;d++){for(c=0;c<73;c++){for(a=e=0;a<3;a++){f=S*(c-27);g=S*(d*3+a-36);e^=(136*f*f+84*g*g<92033)<<a;b=0;p=6;for(m=0;m<8;){h=('O:85!fI,wfO8!yZfO8!f*hXK3&fO;:O;#hP;"i'.charCodeAt(b)-79)/14.6423;j="<[\\]O=IKNAL;KNRbF8EbGEROQ@BSXXtG!#t3!^".charCodeAt(b++)-79;if(f*Math.cos(h)+g*Math.sin(h)<j/1.165){b=p;p="<AFJPTX".charCodeAt(m++)-50}else if(b==p){e^=1<<a;m=8}}}i.push(" ''\".$u$"[e])}i.push("\n")}k.innerHTML=
+i.join("");if(!F--){clearInterval(tmr);tmr=undefined}};function animate(){F=40;V=S=0;if(tmr===undefined)tmr=setInterval(doframe,50)};
+</script>
+
+<pre>
+$ cat &gt;yanim.c
+c,p,i,j,n,F=40,k,m;float a,x,y,S=0,V=0;main(){for(;F--;usleep(50000),F?puts(
+"\x1b[25A"):0)for(S+=V+=(1-S)/10-V/4,j=0;j&lt;72;j+=3,putchar(10))for(i=0;x=S*(
+i-27),i++&lt;73;putchar(c[" ''\".$u$"]))for(c=0,n=3;n--;)for(y=S*(j+n-36),k=0,c
+^=(136*x*x+84*y*y&lt;92033)&lt;&lt;n,p=6,m=0;m&lt;8;k++["&lt;[\\]O=IKNAL;KNRbF8EbGEROQ@BSX"
+"XtG!#t3!^"]/1.16-68&gt;x*cos(a)+y*sin(a)?k=p,p="&lt;AFJPTX"[m++]-50:k==p?c^=1&lt;&lt;n,
+m=8:0)a=(k["O:85!fI,wfO8!yZfO8!f*hXK3&fO;:O;#hP;\"i[by asloane"]-79)/14.64;}
+^D
+$ gcc -o yanim yanim.c -lm
+[warnings which real programmers ignore]
+$ ./yanim
+[you'll see - <button onclick="animate();">show the animation</button>]
+</pre>
+<pre id="output" style="background:#000; color:#ccc;">
+</pre>
+
+<p>It's a 20fps, antialiased ASCII art animation of the Yahoo! logo.  If you
+want to figure out how it works on your own, you're welcome to.  Otherwise,
+read on.</p>
+
+<p>I encourage you to play with the constants in the code: S+=V+=(1-S)/10-V/5
+is the underdamped control system for the animation -- S is scale (=1/zoom), V
+is velocity, and 1/10 and 1/5 are the <a
+  href="http://en.wikipedia.org/wiki/PID_controller">PD constants</a>.  S=0
+corresponds to infinite zoom on the first frame.  S&lt;0 is funny.  F is the
+frame counter.  The 1.16 controls the scale of the polygon rendering (68 is an
+approximation of 79/1.16 so you have to adjust that too), and 136/84/92033
+define the ellipse.  The 14.64 is not a tunable parameter,
+though (it's 46/&pi;, and for a good reason).</p>
+
+<p>The antialiasing is simple: each character consists of three
+vertically-arranged samples and an 8-character lookup table for each
+arrangement of three on/off pixels.  Each frame consists of 73x24 characters,
+or 73x72 pixels.  The 73 horizontal choice was somewhat arbitrary; I suppose I
+could have gone up to 79.</p>
+
+<p>The logo is rendered as an ellipse and eight convex polygons using a fairly
+neat method (I thought) with sub-pixel precision and no frame buffer.  It
+required some design tradeoffs to fit into two printable-character arrays, but
+it's much less code than rendering triangles to a framebuffer, which is the
+typical way polygon rasterization is done.</p>
+
+<p>To produce this, first I had to vectorize the "Y!" logo.  I did this by
+taking some measurements of a reference image and writing coordinates down on
+graph paper.  Then I wrote a utility program which takes the points and polygon
+definitions and turns them into angles and offsets as defined below.  [I put <a
+  href="http://pastebin.com/tNqrGszq">the generator code on pastebin</a> until
+I get can some code highlighting stuff set up for my blog].</p>
+
+<p>The ellipse is fairly standard high-school math:
+<i>x</i><sup>2</sup>/<i>a</i><sup>2</sup> +
+<i>y</i><sup>2</sup>/<i>b</i><sup>2</sup> &lt; 1.  Each point is tested and if
+it's inside the ellipse, the pixel is plotted.  (136<i>x</i><sup>2</sup> +
+84<i>y</i><sup>2</sup> &lt; 92033 was a trivial rearrangement of terms with
+<i>a</i> and <i>b</i> being the radii of the two axes of the ellipse measured
+from my source image, scaled to the pixel grid).  </p>
+
+<p>Each polygon is made up of a set of separating half-planes (a half-plane
+being all points on one side of an infinitely long line).  If a given point is
+"inside" all of the half-planes, it's inside the polygon (which only works as
+long as the polygon is convex) and the pixel is toggled with the XOR operator
+<tt>^</tt> (thus it handles the "inverse" part inside the ellipse as well as
+the uninverted exclamation mark without any special cases).  Each side of a
+polygon is defined by the equation <i>ax</i> + <i>by</i> &gt; <i>c</i>.  To
+represent both <i>a</i> and <i>b</i> I use an angle <i>&theta;</i> so that
+<i>a</i> = cos(<i>&theta;</i>) and <i>b</i> = sin(<i>&theta;</i>) and quantize
+the angle in &pi;/46 increments &mdash; my angles are thus represented from
+-&pi; to +&pi; as ASCII 33 to 125 &mdash; '!' to '}' &mdash; with 'O' (ASCII
+79) as zero.  Then I solve for <i>c</i>, also quantized in scaled increments
+from -47 to +47, so that the midpoint of the side is considered inside the
+polygon.</p>
+
+<p>Here's an extremely crude diagram:  (I'm writing this on a plane and none of
+my drawing programs are working.  Sorry.)</p> <img src="/img/polygon_separation.jpg" /> <p>The
+shaded area is <i>ax</i> + <i>by</i> &lt; <i>c</i>, implying it's outside the
+polygon, and the dashed line is <i>ax</i> + <i>by</i> = <i>c</i>.</p>
+
+<p>(<i>a</i>,<i>b</i>) form a vector orthogonal to the line segment they
+represent pointing towards the inside of the polygon, so we can get them
+directly from the points defining the line segment by taking the vector
+defining the side &mdash;
+(<i>x<sub>1</sub></i> - <i>x<sub>0</sub></i>, <i>y<sub>1</sub></i> - <i>y<sub>0</sub></i>)
+&mdash;
+and rotating it 90 degrees,
+<!--(you think of it as multiplying <i>x</i>+<i>yi</i> by <i>i</i> or as multiplying the vector with the matrix [<table cellspacing=2 cellpadding=0 border=0 style="display: inline; margin: 0px; font-size: x-small; margin-bottom: 0px">
+  <tr><td>0</td><td>1</td></tr><tr><td>-1</td><td>0</td></tr></table>])  -this is unclear and looks like crap  -->
+resulting in (<i>a</i>, <i>b</i>) = (<i>y<sub>1</sub></i> -
+<i>y<sub>0</sub></i>, <i>x<sub>0</sub></i> - <i>x<sub>1</sub></i>).  Then we
+normalize (<i>a</i>, <i>b</i>) as the actual magnitude doesn't matter, but it
+will be 1 when we decode the angle and we can compensate with our choice of
+<i>c</i> later (if <i>ax</i>+<i>by</i>&gt;<i>c</i>, then
+<i>sax</i>+<i>sby</i>&gt;<i>sc</i> for some scale <i>s</i>&gt;0).  Then compute
+<i>&theta;</i> = <tt><a
+    href="http://en.wikipedia.org/wiki/Atan2">atan2</a></tt>(<i>a</i>,<i>b</i>),
+quantize to one of our 94 angles, and get our new (<i>a</i>,<i>b</i>) =
+(<tt>cos</tt>(<i>&theta;</i>), <tt>sin</tt>(<i>&theta;</i>)).</p>
+
+<p><i>c</i> is easy to get by directly substituting any of the points making up
+the line on the side of the polygon into <i>c</i> = <i>ax</i>+<i>by</i>.  I use
+the midpoint of the line segment on the side, (<i>x<sub>t</sub></i>,
+<i>y<sub>t</sub></i>) = ((<i>x<sub>0</sub></i> + <i>x<sub>1</sub></i>)/2,
+(<i>y<sub>0</sub></i> + <i>y<sub>1</sub></i>)/2), because the angle of the side
+can be slightly off after we quantize &theta;, and this evens the errors out
+across the length of the side.</p>
+
+<p>You'll notice on the first couple frames (you can pause with ^S, resume with
+^Q -- xon/xoff) that the bottom section of the 'Y' has little bites taken out
+of it due to the quantization error in the separating half-plane equations.
+</p>
+
+<p>It could probably be made somewhat more efficient CPU-wise by careful
+reordering of the separating plane arrays so that most of the drawing area is
+rejected first.  I didn't get to that in my generator code.</p>
+
+<p>The animation is done by the &lt;ESC&gt;[25A sequence &mdash; it moves the
+cursor up 25 lines in just about any terminal emulation mode.  I technically
+only need to move up 24 lines, but <tt>puts</tt> is shorter than
+<tt>printf</tt> and it implicitly adds a newline.  If your terminal isn't at
+least 26 lines high, though, it does funky things to your scrollback.  And
+<tt>usleep</tt> is there to limit it to 20fps, which is the only non-ANSI Cism
+about it.</p>
+
+<p>And then I shrunk the code down by arranging it into clever <tt>for</tt>
+loops and taking unorthodox advantage of commas, conditionals, and globals
+being <tt>int</tt>s by default in C (which is all par for the course in
+obfuscated C code).  And that pretty much reveals all the secrets as to how it
+was done.</p>
+
+<p>It would be fairly easy to enhance this with a different movement sequence,
+or rotation (or any kind of 3D transform, as it's basically just ray-tracing
+the logo).  I just animated the scale to prove the point that it was being
+rendered dynamically and not just a compressed logo, and kept the animation
+short and sweet.</p>
+
+<p>I apologize in advance for the various sign errors I'm sure to have made
+when typing this up, but you get the idea.</p>
+
+<hr>
+<a href=''>permalink</a> | 
+<a href="/atom.xml" class=feed><img src="/img/feed-icon-14x14.png" /></a> | <a href="/">a1k0n.net</a><br />
+<!--
+<div id="disqus_thread"></div>
+<-->
+</body>
+
+</html>

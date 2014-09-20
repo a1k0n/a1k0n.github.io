@@ -1,0 +1,262 @@
+verbose = false
+extra_bit = false
+
+ascii_base = nil -- can range from 32..63; encodes actual image data, 91 chars wide
+--ascii_base2 = 32 -- automatically determined.  32..(127-num_huff_nodes)
+
+function vprint(...) if verbose then print(unpack(arg)) end end
+
+function make_plstring(str)
+	s = string.gsub(str, "\\", "\\\\")
+	s = string.gsub(s, "'", "\\'")
+	-- forbid < from appearing due to retarded & wrong HTML escapers
+	--s = string.gsub(s, "<", "\\x3c")
+	--s = string.gsub(s, "["..string.char(127).."-"..string.char(255).."]", function(c) return string.format("\\x%02x",string.byte(c)) end)
+	return "'"..s.."'"
+end
+
+function schar(x)
+	assert(x>=32, "trying to encode ASCII "..x)
+	assert(x<=255, "trying to encode ASCII "..x)
+	return string.char(x)
+end
+
+function walk_tree(hufftbl,codelen,codes,node,depth,bits)
+	if hufftbl[node].code then
+		codes[hufftbl[node].code] = bits
+		codelen[hufftbl[node].code] = depth
+	else
+		walk_tree(hufftbl,codelen,codes,hufftbl[node].l, depth+1, bits..'0')
+		walk_tree(hufftbl,codelen,codes,hufftbl[node].r, depth+1, bits..'1')
+	end
+	return codes,codelen
+end
+
+function min_weight(hufftree)
+	local min1,min2
+	for i,v in ipairs(hufftree) do
+		if v.weight then
+			if not min1 then min1=i
+			elseif v.weight < hufftree[min1].weight then
+				min2=min1
+				min1=i
+			elseif not min2 then min2 = i
+			elseif v.weight < hufftree[min2].weight then
+				min2=i
+			end
+		end
+	end
+	return min1,min2
+end
+
+function build_tree(freq)
+	local hufftree = {}
+	for k,v in pairs(freq) do
+		if k ~= "total" then
+			table.insert(hufftree, {code=k, weight=v})
+		end
+	end
+	local treebase=table.getn(hufftree)
+	vprint(table.getn(hufftree)..' total unique codes')
+	while true do
+		local n1,n2 = min_weight(hufftree)
+		if not n1 or not n2 then 
+			vprint(table.getn(hufftree)..' total tree nodes')
+			return hufftree,treebase 
+		end
+		table.insert(hufftree, {l=n1,r=n2,weight=hufftree[n1].weight+hufftree[n2].weight})
+		hufftree[n1].weight = nil
+		hufftree[n2].weight = nil
+	end
+	-- not reached
+end
+
+function inc_freq(symbolbuf,freq,k)
+	freq[k] = (freq[k] or 0)+1
+	table.insert(symbolbuf,k)
+	freq.total = (freq.total or 0) + 1
+end
+
+function add_bit(codebuf, bit)
+	codebuf.n = codebuf.n or 1
+	codebuf.b = (codebuf.b or 0)
+	codebuf.x = (bit*(2^codebuf.b))+(codebuf.x or 0)
+	codebuf.b = codebuf.b + 1
+	if(codebuf.b >= 6) then
+		--vprint('ok: '..codebuf[codebuf.n])
+                codebuf.lo = codebuf.lo or {}
+		codebuf.lo[codebuf.n] = schar(ascii_base+codebuf.x,91)
+		codebuf.n = codebuf.n+1
+		codebuf.b = 0
+                codebuf.x = 0
+	end
+end
+
+function flush_bits(codebuf)
+	codebuf.totalbits = (codebuf.n-1)*6+codebuf.b
+	while codebuf.b ~= 0 do add_bit(codebuf,0) end
+	codebuf.n=nil
+end
+
+function add_code(codebuf, code)
+	--vprint('code: '..code)
+	for i=1,string.len(code) do
+		add_bit(codebuf,tonumber(string.sub(code,i,i)))
+	end
+end
+
+function read_stdin()
+	local image = {}
+	local freq = {},{}
+
+	for line in io.lines() do
+		line = string.gsub(line, "%s*$", "") -- strip trailing space
+		for i=1,string.len(line) do
+			inc_freq(image, freq, string.sub(line,i,i))
+		end
+		inc_freq(image, freq, "\n")
+	end
+	return image,freq
+end
+
+image,cfreq = read_stdin()
+
+vprint(cfreq.total..' total char codes')
+
+function calculate_entropy(freqtbl)
+	local entropy = 0
+	local total = freqtbl.total
+	freqtbl.total = nil
+	for k,v in pairs(freqtbl) do
+		local bits = -v*math.log(v/total)/math.log(2)
+		entropy = entropy + bits
+		local kk=k if(type(k) == "string") then kk=make_plstring(k) end
+		vprint(kk,v,bits)
+	end
+	freqtbl.total = total
+	return entropy
+end
+
+centropy = calculate_entropy(cfreq)
+vprint('entropy(chars)  = '..centropy)
+
+function build_hufftree(freq)
+	local hufftbl,treebase = build_tree(freq)
+	-- to encode the tree nodes into a C string, we split it up into the actual
+	-- tree nodes, which are all the 'states' above <treebase>, and the actual
+	-- codes, which are states 0..<treebase>.
+--	local hufftree_upperlimit = table.getn(hufftbl) + asciibase
+--	vprint('huffman tree node coding space: 32 - '..hufftree_upperlimit)
+--	if hufftree_upperlimit > 127 then
+--		error('Image too complex to do this in ASCII...')
+--	end
+	treeroot = table.getn(hufftbl)-1
+	codes,codelen = walk_tree(hufftbl,{},{},table.getn(hufftbl),0,"")
+
+	hufflen=0
+	for k,v in pairs(codelen) do
+		hufflen = hufflen + v*freq[k]
+		local kk=k if(type(k) == "string") then kk=make_plstring(k) end
+		vprint("code "..kk..": len "..v.." code "..codes[k].."\t\t"..v*freq[k])
+	end
+
+	return hufftbl,treebase,hufflen,codes
+end
+
+function build_codetables(hufftbl, treebase, tree_asciibase)
+	l,r,c = {},{},{}
+	for i,v in ipairs(hufftbl) do
+		if v.l then
+			--vprint('l='..v.l..' r='..v.r)
+			table.insert(l, schar(v.l-1+tree_asciibase-treebase))
+			table.insert(r, schar(v.r-1+tree_asciibase-treebase))
+		else
+			local code = v.code
+			if type(code) == "string" then code=string.byte(code) end
+			table.insert(c, string.char(code))
+		end
+	end
+	return l,r,c
+end
+
+local function make_imagestring(try_asciibase)
+	ascii_base = try_asciibase
+	imagebuf = {}
+	if extra_bit then
+		add_bit(imagebuf, 0)
+	end
+	for i,v in ipairs(image) do
+		add_code(imagebuf, ccodes[v])
+	end
+	flush_bits(imagebuf)
+	return make_plstring(table.concat(imagebuf.lo))
+end
+
+local function optimize_asciibase()
+	local bestbase,beststr,bestlen
+	for i=32,63 do
+		local s = make_imagestring(i)
+		local l = string.len(s)
+		if not bestlen or l <= bestlen then
+			bestbase,beststr,bestlen = i,s,l
+		end
+	end
+	return beststr,bestbase
+end
+
+local function optimize_treebase()
+	local chufftbl,ctreebase,chufflen,_ccodes = build_hufftree(cfreq)
+	ccodes = _ccodes
+	vprint("total hufflen(chars):  "..hufflen..', '..chufflen-centropy..' bits from optimal.')
+
+	local bestabase,bestlen
+	for i=(32+ctreebase),(127-ctreebase) do
+		local cl,cr,cc = build_codetables(chufftbl, ctreebase, i)
+		local l = string.len(make_plstring(table.concat(cl))) +
+		   string.len(make_plstring(table.concat(cr))) +
+		   string.len(tostring(i))
+		if(not bestlen or l <= bestlen) then
+			bestabase, bestlen = i,l
+		end
+	end
+
+	local cl,cr,cc = build_codetables(chufftbl, ctreebase, bestabase)
+
+	croot = table.getn(chufftbl)-1-ctreebase
+	vprint('char root: '..croot)
+	vprint('char base: '..ctreebase)
+	vprint("char l: "..make_plstring(table.concat(cl))..'[q]-'..bestabase)
+	vprint("char r: "..make_plstring(table.concat(cr))..'[q]-'..bestabase)
+	vprint("char c: "..make_plstring(table.concat(cc))..'[q]')
+
+	vprint("total coding bytes: "..math.ceil(chufflen/6)+table.getn(cl)+table.getn(cr)+table.getn(cc))
+
+	return make_plstring(table.concat(cl)), 
+		   make_plstring(table.concat(cr)),
+		   make_plstring(table.concat(cc)), 
+		   ctreebase,
+		   bestabase,
+		   croot
+end
+
+local tleft,tright,tsym,tbase,tabase,troot = optimize_treebase()
+local img,imgbase = optimize_asciibase()
+
+vprint("imagelo: "..make_plstring( table.concat(imagebuf.lo)))
+vprint(imagebuf.totalbits..' total bits in image')
+
+
+vprint("here's the code:\n\n")
+print(string.format([[
+sub c{($_=pop)<0?print substr%s,$_+%d,1:
+c(vec(vec(%s,
+$a/6,8)-%d>>$a++%%6&1?%s:%s,$_,8)-%d)}
+c %d while$a<%d]],
+tsym, tbase, 
+img, imgbase,
+tright, tleft, tabase,
+troot,
+imagebuf.totalbits
+))
+
+

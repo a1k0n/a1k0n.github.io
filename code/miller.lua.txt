@@ -1,0 +1,79 @@
+local initial_deck = { 56, 8, 40}
+math.randomseed(1337)
+
+function reset_deck()
+    local deck = {}
+    for i,v in ipairs(initial_deck) do deck[i]=v end
+    return deck
+end
+
+function draw(deck)
+    local total=deck[1]+deck[2]+deck[3]
+    local n = math.random(total)
+    for i=1,3 do
+        n=n-deck[i]
+        if n <= 0 then
+            deck[i] = deck[i] - 1
+            return i
+        end
+    end
+    error("draw is broken: n="..n.." deck="..deck[1]..','..deck[2]..','..deck[3])
+end
+
+function kelly(bank, deck)
+    return bank*math.max((deck[1]-deck[3])/(deck[3]+deck[1]), 0)
+end
+
+-- what a stupid idea.
+function martingale(bank, loss_streak)
+    return 1666*math.pow(2, loss_streak)
+end
+
+function miller_test()
+    local bankk,bankm = 10000,10000
+
+    local loss_streak = 0
+    local n,sumk=0,0
+    for j = 1,500 do
+        print('--- reshuffle ---')
+        local deck = reset_deck()
+        for i=1,50 do
+            local betk = math.floor(kelly(bankk, deck) + 0.5)
+            local betm = martingale(bankm, loss_streak)
+            n=n+1
+            sumk = sumk + betk
+            x=string.format("deck={%2d,%d,%2d}, bankk=%10.0f betk=%8.0f; bankm=%8.0f betm=%5d",
+                deck[1], deck[2], deck[3],
+                bankk, betk,
+                bankm, betm)
+            local card = draw(deck)
+            print(x..' drawn='..card)
+            if card == 1 then 
+                bankk = bankk + betk
+                bankm = bankm + betm
+                loss_streak = 0
+            elseif card == 3 then
+                bankk = bankk - betk
+                bankm = bankm - betm
+                loss_streak = loss_streak + 1
+            else
+                loss_streak = 0
+            end
+            if(bankm <= 0) then 
+                print("Martingale is bankrupt!")
+                return bankk, bankm, sumk/n
+            end
+            if(bankk > 1e9) then
+                print("Kelly won a billion dollars after "..n.." draws; that's probably enough")
+                return bankk, bankm, sumk/n
+            end
+        end
+    end
+
+end
+
+bankk, bankm, avgk = miller_test()
+print("Final: kelly="..bankk.." martingale="..bankm)
+print("Average kelly bet was "..avgk)
+
+

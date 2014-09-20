@@ -1,0 +1,1555 @@
+<?xml version="1.0"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+ 
+  <title>a1k0n.net</title>
+  <link href="http://a1k0n.net/"/>
+  <link type="application/atom+xml" rel="self" href="http://a1k0n.net/atom.xml"/>
+  <updated>2014-09-20T08:45:00-05:00</updated>
+  <id>http://a1k0n.net/</id>
+  <author>
+    <name>Andy Sloane</name>
+    <email>andy@a1k0n.net</email>
+  </author>
+
+  
+  
+  <entry>
+    <id>http://a1k0n.net/2011/07/20/donut-math</id>
+    <link type="text/html" rel="alternate" href="http://a1k0n.net/2011/07/20/donut-math.html"/>
+    <title>Donut math&#58; how donut.c works</title>
+    <updated>2011-07-20T00:00:00-05:00</updated>
+    <author>
+      <name>Andy Sloane</name>
+      <uri>http://a1k0n.net/</uri>
+    </author>
+    <content type="html">&lt;link href='/css/prettify.css' rel='stylesheet' type='text/css' /&gt;&lt;script type='text/javascript' src='/js/prettify.js'&gt;
+&lt;/script&gt;&lt;script src='/js/donut.js'&gt;
+&lt;/script&gt;
+&lt;p&gt;There has been a sudden resurgence of interest in my &lt;a href='/2006/09/15/obfuscated-c-donut.html'&gt;&quot;donut&quot; code from 2006&lt;/a&gt;, and I&amp;#8217;ve had a couple requests to explain this one. It&amp;#8217;s been five years now, so it&amp;#8217;s not exactly fresh in my memory, so I will reconstruct it from scratch, in great detail, and hopefully get approximately the same result.&lt;/p&gt;
+
+&lt;p&gt;This is the code and the output, animated in Javascript: &lt;button onclick='anim1();'&gt;toggle animation&lt;/button&gt; &lt;table cellspacing='0' border='0' cellpadding='0'&gt;&lt;tr&gt;
+&lt;td style='background-color:#000'&gt;
+&lt;pre style='background-color:#000; color:#ccc;'&gt;
+             k;double sin()
+         ,cos();main(){float A=
+       0,B=0,i,j,z[1760];char b[
+     1760];printf(&quot;\x1b[2J&quot;);for(;;
+  ){memset(b,32,1760);memset(z,0,7040)
+  ;for(j=0;6.28&amp;gt;j;j+=0.07)for(i=0;6.28
+ &amp;gt;i;i+=0.02){float c=sin(i),d=cos(j),e=
+ sin(A),f=sin(j),g=cos(A),h=d+2,D=1/(c*
+ h*e+f*g+5),l=cos      (i),m=cos(B),n=s\
+in(B),t=c*h*g-f*        e;int x=40+30*D*
+(l*h*m-t*n),y=            12+15*D*(l*h*n
++t*m),o=x+80*y,          N=8*((f*e-c*d*g
+ )*m-c*d*e-f*g-l        *d*n);if(22&amp;gt;y&amp;amp;&amp;amp;
+ y&amp;gt;0&amp;amp;&amp;amp;x&amp;gt;0&amp;amp;&amp;amp;80&amp;gt;x&amp;amp;&amp;amp;D&amp;gt;z[o]){z[o]=D;;;b[o]=
+ &quot;.,-~:;=!*#$@&quot;[N&amp;gt;0?N:0];}}/*#****!!-*/
+  printf(&quot;\x1b[H&quot;);for(k=0;1761&amp;gt;k;k++)
+   putchar(k%80?b[k]:10);A+=0.04;B+=
+     0.02;}}/*****####*******!!=;:~
+       ~::==!!!**********!!!==::-
+         .,~~;;;========;;;:~-.
+             ..,--------,*/
+&lt;/pre&gt;
+&lt;/td&gt;
+&lt;td style='background-color:#000'&gt;
+&lt;pre style='background-color:#000; color:#ccc;' id='d'&gt;
+&lt;/pre&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/p&gt;
+
+&lt;p&gt;At its core, it&amp;#8217;s a framebuffer and a Z-buffer into which I render pixels. Since it&amp;#8217;s just rendering relatively low-resolution ASCII art, I massively cheat. All it does is plot pixels along the surface of the torus at fixed-angle increments, and does it densely enough that the final result looks solid. The &amp;#8220;pixels&amp;#8221; it plots are ASCII characters corresponding to the illumination value of the surface at each point: &lt;code&gt;.,-~:;=!*#$@&lt;/code&gt; from dimmest to brightest. No raytracing required.&lt;/p&gt;
+
+&lt;p&gt;So how do we do that? Well, let&amp;#8217;s start with the basic math behind 3D perspective rendering. The following diagram is a side view of a person sitting in front of a screen, viewing a 3D object behind it.&lt;/p&gt;
+&lt;center&gt;&lt;img src='/img/perspective.png' /&gt;&lt;/center&gt;
+&lt;p&gt;To render a 3D object onto a 2D screen, we project each point (&lt;em&gt;x&lt;/em&gt;,&lt;em&gt;y&lt;/em&gt;,&lt;em&gt;z&lt;/em&gt;) in 3D-space onto a plane located &lt;em&gt;z&amp;#8217;&lt;/em&gt; units away from the viewer, so that the corresponding 2D position is (&lt;em&gt;x&amp;#8217;&lt;/em&gt;,&lt;em&gt;y&amp;#8217;&lt;/em&gt;). Since we&amp;#8217;re looking from the side, we can only see the &lt;em&gt;y&lt;/em&gt; and &lt;em&gt;z&lt;/em&gt; axes, but the math works the same for the &lt;em&gt;x&lt;/em&gt; axis (just pretend this is a top view instead). This projection is really easy to obtain: notice that the origin, the &lt;em&gt;y&lt;/em&gt;-axis, and point (&lt;em&gt;x&lt;/em&gt;,&lt;em&gt;y&lt;/em&gt;,&lt;em&gt;z&lt;/em&gt;) form a right triangle, and a similar right triangle is formed with (&lt;em&gt;x&amp;#8217;&lt;/em&gt;,&lt;em&gt;y&amp;#8217;&lt;/em&gt;,&lt;em&gt;z&amp;#8217;&lt;/em&gt;). Thus the relative proportions are maintained:&lt;/p&gt;
+&lt;div class='maruku-equation'&gt;&lt;img style='height: 10.1111111111111ex;' alt='$\begin{aligned}
+\frac{y&amp;apos;}{z&amp;apos;} &amp;amp;= \frac{y}{z}
+\\
+y&amp;apos; &amp;amp;= \frac{y z&amp;apos;}{z}.
+\end{aligned}$' class='maruku-png' src='/img/latex/1b710772b17843b980f2e9ca46732e92.png' /&gt;&lt;span class='maruku-eq-tex'&gt;&lt;code style='display: none'&gt;\begin{aligned}
+\frac{y'}{z'} &amp;amp;= \frac{y}{z}
+\\
+y' &amp;amp;= \frac{y z'}{z}.
+\end{aligned}&lt;/code&gt;&lt;/span&gt;&lt;/div&gt;
+&lt;p&gt;So to project a 3D coordinate to 2D, we scale a coordinate by the screen distance &lt;em&gt;z&amp;#8217;&lt;/em&gt;. Since &lt;em&gt;z&amp;#8217;&lt;/em&gt; is a fixed constant, and not functionally a coordinate, let&amp;#8217;s rename it to &lt;em&gt;K&lt;sub&gt;1&lt;/sub&gt;&lt;/em&gt;, so our projection equation becomes &lt;span class='maruku-inline'&gt;&lt;img style='vertical-align: -0.777777777777778ex;height: 2.77777777777778ex;' alt='$(x&amp;apos;,y&amp;apos;) = (\frac{K_1 x}{z}, \frac{K_1 y}{z})$' class='maruku-png' src='/img/latex/177962348550aa653ef29eec5f04b1d6.png' /&gt;&lt;/span&gt;. We can choose &lt;em&gt;K&lt;sub&gt;1&lt;/sub&gt;&lt;/em&gt; arbitrarily based on the field of view we want to show in our 2D window. For example, if we have a 100x100 window of pixels, then the view is centered at (50,50); and if we want to see an object which is 10 units wide in our 3D space, set back 5 units from the viewer, then &lt;em&gt;K&lt;sub&gt;1&lt;/sub&gt;&lt;/em&gt; should be chosen so that the projection of the point &lt;em&gt;x&lt;/em&gt;=10, &lt;em&gt;z&lt;/em&gt;=5 is still on the screen with &lt;em&gt;x&amp;#8217;&lt;/em&gt; &amp;lt; 50: 10&lt;em&gt;K&lt;sub&gt;1&lt;/sub&gt;&lt;/em&gt;/5 &amp;lt; 50, or &lt;em&gt;K&lt;sub&gt;1&lt;/sub&gt;&lt;/em&gt; &amp;lt; 25.&lt;/p&gt;
+
+&lt;p&gt;When we&amp;#8217;re plotting a bunch of points, we might end up plotting different points at the same (&lt;em&gt;x&amp;#8217;&lt;/em&gt;,&lt;em&gt;y&amp;#8217;&lt;/em&gt;) location but at different depths, so we maintain a &lt;a href='http://en.wikipedia.org/wiki/Z-buffering'&gt;z-buffer&lt;/a&gt; which stores the &lt;em&gt;z&lt;/em&gt; coordinate of everything we draw. If we need to plot a location, we first check to see whether we&amp;#8217;re plotting in front of what&amp;#8217;s there already. It also helps to compute &lt;em&gt;z&lt;/em&gt;&lt;sup&gt;-1&lt;/sup&gt; &lt;span class='maruku-inline'&gt;&lt;img style='vertical-align: -0.777777777777778ex;height: 2.66666666666667ex;' alt='$= \frac{1}{z}$' class='maruku-png' src='/img/latex/ed0a093882a4dfd48f6e83aea38313e7.png' /&gt;&lt;/span&gt; and use that when depth buffering because:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;em&gt;z&lt;/em&gt;&lt;sup&gt;-1&lt;/sup&gt; = 0 corresponds to infinite depth, so we can pre-initialize our z-buffer to 0 and have the background be infinitely far away&lt;/li&gt;
+
+&lt;li&gt;we can re-use &lt;em&gt;z&lt;/em&gt;&lt;sup&gt;-1&lt;/sup&gt; when computing &lt;em&gt;x&amp;#8217;&lt;/em&gt; and &lt;em&gt;y&amp;#8217;&lt;/em&gt;: Dividing once and multiplying by &lt;em&gt;z&lt;/em&gt;&lt;sup&gt;-1&lt;/sup&gt; twice is cheaper than dividing by &lt;em&gt;z&lt;/em&gt; twice.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Now, how do we draw a donut, AKA &lt;a href='http://en.wikipedia.org/wiki/Torus'&gt;torus&lt;/a&gt;? Well, a torus is a &lt;a href='http://en.wikipedia.org/wiki/Solid_of_revolution'&gt;solid of
+revolution&lt;/a&gt;, so one way to do it is to draw a 2D circle around some point in 3D space, and then rotate it around the central axis of the torus. Here is a cross-section through the center of a torus:&lt;/p&gt;
+&lt;center&gt;&lt;img src='/img/torusxsec.png' /&gt;&lt;/center&gt;
+&lt;p&gt;So we have a circle of radius &lt;em&gt;R&lt;/em&gt;&lt;sub&gt;1&lt;/sub&gt; centered at point (&lt;em&gt;R&lt;/em&gt;&lt;sub&gt;2&lt;/sub&gt;,0,0), drawn on the &lt;em&gt;xy&lt;/em&gt;-plane. We can draw this by sweeping an angle &amp;#8212; let&amp;#8217;s call it &lt;em&gt;&amp;#952;&lt;/em&gt; &amp;#8212; from 0 to 2&amp;#960;:&lt;/p&gt;
+&lt;div class='maruku-equation'&gt;&lt;img style='height: 2.33333333333333ex;' alt='$(x,y,z) = (R_2,0,0) + (R_1 \cos \theta, R_1 \sin \theta, 0)$' class='maruku-png' src='/img/latex/aca3f080178e9a3fe979c5f594e0beab.png' /&gt;&lt;span class='maruku-eq-tex'&gt;&lt;code style='display: none'&gt;(x,y,z) = (R_2,0,0) + (R_1 \cos \theta, R_1 \sin \theta, 0)&lt;/code&gt;&lt;/span&gt;&lt;/div&gt;
+&lt;p&gt;Now we take that circle and rotate it around the &lt;em&gt;y&lt;/em&gt;-axis by another angle &amp;#8212; let&amp;#8217;s call it &amp;#966;. To rotate an arbitrary 3D point around one of the cardinal axes, the standard technique is to multiply by a &lt;a href='http://en.wikipedia.org/wiki/Rotation_matrix'&gt;rotation matrix&lt;/a&gt;. So if we take the previous points and rotate about the &lt;em&gt;y&lt;/em&gt;-axis we get:&lt;/p&gt;
+&lt;div class='maruku-equation'&gt;&lt;img style='height: 8.11111111111111ex;' alt='$\left( \begin{matrix}
+R_2 + R_1 \cos \theta, &amp;amp;
+R_1 \sin \theta, &amp;amp;
+0 \end{matrix} \right)
+\cdot
+\left( \begin{matrix}
+\cos \phi &amp;amp; 0 &amp;amp; \sin \phi \\
+0 &amp;amp; 1 &amp;amp; 0 \\
+-\sin \phi &amp;amp; 0 &amp;amp; \cos \phi \end{matrix} \right)
+=
+\left( \begin{matrix}
+(R_2 + R_1 \cos \theta)\cos \phi, &amp;amp;
+R_1 \sin \theta, &amp;amp;
+-(R_2 + R_1 \cos \theta)\sin \phi \end{matrix} \right)$' class='maruku-png' src='/img/latex/0efcfa79c88e4aaf636d09cc932908b1.png' /&gt;&lt;span class='maruku-eq-tex'&gt;&lt;code style='display: none'&gt;\left( \begin{matrix}
+R_2 + R_1 \cos \theta, &amp;amp;
+R_1 \sin \theta, &amp;amp;
+0 \end{matrix} \right)
+\cdot
+\left( \begin{matrix}
+\cos \phi &amp;amp; 0 &amp;amp; \sin \phi \\
+0 &amp;amp; 1 &amp;amp; 0 \\
+-\sin \phi &amp;amp; 0 &amp;amp; \cos \phi \end{matrix} \right)
+=
+\left( \begin{matrix}
+(R_2 + R_1 \cos \theta)\cos \phi, &amp;amp;
+R_1 \sin \theta, &amp;amp;
+-(R_2 + R_1 \cos \theta)\sin \phi \end{matrix} \right)&lt;/code&gt;&lt;/span&gt;&lt;/div&gt;
+&lt;p&gt;But wait: we also want the whole donut to spin around on at least two more axes for the animation. They were called &lt;em&gt;A&lt;/em&gt; and &lt;em&gt;B&lt;/em&gt; in the original code: it was a rotation about the &lt;em&gt;x&lt;/em&gt;-axis by &lt;em&gt;A&lt;/em&gt; and a rotation about the &lt;em&gt;z&lt;/em&gt;-axis by &lt;em&gt;B&lt;/em&gt;. This is a bit hairier, so I&amp;#8217;m not even going write the result yet, but it&amp;#8217;s a bunch of matrix multiplies.&lt;/p&gt;
+&lt;div class='maruku-equation'&gt;&lt;img style='height: 8.11111111111111ex;' alt='$\left( \begin{matrix}
+R_2 + R_1 \cos \theta, &amp;amp;
+R_1 \sin \theta, &amp;amp;
+0 \end{matrix} \right)
+\cdot
+\left( \begin{matrix}
+\cos \phi &amp;amp; 0 &amp;amp; \sin \phi \\
+0 &amp;amp; 1 &amp;amp; 0 \\
+-\sin \phi &amp;amp; 0 &amp;amp; \cos \phi \end{matrix} \right)
+\cdot
+\left( \begin{matrix}
+1 &amp;amp; 0 &amp;amp; 0 \\
+0 &amp;amp; \cos A &amp;amp; \sin A \\
+0 &amp;amp; -\sin A &amp;amp; \cos A \end{matrix} \right)
+\cdot
+\left( \begin{matrix}
+\cos B &amp;amp; \sin B &amp;amp; 0 \\
+-\sin B &amp;amp; \cos B &amp;amp; 0 \\
+0 &amp;amp; 0 &amp;amp; 1 \end{matrix} \right)$' class='maruku-png' src='/img/latex/6c1370bb4d444fc1de289c06204d384c.png' /&gt;&lt;span class='maruku-eq-tex'&gt;&lt;code style='display: none'&gt;\left( \begin{matrix}
+R_2 + R_1 \cos \theta, &amp;amp;
+R_1 \sin \theta, &amp;amp;
+0 \end{matrix} \right)
+\cdot
+\left( \begin{matrix}
+\cos \phi &amp;amp; 0 &amp;amp; \sin \phi \\
+0 &amp;amp; 1 &amp;amp; 0 \\
+-\sin \phi &amp;amp; 0 &amp;amp; \cos \phi \end{matrix} \right)
+\cdot
+\left( \begin{matrix}
+1 &amp;amp; 0 &amp;amp; 0 \\
+0 &amp;amp; \cos A &amp;amp; \sin A \\
+0 &amp;amp; -\sin A &amp;amp; \cos A \end{matrix} \right)
+\cdot
+\left( \begin{matrix}
+\cos B &amp;amp; \sin B &amp;amp; 0 \\
+-\sin B &amp;amp; \cos B &amp;amp; 0 \\
+0 &amp;amp; 0 &amp;amp; 1 \end{matrix} \right)&lt;/code&gt;&lt;/span&gt;&lt;/div&gt;
+&lt;p&gt;Churning through the above gets us an (&lt;em&gt;x&lt;/em&gt;,&lt;em&gt;y&lt;/em&gt;,&lt;em&gt;z&lt;/em&gt;) point on the surface of our torus, rotated around two axes, centered at the origin. To actually get screen coordinates, we need to:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Move the torus somewhere in front of the viewer (the viewer is at the origin) &amp;#8212; so we just add some constant to &lt;em&gt;z&lt;/em&gt; to move it backward.&lt;/li&gt;
+
+&lt;li&gt;Project from 3D onto our 2D screen.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;So we have another constant to pick, call it &lt;em&gt;K&lt;/em&gt;&lt;sub&gt;2&lt;/sub&gt;, for the distance of the donut from the viewer, and our projection now looks like:&lt;/p&gt;
+&lt;div class='maruku-equation'&gt;&lt;img style='height: 4.88888888888889ex;' alt='$\left( x&amp;apos;, y&amp;apos; \right)
+=
+\left( \frac{K_1 x}{K_2 + z} , \frac{K_1 y}{K_2 + z} \right)$' class='maruku-png' src='/img/latex/2919c373ab68c31e37685cab52fad45a.png' /&gt;&lt;span class='maruku-eq-tex'&gt;&lt;code style='display: none'&gt;\left( x', y' \right)
+=
+\left( \frac{K_1 x}{K_2 + z} , \frac{K_1 y}{K_2 + z} \right)&lt;/code&gt;&lt;/span&gt;&lt;/div&gt;
+&lt;p&gt;&lt;em&gt;K&lt;/em&gt;&lt;sub&gt;1&lt;/sub&gt; and &lt;em&gt;K&lt;/em&gt;&lt;sub&gt;2&lt;/sub&gt; can be tweaked together to change the field of view and flatten or exaggerate the depth of the object.&lt;/p&gt;
+
+&lt;p&gt;Now, we could implement a 3x3 matrix multiplication routine in our code and implement the above in a straightforward way. But if our goal is to shrink the code as much as possible, then every 0 in the matrices above is an opportunity for simplification. So let&amp;#8217;s multiply it out. Churning through a bunch of algebra (thanks Mathematica!), the full result is:&lt;/p&gt;
+&lt;div class='maruku-equation'&gt;&lt;img style='height: 8.11111111111111ex;' alt='$\left( \begin{matrix} x \\ y \\ z \end{matrix} \right) =
+\left( \begin{matrix}
+ (R_2 + R_1 \cos \theta) (\cos B \cos \phi + \sin A \sin B \sin \phi) - 
+   R_1 \cos A \sin B \sin \theta \\
+
+ (R_2 + R_1 \cos \theta) (\cos \phi \sin B - \cos B \sin A \sin \phi) + 
+   R_1 \cos A \cos B \sin \theta \\
+ \cos A (R_2 + R_1 \cos \theta) \sin \phi + R_1 \sin A \sin \theta
+\end{matrix} \right)$' class='maruku-png' src='/img/latex/30543268e7326534b0a18a1c84e24510.png' /&gt;&lt;span class='maruku-eq-tex'&gt;&lt;code style='display: none'&gt;\left( \begin{matrix} x \\ y \\ z \end{matrix} \right) =
+\left( \begin{matrix}
+ (R_2 + R_1 \cos \theta) (\cos B \cos \phi + \sin A \sin B \sin \phi) - 
+   R_1 \cos A \sin B \sin \theta \\
+
+ (R_2 + R_1 \cos \theta) (\cos \phi \sin B - \cos B \sin A \sin \phi) + 
+   R_1 \cos A \cos B \sin \theta \\
+ \cos A (R_2 + R_1 \cos \theta) \sin \phi + R_1 \sin A \sin \theta
+\end{matrix} \right)&lt;/code&gt;&lt;/span&gt;&lt;/div&gt;
+&lt;p&gt;Well, that looks pretty hideous, but we we can precompute some common subexpressions (e.g. all the sines and cosines, and &lt;span class='maruku-inline'&gt;&lt;img style='vertical-align: -0.444444444444444ex;height: 2.0ex;' alt='$R_2 + R_1 \cos \theta$' class='maruku-png' src='/img/latex/54482053911d43204d56b95e4b58ed4b.png' /&gt;&lt;/span&gt;) and reuse them in the code. In fact I came up with a completely different factoring in the original code but that&amp;#8217;s left as an exercise for the reader. (The original code also swaps the sines and cosines of A, effectively rotating by 90 degrees, so I guess my initial derivation was a bit different but that&amp;#8217;s OK.)&lt;/p&gt;
+
+&lt;p&gt;Now we know where to put the pixel, but we still haven&amp;#8217;t even considered which shade to plot. To calculate illumination, we need to know the &lt;a href='http://en.wikipedia.org/wiki/Surface_normal'&gt;surface normal&lt;/a&gt; &amp;#8212; the direction perpendicular to the surface at each point. If we have that, then we can take the &lt;a href='http://en.wikipedia.org/wiki/Dot_product'&gt;dot
+product&lt;/a&gt; of the surface normal with the light direction, which we can choose arbitrarily. That gives us the cosine of the angle between the light direction and the surface direction: If the dot product is &amp;#62;0, the surface is facing the light and if it&amp;#8217;s &amp;#60;0, it faces away from the light. The higher the value, the more light falls on the surface.&lt;/p&gt;
+
+&lt;p&gt;The derivation of the surface normal direction turns out to be pretty much the same as our derivation of the point in space. We start with a point on a circle, rotate it around the torus&amp;#8217;s central axis, and then make two more rotations. The surface normal of the point on the circle is fairly obvious: it&amp;#8217;s the same as the point on a unit (radius=1) circle centered at the origin.&lt;/p&gt;
+
+&lt;p&gt;So our surface normal (&lt;em&gt;N&lt;sub&gt;x&lt;/sub&gt;&lt;/em&gt;, &lt;em&gt;N&lt;sub&gt;y&lt;/sub&gt;&lt;/em&gt;, &lt;em&gt;N&lt;sub&gt;z&lt;/sub&gt;&lt;/em&gt;) is derived the same as above, except the point we start with is just (cos &lt;em&gt;&amp;#952;&lt;/em&gt;, sin &lt;em&gt;&amp;#952;&lt;/em&gt;, 0). Then we apply the same rotations:&lt;/p&gt;
+&lt;div class='maruku-equation'&gt;&lt;img style='height: 8.11111111111111ex;' alt='$\left( \begin{matrix}
+N_x, &amp;amp;
+N_y, &amp;amp;
+N_z \end{matrix} \right)
+=
+\left( \begin{matrix}
+\cos \theta, &amp;amp;
+\sin \theta, &amp;amp;
+0 \end{matrix} \right)
+\cdot
+\left( \begin{matrix}
+\cos \phi &amp;amp; 0 &amp;amp; \sin \phi \\
+0 &amp;amp; 1 &amp;amp; 0 \\
+-\sin \phi &amp;amp; 0 &amp;amp; \cos \phi \end{matrix} \right)
+\cdot
+\left( \begin{matrix}
+1 &amp;amp; 0 &amp;amp; 0 \\
+0 &amp;amp; \cos A &amp;amp; \sin A \\
+0 &amp;amp; -\sin A &amp;amp; \cos A \end{matrix} \right)
+\cdot
+\left( \begin{matrix}
+\cos B &amp;amp; \sin B &amp;amp; 0 \\
+-\sin B &amp;amp; \cos B &amp;amp; 0 \\
+0 &amp;amp; 0 &amp;amp; 1 \end{matrix} \right)$' class='maruku-png' src='/img/latex/b75b5020836f6ba6428f2ec6373d5566.png' /&gt;&lt;span class='maruku-eq-tex'&gt;&lt;code style='display: none'&gt;\left( \begin{matrix}
+N_x, &amp;amp;
+N_y, &amp;amp;
+N_z \end{matrix} \right)
+=
+\left( \begin{matrix}
+\cos \theta, &amp;amp;
+\sin \theta, &amp;amp;
+0 \end{matrix} \right)
+\cdot
+\left( \begin{matrix}
+\cos \phi &amp;amp; 0 &amp;amp; \sin \phi \\
+0 &amp;amp; 1 &amp;amp; 0 \\
+-\sin \phi &amp;amp; 0 &amp;amp; \cos \phi \end{matrix} \right)
+\cdot
+\left( \begin{matrix}
+1 &amp;amp; 0 &amp;amp; 0 \\
+0 &amp;amp; \cos A &amp;amp; \sin A \\
+0 &amp;amp; -\sin A &amp;amp; \cos A \end{matrix} \right)
+\cdot
+\left( \begin{matrix}
+\cos B &amp;amp; \sin B &amp;amp; 0 \\
+-\sin B &amp;amp; \cos B &amp;amp; 0 \\
+0 &amp;amp; 0 &amp;amp; 1 \end{matrix} \right)&lt;/code&gt;&lt;/span&gt;&lt;/div&gt;
+&lt;p&gt;So which lighting direction should we choose? How about we light up surfaces facing behind and above the viewer: &lt;span class='maruku-inline'&gt;&lt;img style='vertical-align: -0.555555555555556ex;height: 2.33333333333333ex;' alt='$(0,1,-1)$' class='maruku-png' src='/img/latex/a630fbf79f8ae344d7f88ee29868f7b7.png' /&gt;&lt;/span&gt;. Technically this should be a normalized unit vector, and this vector has a magnitude of &amp;#8730;2. That&amp;#8217;s okay &amp;#8211; we will compensate later. Therefore we compute the above (&lt;em&gt;x&lt;/em&gt;,&lt;em&gt;y&lt;/em&gt;,&lt;em&gt;z&lt;/em&gt;), throw away the &lt;em&gt;x&lt;/em&gt; and get our luminance &lt;em&gt;L&lt;/em&gt; = &lt;em&gt;y&lt;/em&gt;-&lt;em&gt;z&lt;/em&gt;.&lt;/p&gt;
+&lt;div class='maruku-equation'&gt;&lt;img style='height: 5.66666666666667ex;' alt='$\begin{aligned}
+L &amp;amp;=
+\left( \begin{matrix}
+N_x, &amp;amp;
+N_y, &amp;amp;
+N_z \end{matrix} \right)
+\cdot
+\left( \begin{matrix}
+0, &amp;amp;
+1, &amp;amp;
+-1 \end{matrix} \right)
+\\
+&amp;amp;= 
+\cos \phi \cos \theta \sin B - \cos A \cos \theta \sin \phi - \sin A \sin \theta + 
+ \cos B ( \cos A \sin \theta - \cos \theta \sin A \sin \phi)
+\end{aligned}$' class='maruku-png' src='/img/latex/d2a3805a6edac7e522c8956b00ebf10f.png' /&gt;&lt;span class='maruku-eq-tex'&gt;&lt;code style='display: none'&gt;\begin{aligned}
+L &amp;amp;=
+\left( \begin{matrix}
+N_x, &amp;amp;
+N_y, &amp;amp;
+N_z \end{matrix} \right)
+\cdot
+\left( \begin{matrix}
+0, &amp;amp;
+1, &amp;amp;
+-1 \end{matrix} \right)
+\\
+&amp;amp;= 
+\cos \phi \cos \theta \sin B - \cos A \cos \theta \sin \phi - \sin A \sin \theta + 
+ \cos B ( \cos A \sin \theta - \cos \theta \sin A \sin \phi)
+\end{aligned}&lt;/code&gt;&lt;/span&gt;&lt;/div&gt;
+&lt;p&gt;Again, not too pretty, but not terrible once we&amp;#8217;ve precomputed all the sines and cosines.&lt;/p&gt;
+
+&lt;p&gt;So now all that&amp;#8217;s left to do is to pick some values for &lt;em&gt;R&lt;/em&gt;&lt;sub&gt;1&lt;/sub&gt;, &lt;em&gt;R&lt;/em&gt;&lt;sub&gt;2&lt;/sub&gt;, &lt;em&gt;K&lt;/em&gt;&lt;sub&gt;1&lt;/sub&gt;, and &lt;em&gt;K&lt;/em&gt;&lt;sub&gt;2&lt;/sub&gt;. In the original donut code I chose &lt;em&gt;R&lt;/em&gt;&lt;sub&gt;1&lt;/sub&gt;=1 and &lt;em&gt;R&lt;/em&gt;&lt;sub&gt;2&lt;/sub&gt;=2, so it has the same geometry as my cross-section diagram above. &lt;em&gt;K&lt;sub&gt;1&lt;/sub&gt;&lt;/em&gt; controls the scale, which depends on our pixel resolution and is in fact different for &lt;em&gt;x&lt;/em&gt; and &lt;em&gt;y&lt;/em&gt; in the ASCII animation. &lt;em&gt;K&lt;/em&gt;&lt;sub&gt;2&lt;/sub&gt;, the distance from the viewer to the donut, was chosen to be 5.&lt;/p&gt;
+
+&lt;p&gt;I&amp;#8217;ve taken the above equations and written a quick and dirty canvas implementation here, just plotting the pixels and the lighting values from the equations above. The result is not exactly the same as the original as some of my rotations are in opposite directions or off by 90 degrees, but it is qualitatively doing the same thing.&lt;/p&gt;
+
+&lt;p&gt;Here it is: &lt;button onclick='anim2();'&gt;toggle animation&lt;/button&gt;&lt;/p&gt;
+&lt;canvas height='240' width='300' id='canvasdonut'&gt;
+&lt;/canvas&gt;
+&lt;p&gt;It&amp;#8217;s slightly mind-bending because you can see right through the torus, but the math does work! Convert that to an ASCII rendering with &lt;em&gt;z&lt;/em&gt;-buffering, and you&amp;#8217;ve got yourself a clever little program.&lt;/p&gt;
+
+&lt;p&gt;Now, we have all the pieces, but how do we write the code? Roughly like this (some pseudocode liberties have been taken with 2D arrays):&lt;/p&gt;
+&lt;pre class='prettyprint'&gt;
+const float theta_spacing = 0.07;
+const float phi_spacing   = 0.02;
+
+const float R1 = 1;
+const float R2 = 2;
+const float K2 = 5;
+// Calculate K1 based on screen size: the maximum x-distance occurs roughly at
+// the edge of the torus, which is at x=R1+R2, z=0.  we want that to be
+// displaced 3/8ths of the width of the screen, which is 3/4th of the way from
+// the center to the side of the screen.
+// screen_width*3/8 = K1*(R1+R2)/(K2+0)
+// screen_width*K2*3/(8*(R1+R2)) = K1
+const float K1 = screen_width*K2*3/(8*(R1+R2));
+
+render_frame(float A, float B) {
+  // precompute sines and cosines of A and B
+  float cosA = cos(A), sinA = sin(A);
+  float cosB = cos(B), sinB = sin(B);
+
+  char output[0..screen_width, 0..screen_height] = ' ';
+  float zbuffer[0..screen_width, 0..screen_height] = 0;
+
+  // theta goes around the cross-sectional circle of a torus
+  for(float theta=0; theta &amp;lt; 2*pi; theta += theta_spacing) {
+    // precompute sines and cosines of theta
+    float costheta = cos(theta), sintheta = sin(theta);
+
+    // phi goes around the center of revolution of a torus
+    for(float phi=0; phi &amp;lt; 2*pi; phi += phi_spacing) {
+      // precompute sines and cosines of phi
+      float cosphi = cos(phi), sinphi = sin(phi);
+    
+      // the x,y coordinate of the circle, before revolving (factored out of the above equations)
+      float circlex = R2 + R1*costheta;
+      float circley = R1*sintheta;
+
+      // final 3D (x,y,z) coordinate after rotations, directly from our math above
+      float x = circlex*(cosB*cosphi + sinA*sinB*sinphi) - circley*cosA*sinB; 
+      float y = circlex*(sinB*cosphi - sinA*cosB*sinphi) + circley*cosA*cosB;
+      float z = K2 + cosA*circlex*sinphi + circley*sinA;
+      float ooz = 1/z;  // &quot;one over z&quot;
+      
+      // x and y projection.  note that y is negated here, because y goes up in
+      // 3D space but down on 2D displays.
+      int xp = (int) (screen_width/2 + K1*ooz*x);
+      int yp = (int) (screen_height/2 - K1*ooz*y);
+      
+      // calculate luminance.  ugly, but correct.
+      float L = cosphi*costheta*sinB - cosA*costheta*sinphi - sinA*sintheta + 
+                cosB*(cosA*sintheta - costheta*sinA*sinphi);
+      // L ranges from -sqrt(2) to +sqrt(2).  If it's &amp;lt; 0, the surface is
+      // pointing away from us, so we won't bother trying to plot it.
+      if(L&gt;0) {
+        // test against the z-buffer.  larger 1/z means the pixel is closer to
+        // the viewer than what's already plotted.
+        if(ooz &gt; zbuffer[xp,yp]) {
+          zbuffer[xp,yp] = ooz;
+          int luminance_index = L*8; // this brings L into the range 0..11 (8*sqrt(2) = 11.3)
+          // now we lookup the character corresponding to the luminance and plot it in our output:
+          output[xp,yp] = &quot;.,-~:;=!*#$@&quot;[luminance_index];
+        }
+      }
+    }
+  }
+
+  // now, dump output[] to the screen.
+  // bring cursor to &quot;home&quot; location, in just about any currently-used terminal
+  // emulation mode
+  printf(&quot;\x1b[H&quot;);
+  for(int j=0;j&amp;lt;screen_height;j++) {
+    for(int i=0;i&amp;lt;screen_width;i++) {
+      putchar(output[i,j]);
+    }
+    putchar('\n');
+  }
+  
+}
+&lt;/pre&gt;
+&lt;p&gt;The Javascript source for both the ASCII and canvas rendering is &lt;a href='/js/donut.js'&gt;right here&lt;/a&gt;.&lt;/p&gt;</content>
+  </entry>
+  
+  
+  
+  <entry>
+    <id>http://a1k0n.net/2011/06/26/obfuscated-c-yahoo-logo</id>
+    <link type="text/html" rel="alternate" href="http://a1k0n.net/2011/06/26/obfuscated-c-yahoo-logo.html"/>
+    <title>Yahoo! Logo ASCII Animation in six lines of C</title>
+    <updated>2011-06-26T00:00:00-05:00</updated>
+    <author>
+      <name>Andy Sloane</name>
+      <uri>http://a1k0n.net/</uri>
+    </author>
+    <content type="html">&lt;p&gt;[&lt;b&gt;Update 6/28/2011:&lt;/b&gt; added Javascript version; press button below to see the
+output without compiling the code.]&lt;/p&gt;
+
+&lt;p&gt;[&lt;b&gt;Update 7/9/2011:&lt;/b&gt; if you're using a compiler other than gcc, you
+might need to put a &lt;tt&gt;#include &amp;lt;math.h&amp;gt;&lt;/tt&gt; at the top for it to work
+correctly -- I seem to be depending on the builtin behavior of &lt;tt&gt;sin&lt;/tt&gt; and
+&lt;tt&gt;cos&lt;/tt&gt; w.r.t. their return types when undeclared.]&lt;/p&gt;
+
+&lt;p&gt;Last week I put together another obfuscated C program and have been urged by
+my coworkers to post it publicly.  I've made some refinements since posting it
+to our internal list, so here is the final version (to those who had seen it
+already: it's one line shorter now, and the angles are less screwy, and the
+animation is 2 seconds instead of 3).  Go ahead, try it:&lt;/p&gt;
+
+&lt;script&gt;
+var F,S,V,tmr,doframe=function(){var k=document.getElementById(&quot;output&quot;),c,d,e,a,f,g,h,j,b,i=[];S+=V+=(1-S)/10-V/4;for(d=0;d&lt;24;d++){for(c=0;c&lt;73;c++){for(a=e=0;a&lt;3;a++){f=S*(c-27);g=S*(d*3+a-36);e^=(136*f*f+84*g*g&lt;92033)&lt;&lt;a;b=0;p=6;for(m=0;m&lt;8;){h=('O:85!fI,wfO8!yZfO8!f*hXK3&amp;fO;:O;#hP;&quot;i'.charCodeAt(b)-79)/14.6423;j=&quot;&lt;[\\]O=IKNAL;KNRbF8EbGEROQ@BSXXtG!#t3!^&quot;.charCodeAt(b++)-79;if(f*Math.cos(h)+g*Math.sin(h)&lt;j/1.165){b=p;p=&quot;&lt;AFJPTX&quot;.charCodeAt(m++)-50}else if(b==p){e^=1&lt;&lt;a;m=8}}}i.push(&quot; ''\&quot;.$u$&quot;[e])}i.push(&quot;\n&quot;)}k.innerHTML=
+i.join(&quot;&quot;);if(!F--){clearInterval(tmr);tmr=undefined}};function animate(){F=40;V=S=0;if(tmr===undefined)tmr=setInterval(doframe,50)};
+&lt;/script&gt;
+
+&lt;pre&gt;
+$ cat &amp;gt;yanim.c
+c,p,i,j,n,F=40,k,m;float a,x,y,S=0,V=0;main(){for(;F--;usleep(50000),F?puts(
+&quot;\x1b[25A&quot;):0)for(S+=V+=(1-S)/10-V/4,j=0;j&amp;lt;72;j+=3,putchar(10))for(i=0;x=S*(
+i-27),i++&amp;lt;73;putchar(c[&quot; ''\&quot;.$u$&quot;]))for(c=0,n=3;n--;)for(y=S*(j+n-36),k=0,c
+^=(136*x*x+84*y*y&amp;lt;92033)&amp;lt;&amp;lt;n,p=6,m=0;m&amp;lt;8;k++[&quot;&amp;lt;[\\]O=IKNAL;KNRbF8EbGEROQ@BSX&quot;
+&quot;XtG!#t3!^&quot;]/1.16-68&amp;gt;x*cos(a)+y*sin(a)?k=p,p=&quot;&amp;lt;AFJPTX&quot;[m++]-50:k==p?c^=1&amp;lt;&amp;lt;n,
+m=8:0)a=(k[&quot;O:85!fI,wfO8!yZfO8!f*hXK3&amp;fO;:O;#hP;\&quot;i[by asloane&quot;]-79)/14.64;}
+^D
+$ gcc -o yanim yanim.c -lm
+[warnings which real programmers ignore]
+$ ./yanim
+[you'll see - &lt;button onclick=&quot;animate();&quot;&gt;show the animation&lt;/button&gt;]
+&lt;/pre&gt;
+&lt;pre id=&quot;output&quot; style=&quot;background:#000; color:#ccc;&quot;&gt;
+&lt;/pre&gt;
+
+&lt;p&gt;It's a 20fps, antialiased ASCII art animation of the Yahoo! logo.  If you
+want to figure out how it works on your own, you're welcome to.  Otherwise,
+read on.&lt;/p&gt;
+
+&lt;p&gt;I encourage you to play with the constants in the code: S+=V+=(1-S)/10-V/5
+is the underdamped control system for the animation -- S is scale (=1/zoom), V
+is velocity, and 1/10 and 1/5 are the &lt;a
+  href=&quot;http://en.wikipedia.org/wiki/PID_controller&quot;&gt;PD constants&lt;/a&gt;.  S=0
+corresponds to infinite zoom on the first frame.  S&amp;lt;0 is funny.  F is the
+frame counter.  The 1.16 controls the scale of the polygon rendering (68 is an
+approximation of 79/1.16 so you have to adjust that too), and 136/84/92033
+define the ellipse.  The 14.64 is not a tunable parameter,
+though (it's 46/&amp;pi;, and for a good reason).&lt;/p&gt;
+
+&lt;p&gt;The antialiasing is simple: each character consists of three
+vertically-arranged samples and an 8-character lookup table for each
+arrangement of three on/off pixels.  Each frame consists of 73x24 characters,
+or 73x72 pixels.  The 73 horizontal choice was somewhat arbitrary; I suppose I
+could have gone up to 79.&lt;/p&gt;
+
+&lt;p&gt;The logo is rendered as an ellipse and eight convex polygons using a fairly
+neat method (I thought) with sub-pixel precision and no frame buffer.  It
+required some design tradeoffs to fit into two printable-character arrays, but
+it's much less code than rendering triangles to a framebuffer, which is the
+typical way polygon rasterization is done.&lt;/p&gt;
+
+&lt;p&gt;To produce this, first I had to vectorize the &quot;Y!&quot; logo.  I did this by
+taking some measurements of a reference image and writing coordinates down on
+graph paper.  Then I wrote a utility program which takes the points and polygon
+definitions and turns them into angles and offsets as defined below.  [I put &lt;a
+  href=&quot;http://pastebin.com/tNqrGszq&quot;&gt;the generator code on pastebin&lt;/a&gt; until
+I get can some code highlighting stuff set up for my blog].&lt;/p&gt;
+
+&lt;p&gt;The ellipse is fairly standard high-school math:
+&lt;i&gt;x&lt;/i&gt;&lt;sup&gt;2&lt;/sup&gt;/&lt;i&gt;a&lt;/i&gt;&lt;sup&gt;2&lt;/sup&gt; +
+&lt;i&gt;y&lt;/i&gt;&lt;sup&gt;2&lt;/sup&gt;/&lt;i&gt;b&lt;/i&gt;&lt;sup&gt;2&lt;/sup&gt; &amp;lt; 1.  Each point is tested and if
+it's inside the ellipse, the pixel is plotted.  (136&lt;i&gt;x&lt;/i&gt;&lt;sup&gt;2&lt;/sup&gt; +
+84&lt;i&gt;y&lt;/i&gt;&lt;sup&gt;2&lt;/sup&gt; &amp;lt; 92033 was a trivial rearrangement of terms with
+&lt;i&gt;a&lt;/i&gt; and &lt;i&gt;b&lt;/i&gt; being the radii of the two axes of the ellipse measured
+from my source image, scaled to the pixel grid).  &lt;/p&gt;
+
+&lt;p&gt;Each polygon is made up of a set of separating half-planes (a half-plane
+being all points on one side of an infinitely long line).  If a given point is
+&quot;inside&quot; all of the half-planes, it's inside the polygon (which only works as
+long as the polygon is convex) and the pixel is toggled with the XOR operator
+&lt;tt&gt;^&lt;/tt&gt; (thus it handles the &quot;inverse&quot; part inside the ellipse as well as
+the uninverted exclamation mark without any special cases).  Each side of a
+polygon is defined by the equation &lt;i&gt;ax&lt;/i&gt; + &lt;i&gt;by&lt;/i&gt; &amp;gt; &lt;i&gt;c&lt;/i&gt;.  To
+represent both &lt;i&gt;a&lt;/i&gt; and &lt;i&gt;b&lt;/i&gt; I use an angle &lt;i&gt;&amp;theta;&lt;/i&gt; so that
+&lt;i&gt;a&lt;/i&gt; = cos(&lt;i&gt;&amp;theta;&lt;/i&gt;) and &lt;i&gt;b&lt;/i&gt; = sin(&lt;i&gt;&amp;theta;&lt;/i&gt;) and quantize
+the angle in &amp;pi;/46 increments &amp;mdash; my angles are thus represented from
+-&amp;pi; to +&amp;pi; as ASCII 33 to 125 &amp;mdash; '!' to '}' &amp;mdash; with 'O' (ASCII
+79) as zero.  Then I solve for &lt;i&gt;c&lt;/i&gt;, also quantized in scaled increments
+from -47 to +47, so that the midpoint of the side is considered inside the
+polygon.&lt;/p&gt;
+
+&lt;p&gt;Here's an extremely crude diagram:  (I'm writing this on a plane and none of
+my drawing programs are working.  Sorry.)&lt;/p&gt; &lt;img src=&quot;/img/polygon_separation.jpg&quot; /&gt; &lt;p&gt;The
+shaded area is &lt;i&gt;ax&lt;/i&gt; + &lt;i&gt;by&lt;/i&gt; &amp;lt; &lt;i&gt;c&lt;/i&gt;, implying it's outside the
+polygon, and the dashed line is &lt;i&gt;ax&lt;/i&gt; + &lt;i&gt;by&lt;/i&gt; = &lt;i&gt;c&lt;/i&gt;.&lt;/p&gt;
+
+&lt;p&gt;(&lt;i&gt;a&lt;/i&gt;,&lt;i&gt;b&lt;/i&gt;) form a vector orthogonal to the line segment they
+represent pointing towards the inside of the polygon, so we can get them
+directly from the points defining the line segment by taking the vector
+defining the side &amp;mdash;
+(&lt;i&gt;x&lt;sub&gt;1&lt;/sub&gt;&lt;/i&gt; - &lt;i&gt;x&lt;sub&gt;0&lt;/sub&gt;&lt;/i&gt;, &lt;i&gt;y&lt;sub&gt;1&lt;/sub&gt;&lt;/i&gt; - &lt;i&gt;y&lt;sub&gt;0&lt;/sub&gt;&lt;/i&gt;)
+&amp;mdash;
+and rotating it 90 degrees,
+&lt;!--(you think of it as multiplying &lt;i&gt;x&lt;/i&gt;+&lt;i&gt;yi&lt;/i&gt; by &lt;i&gt;i&lt;/i&gt; or as multiplying the vector with the matrix [&lt;table cellspacing=2 cellpadding=0 border=0 style=&quot;display: inline; margin: 0px; font-size: x-small; margin-bottom: 0px&quot;&gt;
+  &lt;tr&gt;&lt;td&gt;0&lt;/td&gt;&lt;td&gt;1&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;-1&lt;/td&gt;&lt;td&gt;0&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;])  -this is unclear and looks like crap  --&gt;
+resulting in (&lt;i&gt;a&lt;/i&gt;, &lt;i&gt;b&lt;/i&gt;) = (&lt;i&gt;y&lt;sub&gt;1&lt;/sub&gt;&lt;/i&gt; -
+&lt;i&gt;y&lt;sub&gt;0&lt;/sub&gt;&lt;/i&gt;, &lt;i&gt;x&lt;sub&gt;0&lt;/sub&gt;&lt;/i&gt; - &lt;i&gt;x&lt;sub&gt;1&lt;/sub&gt;&lt;/i&gt;).  Then we
+normalize (&lt;i&gt;a&lt;/i&gt;, &lt;i&gt;b&lt;/i&gt;) as the actual magnitude doesn't matter, but it
+will be 1 when we decode the angle and we can compensate with our choice of
+&lt;i&gt;c&lt;/i&gt; later (if &lt;i&gt;ax&lt;/i&gt;+&lt;i&gt;by&lt;/i&gt;&amp;gt;&lt;i&gt;c&lt;/i&gt;, then
+&lt;i&gt;sax&lt;/i&gt;+&lt;i&gt;sby&lt;/i&gt;&amp;gt;&lt;i&gt;sc&lt;/i&gt; for some scale &lt;i&gt;s&lt;/i&gt;&amp;gt;0).  Then compute
+&lt;i&gt;&amp;theta;&lt;/i&gt; = &lt;tt&gt;&lt;a
+    href=&quot;http://en.wikipedia.org/wiki/Atan2&quot;&gt;atan2&lt;/a&gt;&lt;/tt&gt;(&lt;i&gt;a&lt;/i&gt;,&lt;i&gt;b&lt;/i&gt;),
+quantize to one of our 94 angles, and get our new (&lt;i&gt;a&lt;/i&gt;,&lt;i&gt;b&lt;/i&gt;) =
+(&lt;tt&gt;cos&lt;/tt&gt;(&lt;i&gt;&amp;theta;&lt;/i&gt;), &lt;tt&gt;sin&lt;/tt&gt;(&lt;i&gt;&amp;theta;&lt;/i&gt;)).&lt;/p&gt;
+
+&lt;p&gt;&lt;i&gt;c&lt;/i&gt; is easy to get by directly substituting any of the points making up
+the line on the side of the polygon into &lt;i&gt;c&lt;/i&gt; = &lt;i&gt;ax&lt;/i&gt;+&lt;i&gt;by&lt;/i&gt;.  I use
+the midpoint of the line segment on the side, (&lt;i&gt;x&lt;sub&gt;t&lt;/sub&gt;&lt;/i&gt;,
+&lt;i&gt;y&lt;sub&gt;t&lt;/sub&gt;&lt;/i&gt;) = ((&lt;i&gt;x&lt;sub&gt;0&lt;/sub&gt;&lt;/i&gt; + &lt;i&gt;x&lt;sub&gt;1&lt;/sub&gt;&lt;/i&gt;)/2,
+(&lt;i&gt;y&lt;sub&gt;0&lt;/sub&gt;&lt;/i&gt; + &lt;i&gt;y&lt;sub&gt;1&lt;/sub&gt;&lt;/i&gt;)/2), because the angle of the side
+can be slightly off after we quantize &amp;theta;, and this evens the errors out
+across the length of the side.&lt;/p&gt;
+
+&lt;p&gt;You'll notice on the first couple frames (you can pause with ^S, resume with
+^Q -- xon/xoff) that the bottom section of the 'Y' has little bites taken out
+of it due to the quantization error in the separating half-plane equations.
+&lt;/p&gt;
+
+&lt;p&gt;It could probably be made somewhat more efficient CPU-wise by careful
+reordering of the separating plane arrays so that most of the drawing area is
+rejected first.  I didn't get to that in my generator code.&lt;/p&gt;
+
+&lt;p&gt;The animation is done by the &amp;lt;ESC&amp;gt;[25A sequence &amp;mdash; it moves the
+cursor up 25 lines in just about any terminal emulation mode.  I technically
+only need to move up 24 lines, but &lt;tt&gt;puts&lt;/tt&gt; is shorter than
+&lt;tt&gt;printf&lt;/tt&gt; and it implicitly adds a newline.  If your terminal isn't at
+least 26 lines high, though, it does funky things to your scrollback.  And
+&lt;tt&gt;usleep&lt;/tt&gt; is there to limit it to 20fps, which is the only non-ANSI Cism
+about it.&lt;/p&gt;
+
+&lt;p&gt;And then I shrunk the code down by arranging it into clever &lt;tt&gt;for&lt;/tt&gt;
+loops and taking unorthodox advantage of commas, conditionals, and globals
+being &lt;tt&gt;int&lt;/tt&gt;s by default in C (which is all par for the course in
+obfuscated C code).  And that pretty much reveals all the secrets as to how it
+was done.&lt;/p&gt;
+
+&lt;p&gt;It would be fairly easy to enhance this with a different movement sequence,
+or rotation (or any kind of 3D transform, as it's basically just ray-tracing
+the logo).  I just animated the scale to prove the point that it was being
+rendered dynamically and not just a compressed logo, and kept the animation
+short and sweet.&lt;/p&gt;
+
+&lt;p&gt;I apologize in advance for the various sign errors I'm sure to have made
+when typing this up, but you get the idea.&lt;/p&gt;
+</content>
+  </entry>
+  
+  
+  
+  <entry>
+    <id>http://a1k0n.net/2010/03/04/google-ai-postmortem</id>
+    <link type="text/html" rel="alternate" href="http://a1k0n.net/2010/03/04/google-ai-postmortem.html"/>
+    <title>Google AI Challenge post-mortem</title>
+    <updated>2010-03-04T00:00:00-06:00</updated>
+    <author>
+      <name>Andy Sloane</name>
+      <uri>http://a1k0n.net/</uri>
+    </author>
+    <content type="html">&lt;p&gt;[&lt;b&gt;Update 8/2/2011&lt;/b&gt;: you can play against a dumbed-down Javascript version of the bot &lt;a href=&quot;/code/tron.html&quot;&gt;here&lt;/a&gt;.]&lt;/p&gt;
+&lt;p /&gt;I can't believe &lt;a
+  href=&quot;http://csclub.uwaterloo.ca/contest/rankings.php&quot;&gt;I won&lt;/a&gt;.
+
+&lt;p /&gt;I can't believe I won &lt;i&gt;decisively&lt;/i&gt; at all.
+
+&lt;p /&gt;I've never won any programming contest before (although I did place in 3rd
+in the &lt;a href=&quot;http://julian.togelius.com/mariocompetition2009/&quot;&gt;Mario AI
+  contest&lt;/a&gt; but there were only about 10 entrants).  Whenever I badly lose at
+an &lt;a href=&quot;http://icfpcontest.org/&quot;&gt;ICFP contest&lt;/a&gt; I'm always anxious to see
+the post mortems of the people who did better than I did, and I imagine a lot
+of people are curious as to how I won, exactly.  So here's my post-mortem.
+
+&lt;h3&gt;Code&lt;/h3&gt;
+
+&lt;p /&gt;Before we get into it, note that all of my code is &lt;a
+  href=&quot;http://github.com/a1k0n/tronbot/&quot;&gt;on github here&lt;/a&gt;.  The commit logs
+might be a mildly entertaining read.
+
+&lt;h3&gt;Phase 1: denial&lt;/h3&gt;
+
+&lt;p /&gt;The first thing I did was attempt to ignore this contest as long as
+possible, because month-long programming contests get me into a lot of trouble
+at work and at home.  The contest was the Tron light cycle game.  I've played
+variants of this game ever since I got one of &lt;a
+  href=&quot;http://www.handheldmuseum.com/Tomy/Tron.htm&quot;&gt;these&lt;/a&gt; when I was in
+1st grade or so.  The most fun variant was my uncle's copy of &lt;a
+  href=&quot;http://www.youtube.com/watch?v=BK_a8xV3O6w&quot;&gt;Snafu for the
+  Intellivision&lt;/a&gt; which we played at my Grandma's house all day long.  I've
+long wondered how to write a bot for it, because the AI on these usually isn't
+very smart.
+
+&lt;h3&gt;Phase 2: space-filling&lt;/h3&gt;
+
+&lt;p /&gt;But I finally gave in on the 9th, downloaded a starter pack, and attempted
+to make a simple semi-decent wall-hugging bot.  I quickly discovered a simple
+useful heuristic: the best rule for efficiently filling space is to always
+choose the move that removes the least number of edges from the graph.  In
+other words, go towards the space with the most walls for neighbors.  But!
+Avoid &lt;a href=&quot;http://en.wikipedia.org/wiki/Cut_vertex&quot;&gt;cut
+  vertices&lt;/a&gt; (AKA articulation points), and if you have to enter a cut vertex,
+then always choose the largest space left over.  At this stage I wasn't
+actually calculating articulation points; I just checked the 3x3 neighborhood
+of the square and made a lookup table of neighbor configurations that
+&lt;i&gt;might&lt;/i&gt; be articulation points based on the 3x3 neighborhood.  This is
+what the &lt;tt&gt;&lt;a
+    href=&quot;http://github.com/a1k0n/tronbot/blob/a1k0nbot-2.18.2/cpp/MyTronBot.cc#L238&quot;&gt;potential_articulation&lt;/a&gt;&lt;/tt&gt;
+function does in my code, and &lt;tt&gt;&lt;a
+    href=&quot;http://github.com/a1k0n/tronbot/blob/a1k0nbot-2.18.2/cpp/artictbl.h#L1&quot;&gt;artictbl.h&lt;/a&gt;&lt;/tt&gt;
+is the lookup table.
+
+&lt;p /&gt;I was, however, computing the &lt;a
+href=&quot;http://en.wikipedia.org/wiki/Connected_component_(graph_theory)&quot;&gt;connected
+components&lt;/a&gt; of the map.  This is a simple two-pass O(&lt;i&gt;NM&lt;/i&gt;)
+algorithm for &lt;i&gt;N&lt;/i&gt; squares in the map and &lt;i&gt;M&lt;/i&gt; different
+components.  For each non-wall square in the map, traversed in raster
+order, merge it with the component above it (if there is no wall
+above) and do the same to its left (if there is no wall to the left).
+If it connects two components, renumber based on the lowest index,
+maintaining an equivalence lookup table on the side (equivalence
+lookups are O(&lt;i&gt;M&lt;/i&gt;) but really just linear scans of a tiny
+vector).  Then scan again and fixup the equivalences.  This is what
+the &lt;tt&gt;&lt;a
+href=&quot;http://github.com/a1k0n/tronbot/blob/a1k0nbot-2.18.2/cpp/MyTronBot.cc#L243&quot;&gt;Components&lt;/a&gt;&lt;/tt&gt;
+structure is for; it has this algorithm and simple sometimes-O(1),
+sometimes-O(&lt;i&gt;NM&lt;/i&gt;) update functions based on
+&lt;tt&gt;potential_articulation&lt;/tt&gt; above.
+
+&lt;h3&gt;Phase 3: minimax&lt;/h3&gt;
+
+&lt;p /&gt;I left it at that for the rest of the week and then Friday the 12th I was
+inspired by various posts on the official contest forum to implement &lt;a
+  href=&quot;http://en.wikipedia.org/wiki/Minimax&quot;&gt;minimax&lt;/a&gt; with &lt;a
+  href=&quot;http://en.wikipedia.org/wiki/Alpha-beta_pruning&quot;&gt;alpha-beta
+  pruning&lt;/a&gt;, which would let it look several moves ahead before deciding what
+to do.  The problem with this approach is that you have to have some way of
+estimating who is going to win and by how much, given any possible
+configuration of walls and players.  If the players are separated by a wall,
+then the one with the most open squares, for the most part, wins.  If they
+aren't separated, then we need to somehow guess who will be able to wall in
+whom into a smaller space.  To do that, I did what everyone else in the contest
+who had read the forums was doing at this point: I used the so-called Voronoi
+heuristic.
+
+&lt;p /&gt;The &quot;Voronoi heuristic&quot; works like this: for each spot on the map, find
+whether player 1 can reach it before player 2 does or vice versa.  This creates
+a &lt;a
+  href=&quot;http://en.wikipedia.org/wiki/Voronoi_diagram&quot;&gt;Voronoi diagram&lt;/a&gt; with
+just two points which sort of winds around all the obstacles.  The best way to
+explain it is to show what it looks like during a game:
+
+&lt;center&gt;&lt;img src=&quot;/img/voronoi.gif&quot; /&gt;&lt;/center&gt;
+
+&lt;p /&gt;The light red area are all squares the red player can reach before the blue
+player can.  Similarly for the light blue squares.  If they're white, they're
+equidistant.  The heuristic value I used initially, and many other contestants
+used, was to add up the number of squares on each side and subtract.
+
+&lt;p /&gt;Once the red player cuts the blue one off, they are no longer in the same
+connected component and then gameplay evaluation switches to &quot;endgame&quot; or
+&quot;survival&quot; mode, where you just try to outlast your opponent.  After this
+point, the minimax value was 1000*(size of player 1's connected component -
+size of player 2's connected component).  The factor of 1000 was just to reward
+certainty in an endgame vs. heuristic positional value.  Note that this was
+only used to &lt;i&gt;predict&lt;/i&gt; an endgame situation.  After the bot actually
+reached the endgame, it simply used the greedy wall-following heuristic
+described above, and it performed admirably for doing no searching at all.
+
+&lt;h3&gt;evaluation heuristic tweaking&lt;/h3&gt;
+
+&lt;p /&gt;I next noticed that my bot would make some fairly random moves in the early
+game, effectively cluttering its own space.  So I took a cue from my flood
+filling heuristic and added a territory bonus for the number of open neighbors
+each square in the territory had (effectively counting each &quot;edge&quot; twice).
+This led to automatic wall-hugging behavior when all else was equal.
+
+&lt;p /&gt;After fixing a lot of bugs, and finally realizing that when time runs out on
+a minimax search, you have to throw away the ply you're in the middle of
+searching and use the best move from the previous ply, I had an extremely
+average bot.  Due to the arbitrariness of the ranking up until the last week in
+the contest, it briefly hit the #1 spot and then settled to a random spot on
+the first page.  It was pretty hard to tell whether it was any good, but I was
+losing some games, so I figured it must not be.
+
+&lt;h3&gt;endgame tweaking&lt;/h3&gt;
+
+&lt;p /&gt;The next realization was that my bot was doing a lot of stupid things in the
+endgame.  So the next improvement was to do an iteratively-deepened search in
+the endgame.  I exhaustively tried all possible moves, and at the bottom of the
+search tree, ran my greedy heuristic to completion.  Whichever move sequence
+&quot;primed&quot; the greedy evaluator the best wins.  This works great on the smallish
+official contest maps.  It works terribly on very large random maps currently
+in rotation on &lt;a href=&quot;http://www.benzedrine.cx/tron/&quot;&gt;dhartmei's server&lt;/a&gt;,
+but I didn't realize that until after the contest.
+
+&lt;h3&gt;data mining&lt;/h3&gt;
+
+&lt;p /&gt;I was out of ideas for a while and spent some time optimizing (I used
+Dijkstra's to do the Voronoi computation and I sped it up by using what I call
+a radix priority queue which is just a vector of stacks... see &lt;a
+  href=&quot;http://github.com/a1k0n/tronbot/blob/a1k0nbot-2.18.2/cpp/MyTronBot.cc#L382&quot;&gt;&lt;tt&gt;dijkstra&lt;/tt&gt;&lt;/a&gt;).
+But it had been bothering me that my edge count/node count Voronoi heuristic
+was pretty arbitrary, and wondered if I could do any kind of inference to
+discover better ones.
+
+&lt;p /&gt;Well, hundreds of thousands of games had been played on the contest server
+by this point, and they are extremely easy to download (the contest site's game
+viewer does an AJAX request to get some simple-to-parse data for the game), so
+I figured I'd try to do some data mining.  I wrote a &lt;a
+  href=&quot;http://github.com/a1k0n/tronbot/blob/a1k0nbot-2.18.2/util/getgame.pl&quot;&gt;quick
+  perl hack&lt;/a&gt; to grab games from the site and output them in a format that
+Tron bots recognize.  Then I copied-and-pasted my code wholesale into
+&lt;tt&gt;examine.cc&lt;/tt&gt; and marked it up so it would read in a game back-to-front,
+find the point at which the players enter separate components, guess what the
+optimal number of moves they could have made from that point forward, and then
+use the existing territory evaluation code on every turn before that and dump
+out some statistics.  The goal was to discover a model that would predict,
+given these territory statistics, what the difference in squares will
+eventually be in the endgame.
+
+&lt;p /&gt;I started with an extremely simple linear model (and never really changed it
+afterwards): the predicted difference in endgame moves is &lt;i&gt;K&lt;sub&gt;1&lt;/sub&gt;&lt;/i&gt;
+(&lt;i&gt;N&lt;sub&gt;1&lt;/sub&gt;&lt;/i&gt; - &lt;i&gt;N&lt;sub&gt;2&lt;/sub&gt;&lt;/i&gt;) + &lt;i&gt;K&lt;sub&gt;2&lt;/sub&gt;&lt;/i&gt;
+(&lt;i&gt;E&lt;sub&gt;1&lt;/sub&gt;&lt;/i&gt; - &lt;i&gt;E&lt;sub&gt;2&lt;/sub&gt;&lt;/i&gt;) where &lt;i&gt;N&lt;sub&gt;i&lt;/sub&gt;&lt;/i&gt; is the
+number of nodes in player &lt;i&gt;i&lt;/i&gt;'s territory and &lt;i&gt;E&lt;sub&gt;i&lt;/sub&gt;&lt;/i&gt; is the
+number of edges (double-counted actually).
+
+&lt;p /&gt;Now, this model is pretty far from absolutely great, and only a little
+predictive.  This is what the raw data looks like after analyzing 11691 of the
+games the top-100 players (at the time) had played:
+
+&lt;p /&gt;&lt;img src=&quot;/img/nodes.png&quot;&gt;&lt;br&gt;
+&lt;img src=&quot;/img/edges.png&quot;&gt;
+
+&lt;p /&gt;That's the difference of nodes/edges on the &lt;i&gt;x&lt;/i&gt;-axis and the difference
+of endgame moves on the &lt;i&gt;y&lt;/i&gt;-axis.  So both nodes and edges by the Voronoi
+metric are, of course, correlated.  I did a linear regression to find
+approximate values for &lt;i&gt;K&lt;sub&gt;1&lt;/sub&gt;&lt;/i&gt; (currently 0.055) and
+&lt;i&gt;K&lt;sub&gt;2&lt;/sub&gt;&lt;/i&gt; (0.194) and multiplied through by 1000 to keep everything
+integers.
+
+&lt;p /&gt;This definitely improved play in my own testing (I kept 14 different
+versions of my bot throughout the contest so I could compare them.
+Interestingly, no bot ever totally shut out a previous bot on all maps in my
+tests; every bot has a weakness).  Once I had that, I was doing very well in
+the leaderboard rankings.
+
+&lt;h3&gt;applied graph theory&lt;/h3&gt;
+
+&lt;p /&gt;Next I noticed &lt;a
+  href=&quot;http://csclub.uwaterloo.ca/contest/forums/viewtopic.php?f=8&amp;t=319&amp;start=10#p1568&quot;&gt;dmj's
+  &quot;mostly useless&quot; idea&lt;/a&gt; on the official contest forums: Pretend the game is
+played on a checkerboard.  Each player can only move from red to black and vice
+versa.  Therefore, if a given space has a lot more &quot;red&quot; squares than &quot;black&quot;
+squares, the surplus &quot;red&quot; squares will necessarily be wasted.  I switched out
+all my space counting code to count up red and black spaces, and found a
+tighter upper bound on the amount of space an ideal bot could fill.  This let
+my endgame code stop searching when it had found a solution matching the upper
+bound, and gave slightly more realistic territory evaluations.
+
+&lt;p /&gt;I had already started to think about what came to be called &quot;chamber trees&quot;,
+as &lt;a
+  href=&quot;http://csclub.uwaterloo.ca/contest/forums/viewtopic.php?f=8&amp;t=319#p1484&quot;&gt;pointed
+  out by iouri in the same thread&lt;/a&gt;: find all the articulation points on the
+map and construct a graph of connected spaces.  I implemented the standard
+O(&lt;i&gt;N&lt;/i&gt;) algorithm for finding articulation points (&lt;a
+  href=&quot;http://github.com/a1k0n/tronbot/blob/a1k0nbot-2.18.2/cpp/MyTronBot.cc#L513&quot;&gt;&lt;tt&gt;calc_articulations&lt;/tt&gt;&lt;/a&gt;,
+taken from &lt;a
+  href=&quot;http://www.eecs.wsu.edu/~holder/courses/CptS223/spr08/slides/graphapps.pdf&quot;&gt;this
+  presentation [pdf]&lt;/a&gt;).  I messed around with this idea but nothing came to
+fruition until just before the deadline.
+
+&lt;p /&gt;At around this point, I got extremely sick and spent all day Wednesday in
+bed.  That day, &lt;a
+  href=&quot;http://www.benzedrine.cx/tron/&quot;&gt;dhartmei's server&lt;/a&gt; showed up, which
+was a huge blessing.  I ran my bot on there in the background all Thursday
+long, and it did very well on there too, which was a very reassuring thing.
+But it was still losing a lot of games.
+
+&lt;p /&gt;So finally, after failing to get to sleep Thursday night thanks to coughing
+and being unable to breathe through my nose, I was struck by an idea at around
+3am.  This, it turns out, was probably the contest-winning idea, though I'm not
+so sure that nobody else implemented it.  Anyway, take a look at this game (&lt;a
+  href=&quot;http://csclub.uwaterloo.ca/contest/visualizer.php?game_id=3878644&quot;&gt;a1k0n_
+  v. ecv257&lt;/a&gt;):
+
+&lt;center&gt;&lt;img src=&quot;/img/example1.png&quot; /&gt;&lt;/center&gt;
+
+&lt;p /&gt;(The little circles are the articulation points found by the algorithm
+above.) By the so-called Voronoi heuristic, blue has a lot more space than red
+does.  But red is ultimately going to win this game, because the only space
+that blue controls that matters here is the space that borders red.  Blue can
+choose to cut off that space and fill in the two chambers on the right, or it
+can choose to move into the left chamber and take its claim on what I call the
+&quot;battlefront&quot;: the border between blue space and red space.
+
+&lt;p /&gt;I had long ago come to the realization that a better evaluation
+heuristic will always beat deeper minimax searches, because a deep
+minimax search using a flawed evaluation heuristic is self-deluded
+about what its opponent is actually going to do, and will occasionally
+favor moves that lose to moves that win, simply because it can't tell
+the difference.  Anything you can do to make your evaluation function
+smarter will result in improved play in the long run.
+
+&lt;p /&gt;In this case, I decided to make my evaluation function aware of the above
+condition: if the player is not in the chamber containing the &quot;battlefront&quot;,
+then make the choice I outlined above.  More formally, the new heuristic value
+is the same as the old one, but &lt;i&gt;N&lt;sub&gt;i&lt;/sub&gt;&lt;/i&gt; and &lt;i&gt;E&lt;sub&gt;i&lt;/sub&gt;&lt;/i&gt;
+are counted differently.  First, find all cut vertices &lt;i&gt;assuming the
+  opponent's territory by the Voronoi metric is disconnected&lt;/i&gt;.  Start a
+depth-first search in the player's &quot;chamber&quot;, count &lt;i&gt;N&lt;sub&gt;i&lt;/sub&gt;&lt;/i&gt; and
+&lt;i&gt;E&lt;sub&gt;i&lt;/sub&gt;&lt;/i&gt; within the chamber, and list all the neighboring cut
+vertices but do not traverse them (&lt;a
+  href=&quot;http://github.com/a1k0n/tronbot/blob/a1k0nbot-2.18.2/cpp/MyTronBot.cc#L547&quot;&gt;&lt;tt&gt;_explore_space&lt;/tt&gt;&lt;/a&gt;).
+Now, explore space recursively for each adjacent cut vertex.  If child
+&lt;i&gt;j&lt;/i&gt;'s space is &lt;i&gt;not&lt;/i&gt; a battlefront, then our potential value is the
+sum of the current chamber size and child &lt;i&gt;j&lt;/i&gt;'s value.  Otherwise, it
+&lt;i&gt;is&lt;/i&gt; a battlefront, and we ignore the current chamber's size but add only
+the number of steps it takes to enter the child chamber (I don't have a good
+formal reason for this, it just seemed intuitively right).  After computing
+this potential value for each child, we return the maximum of them as the
+current chamber's value.
+
+&lt;p /&gt;Therefore the new code will handle the mutual exclusion of battlefront
+chambers and other chambers, and force it to choose to either ignore the upper
+left chamber or ignore the two chambers on the right.
+
+&lt;p /&gt;The idea was extremely roughly-formed when I implemented it (see &lt;a
+  href=&quot;http://github.com/a1k0n/tronbot/blob/a1k0nbot-2.18.2/cpp/MyTronBot.cc#L586&quot;&gt;&lt;tt&gt;max_articulated_space&lt;/tt&gt;&lt;/a&gt;),
+but it did improve play markedly after throwing it together (again, it didn't
+shut out the previous version of my bot totally but it won 12-1 IIRC).
+
+&lt;p /&gt;I also had the idea of negatively counting the space we ignore on a
+battlefront, as we are effectively handing that space to our opponent.  Never
+got a chance to try it, though.  Might be a nice improvement.
+
+&lt;p /&gt;So that was it.  I submitted that Friday around noon, and was subsequently
+afraid to touch it.  (My wife and son and I left for Wisconsin Dells right
+afterwards, where I couldn't help but check rankings on my cellphone and keep
+up on the forums the whole time, which didn't go over well)  The bot is still
+running on &lt;a href=&quot;http://www.benzedrine.cx/tron/&quot;&gt;dhartmei's server&lt;/a&gt;, and
+still loses many games as a result of miscounting the opponent's space in the
+endgame, since my endgame evaluation wasn't very good.  But it was good enough
+for the contest.
+</content>
+  </entry>
+  
+  
+  
+  <entry>
+    <id>http://a1k0n.net/2009/12/08/cheap-blackberry-charger</id>
+    <link type="text/html" rel="alternate" href="http://a1k0n.net/2009/12/08/cheap-blackberry-charger.html"/>
+    <title>Super high-tech BlackBerry charger</title>
+    <updated>2009-12-08T00:00:00-06:00</updated>
+    <author>
+      <name>Andy Sloane</name>
+      <uri>http://a1k0n.net/</uri>
+    </author>
+    <content type="html">&lt;p&gt;I got a BlackBerry 8350i from ebay to use with a &lt;a href='http://boostmobile.com'&gt;Boost Mobile&lt;/a&gt; prepaid plan. Boost (as prepaid plans are in general) is much, much cheaper than the alternatives when you don&amp;#8217;t talk on the phone a lot. And (slow) unlimited wireless internet is only 35 cents a day which works out to a little over $10/month.&lt;/p&gt;
+
+&lt;p&gt;But anyway, my used BlackBerry turned out to have a broken USB port. It was mounted entirely with cold solder joints and fell right off like it wasn&amp;#8217;t even soldered on when I first tried to charge it up.&lt;/p&gt;
+
+&lt;p&gt;Most people would avail themselves of the return policy, but I&amp;#8217;m not most people.&lt;/p&gt;
+
+&lt;p&gt;I needed to get updated firmware to get SMS and GPS to work, so I &lt;a href='http://www.flickr.com/photos/asloane/4164714965/'&gt;soldered some
+wires on&lt;/a&gt;, clipped them to a USB cable, and that worked flawlessly, to my surprise.&lt;/p&gt;
+
+&lt;p&gt;That let me charge it up, too. So then I had a phone with a full charge, upgraded firmware, working everything, except it does me no good just sitting on my desk tethered to a bunch of flimsy wires. I clipped off all the wires and ordered a replacement USB port as well as a cradle charger, and all was well until the battery died. Which it pretty much did the next day.&lt;/p&gt;
+
+&lt;p&gt;So last night I came up with this:&lt;/p&gt;
+&lt;img src='/img/hackberry1.jpg' /&gt;&lt;img src='/img/hackberry2.jpg' /&gt;&lt;img src='/img/hackberry3.jpg' /&gt;
+&lt;p&gt;Two nails driven through a block of wood connected to USB +5V and ground. Works like a charm.&lt;/p&gt;</content>
+  </entry>
+  
+  
+  
+  <entry>
+    <id>http://a1k0n.net/2009/11/17/hacker-challenge-2-solution</id>
+    <link type="text/html" rel="alternate" href="http://a1k0n.net/2009/11/17/hacker-challenge-2-solution.html"/>
+    <title>Hacker challenge part 2 solution</title>
+    <updated>2009-11-17T00:00:00-06:00</updated>
+    <author>
+      <name>Andy Sloane</name>
+      <uri>http://a1k0n.net/</uri>
+    </author>
+    <content type="html">&lt;p&gt;Because I am lazy and easily sidetracked, the promised update to
+the &quot;Hacker challenge&quot; (&lt;a
+href=&quot;http://a1k0n.net/blah/archives/2009/03/index.html#e2009-03-31T18_50_59.txt&quot;&gt;part
+1&lt;/a&gt;, &lt;a
+href=&quot;http://a1k0n.net/blah/archives/2009/04/index.html#e2009-04-03T21_36_15.txt&quot;&gt;part
+2&lt;/a&gt;) is now over seven months late.  So I might as well post the
+solution to part 2, which was solved by three individuals on
+&lt;a
+href=&quot;http://www.reddit.com/r/programming/comments/89vma/hacker_challenge_part_2_solution_to_part_1_and_a/&quot;&gt;
+reddit (bobdole, c0dep0et, and xahtep)&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;Part 2 used &lt;a href=&quot;http://en.wikipedia.org/wiki/Digital_Signature_Algorithm&quot;&gt;DSA&lt;/a&gt;,
+which was fairly obvious; as before I made no effort to hide it.  Instead of
+decrypting to a particular value, it verifies a message signature hash of
+12345678 with various &quot;random per-message values&quot; or &lt;a
+  href=&quot;http://en.wikipedia.org/wiki/Cryptographic_nonce&quot;&gt;nonces&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;The parameters for the algorithm were encoded in 32-bit chunks.  The nice
+thing about DSA is that you can use huge &lt;i&gt;p&lt;/i&gt; and &lt;i&gt;y&lt;/i&gt; values (see
+Wikipedia for the terminology) without making the license key any bigger;
+unfortunately that doesn't buy you a lot, because the underlying group order is
+only &lt;i&gt;q&lt;/i&gt;, so that's how big the search space theoretically is -- it
+doesn't increase security, it just makes it marginally slower to factor.&lt;/p&gt;
+
+&lt;p&gt;So I chose &lt;i&gt;p&lt;/i&gt;, &lt;i&gt;y&lt;/i&gt;, and &lt;i&gt;g&lt;/i&gt; to be on the order of 384 bits,
+but &lt;i&gt;q&lt;/i&gt; and &lt;i&gt;x&lt;/i&gt; are only on the order of 64 bits.  In fact &lt;i&gt;p&lt;/i&gt;
+is just a 64-bit number shifted left 320 bits and then incremented.&lt;/p&gt;
+
+&lt;p&gt;The security of DSA derives from the difficulty of determining &lt;i&gt;x&lt;/i&gt; from
+&lt;i&gt;y = g&lt;sup&gt;x&lt;/sup&gt;&lt;/i&gt; mod &lt;i&gt;p&lt;/i&gt;, which is known as the &lt;a
+href=&quot;http://en.wikipedia.org/wiki/Discrete_logarithm&quot;&gt;discrete logarithm
+problem&lt;/a&gt;, which is harder than factoring primes.&lt;/p&gt;
+
+&lt;p&gt;So after you reconstruct the parameters from the hexadecimal encoding you find:&lt;/p&gt;
+
+&lt;i&gt;p&lt;/i&gt; = 12026070341127085754893097835098576041235013569186796331&lt;br /&gt;
+441953314639277634647572425804266039236571162321832835547137&lt;br /&gt;
+&lt;i&gt;g&lt;/i&gt; = 54659936461116297034410364232325768273521088000551606899&lt;br /&gt;
+39983550682370032756410525809260221877924847568552733696072&lt;br /&gt;
+&lt;i&gt;y&lt;/i&gt; = 27434965696578515868290246727046666462183462061939529180&lt;br /&gt;
+41150093730722092239431092724025892380242699544101134561292&lt;br /&gt;
+
+&lt;p&gt;You can plug these numbers into a &lt;a
+  href=&quot;http://www.alpertron.com.ar/DILOG.HTM&quot;&gt;discrete log solver&lt;/a&gt; and find
+&lt;i&gt;x&lt;/i&gt; (it will also deduce &lt;i&gt;q&lt;/i&gt; as the subgroup size after a few
+seconds).  This takes about three hours on my MacBook Pro, IIRC.&lt;/p&gt;
+
+&lt;p&gt;Once you have &lt;i&gt;x&lt;/i&gt; the challenge collapses into reimplementing
+DSA (with a small twist: &lt;i&gt;s&lt;/i&gt; is inverted in the generator, not in
+the validator; I can't see any reason this would affect security and
+it makes the validator simpler):&lt;/p&gt;
+
+&lt;li /&gt;let &lt;i&gt;H&lt;/i&gt; = 12345678 (the supposed message hash)
+&lt;li /&gt;choose a nonce &lt;i&gt;k&lt;/i&gt;
+&lt;li /&gt;compute &lt;i&gt;r&lt;/i&gt; = (&lt;i&gt;g&lt;sup&gt;k&lt;/sup&gt;&lt;/i&gt; mod &lt;i&gt;p&lt;/i&gt;) mod &lt;i&gt;q&lt;/i&gt;
+&lt;li /&gt;compute &lt;i&gt;k&lt;/i&gt;&lt;sup&gt;-1&lt;/sup&gt; (mod &lt;i&gt;q&lt;/i&gt;) using the modular multiplicative inverse (&lt;tt&gt;mpz_invert&lt;/tt&gt; with &lt;a href=&quot;http://gmplib.org/&quot;&gt;GMP&lt;/a&gt;)
+&lt;li /&gt;compute &lt;i&gt;s&lt;/i&gt; = (&lt;i&gt;k&lt;/i&gt;&lt;sup&gt;-1&lt;/sup&gt;(&lt;i&gt;H&lt;/i&gt; + &lt;i&gt;x r&lt;/i&gt;)) mod &lt;i&gt;q&lt;/i&gt;
+&lt;li /&gt;let &lt;i&gt;w&lt;/i&gt; = &lt;i&gt;s&lt;/i&gt;&lt;sup&gt;-1&lt;/sup&gt; (mod &lt;i&gt;q&lt;/i&gt;)
+&lt;li /&gt;combine (&lt;i&gt;r,w&lt;/i&gt;) into &lt;i&gt;K&lt;/i&gt; = &lt;i&gt;r q&lt;/i&gt; + &lt;i&gt;w&lt;/i&gt;
+&lt;li /&gt;convert &lt;i&gt;K&lt;/i&gt; into a base32-ish key string
+
+&lt;p&gt;I think this scheme is actually pretty good, as it's non-trivial to solve,
+but it's still crackable with the newest discrete log solver methods.  It did
+confound some dedicated redditors for a couple days, at least, with all the
+details laid bare.&lt;/p&gt;
+
+&lt;p&gt;The obvious next step is to move on to elliptic curve cryptography, and that
+is the reason this post is so late.  When I started writing the first hacker
+challenge I was completely ignorant of ECC.  Immediately after writing the
+previous post, I bought a book on the subject, and while I understand the
+basics now I still don't understand it well enough to write a toy
+implementation suitable for a &quot;Hacker Challenge&quot;.  So I will leave
+that for another day, or perhaps for another person.&lt;/p&gt;
+
+&lt;p&gt;Source code for the DSA private key generator and license generator:&lt;/p&gt;
+&lt;li /&gt;&lt;a href=&quot;http://a1k0n.net/code/keydecode2.cpp.txt&quot;&gt;keydecode2.cpp&lt;/a&gt; - the challenge code from the last post (for reference)&lt;br /&gt;
+&lt;li /&gt;&lt;a href=&quot;http://a1k0n.net/code/bn.h.txt&quot;&gt;bn.h&lt;/a&gt; - quick and dirty bignum template&lt;br /&gt;
+&lt;li /&gt;&lt;a href=&quot;http://a1k0n.net/code/dl_genpriv.c.txt&quot;&gt;dl_genpriv.c&lt;/a&gt; - discrete log private/public key pair generator&lt;br /&gt;
+&lt;li /&gt;&lt;a href=&quot;http://a1k0n.net/code/dsa_genlic.c.txt&quot;&gt;dsa_genlic.c&lt;/a&gt; - license generator (key parameters hardcoded)&lt;br /&gt;
+
+</content>
+  </entry>
+  
+  
+  
+  <entry>
+    <id>http://a1k0n.net/2009/04/03/hacker-challenge-2</id>
+    <link type="text/html" rel="alternate" href="http://a1k0n.net/2009/04/03/hacker-challenge-2.html"/>
+    <title>Hacker challenge part 2</title>
+    <updated>2009-04-03T00:00:00-05:00</updated>
+    <author>
+      <name>Andy Sloane</name>
+      <uri>http://a1k0n.net/</uri>
+    </author>
+    <content type="html">&lt;p&gt;Well, I guess I'm not quitting my day job to become a cryptographer
+any time soon.&lt;/p&gt;
+
+&lt;p&gt;As was instantly ascertained on reddit, the key algorithm in my &quot;&lt;a
+href=&quot;http://a1k0n.net/blah/archives/2009/03/31/index.html#e2009-03-31T18_50_59.txt&quot;&gt;Hacker
+Challenge&lt;/a&gt;&quot; is &lt;a href=&quot;http://en.wikipedia.org/wiki/RSA&quot;&gt;RSA&lt;/a&gt;.
+I was hoping that it would take at least an hour to crack the private
+key, but alas, I had severely underestimated the time that modern
+elliptic-curve and number field sieve integer factorizers would take.
+It factored in under a second, which means the key would have to be
+many orders of magnitude larger to offer any kind of security.&lt;/p&gt;
+
+&lt;p&gt;So within an hour a factorization of &lt;i&gt;n&lt;/i&gt; was &lt;a
+href=&quot;http://www.reddit.com/r/programming/comments/890yf/hacker_challenge_can_you_make_a_key_generator/c08l4rh&quot;&gt;posted
+to reddit by c0dep0et&lt;/a&gt;.  Even so, &lt;a
+href=&quot;http://www.reddit.com/r/programming/comments/890yf/hacker_challenge_can_you_make_a_key_generator/c08l4mg&quot;&gt;LoneStar309
+pointed out an embarassing implementation mistake&lt;/a&gt; which
+significantly weakened it (given a valid key, you could generate
+several other valid encodings of the same key); I patched this, as I
+mentioned in my update.  And then &lt;a
+  href=&quot;http://www.reddit.com/r/programming/comments/890yf/hacker_challenge_can_you_make_a_key_generator/c08l9k1&quot;&gt;teraflop
+  demonstrated posession of a working keygen&lt;/a&gt; a couple hours
+later.&lt;/p&gt;
+
+&lt;p&gt;I wanted the key generator challenge to be possible, and it
+definitely wasn't trivial, but it was still far easier than I had
+hoped.  Still, I couldn't be happier with the result, and I would like
+to thank my fellow programming.redditors for a great discussion.&lt;/p&gt;
+
+&lt;p&gt;For those who haven't studied how RSA works in sufficient detail to go
+from a factored &lt;i&gt;n&lt;/i&gt; to a key generator, go take a moment to read
+up on Wikipedia.  Basically the public and private keys, &lt;i&gt;e&lt;/i&gt; and
+&lt;i&gt;d&lt;/i&gt;, are &lt;a
+  href=&quot;http://en.wikipedia.org/wiki/Modular_multiplicative_inverse&quot;&gt;multiplicative
+  inverses&lt;/a&gt; mod &lt;i&gt;&amp;phi;(n)&lt;/i&gt; where &lt;i&gt;&amp;phi;(n)&lt;/i&gt; is &lt;a
+  href=&quot;http://en.wikipedia.org/wiki/Euler's_totient_function&quot;&gt;Euler's
+  totient function&lt;/a&gt;.  In the case of &lt;i&gt;n&lt;/i&gt;=&lt;i&gt;pq&lt;/i&gt; where
+&lt;i&gt;p&lt;/i&gt; and &lt;i&gt;q&lt;/i&gt; are prime, &lt;i&gt;&amp;phi;(n)&lt;/i&gt; = (&lt;i&gt;p&lt;/i&gt; -
+1)(&lt;i&gt;q&lt;/i&gt; - 1).  So you use the &lt;a
+  href=&quot;http://en.wikipedia.org/wiki/Extended_Euclidean_algorithm&quot;&gt;extended
+  euclidean algorithm&lt;/a&gt; to find &lt;i&gt;e&lt;/i&gt; from &lt;i&gt;d&lt;/i&gt; and
+&lt;i&gt;&amp;phi;(n)&lt;/i&gt;.  If you're using &lt;a href=&quot;http://gmplib.org/&quot;&gt;GMP&lt;/a&gt;
+(I am), you can just call &lt;tt&gt;mpz_invert&lt;/tt&gt; to do that.&lt;/p&gt;
+
+&lt;p&gt;Once you've recovered &lt;i&gt;e&lt;/i&gt; from &lt;i&gt;d&lt;/i&gt;, you just RSA-encrypt the
+message &lt;i&gt;m&lt;/i&gt; = 12345678 + &lt;tt&gt;check_mod&lt;/tt&gt;*&lt;i&gt;N&lt;/i&gt; where
+&lt;i&gt;N&lt;/i&gt; is the key number of your choosing and 12345678 is a
+&lt;a
+  href=&quot;http://en.wikipedia.org/wiki/Nothing_up_my_sleeve_number&quot;&gt;&quot;nothing
+  up my sleeve&quot; number&lt;/a&gt; I chose for validating a decryption.
+The ciphertext is thus &lt;i&gt;m&lt;/i&gt;&lt;sup&gt;&lt;i&gt;e&lt;/i&gt;&lt;/sup&gt; (mod &lt;i&gt;n&lt;/i&gt;),
+calculated using &lt;a
+  href=&quot;http://en.wikipedia.org/wiki/Exponentiation_by_squaring&quot;&gt;exponentiation
+  by squaring&lt;/a&gt;, mod &lt;i&gt;n&lt;/i&gt; at each step (which is what
+&lt;tt&gt;expmod&lt;/tt&gt; does in &lt;tt&gt;bn.h&lt;/tt&gt;), and then you do the reverse of
+&lt;tt&gt;decode&lt;/tt&gt; to turn the number into a string.&lt;/p&gt;
+
+&lt;p&gt;The code I used for generating RSA private key pairs is &lt;a
+  href=&quot;/code/rsa_genpriv.c.txt&quot;&gt;rsa_genpriv.c&lt;/a&gt; and for generating
+license keys is &lt;a href=&quot;/code/rsa_genlic.c.txt&quot;&gt;rsa_genlic.c&lt;/a&gt;.
+These require &lt;a href=&quot;http://gmplib.org/&quot;&gt;libgmp&lt;/a&gt;; the job is just
+too big for poor little &lt;tt&gt;bn.h&lt;/tt&gt;.&lt;/p&gt;
+
+&lt;p&gt;(All my code here is MIT-licensed, by the way, so feel free to
+steal it for your own purposes.  By all means, use it instead of some
+silly easy-to-duplicate hashing scheme for your application...)&lt;/p&gt;
+
+&lt;p&gt;So, will RSA-based license schemes work?  Not with such a short key
+length.  Can we just make the key length longer?  Well, that depends.
+Your ciphertext is always going to be a number between 2 and &lt;i&gt;n&lt;/i&gt;,
+if &lt;i&gt;n&lt;/i&gt; is 512 bits then so is your ciphertext.  1024 bits is
+probably the smallest reasonably secure size you'd want to use for
+RSA, which is 205 characters in the A-Y,1-9 code I'm using.  So if
+your users are pasting keys out of an email, that's probably fine, but
+if they're typing it in by hand off of a CD case, forget it.&lt;/p&gt;
+
+&lt;p&gt;Also, this scheme, though cryptographically weak, has some points
+in its favor.  If a theoretical cracker disassembles the code, he
+absolutely &lt;b&gt;must&lt;/b&gt; understand RSA at some level, extract &lt;i&gt;n&lt;/i&gt;,
+and factor it in order to create a key generator.  I probably wouldn't
+have the patience to do it if the least bit of obfuscation were used
+in conjunction.  It's totally self-contained (so you don't have to
+link in libcrypto or libopenssl or libgmp), so it's pretty much a
+drop-in replacement for whatever hashing scheme that most software
+tends to use.&lt;/p&gt;
+
+&lt;p&gt;And, though the backbone of the challenge was quickly broken, only
+one person demonstrated a keygen.  I guess one is all it takes.&lt;/p&gt;
+
+&lt;p&gt;Can we do better?  Yes, I think we can do much better.  RSA's
+security derives from the difficulty of the integer factorization
+problem.  There are two other commonly used classes of asymmetric key
+cryptosystems based on harder problems: discrete logarithm and
+elliptic curve discrete logarithm.  Each provides more &quot;strengh&quot; per
+bit of key than the last.&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;http://www.reddit.com/r/programming/comments/890yf/hacker_challenge_can_you_make_a_key_generator/c08l6dl&quot;&gt;james_block
+  brings up some good points&lt;/a&gt; along these lines.  It may not be
+possible to create a software license scheme with both short license
+codes and enough security to withstand a large, coordinated effort to
+break it.  But it's far better to use a license key scheme that could
+be broken with a large effort than one that will definitely be broken
+with a small effort, when the former is an easy drop-in replacement
+for the latter.  Truly uncrackable (in the cryptographic sense)
+security will require longer keys and users who paste keys out of
+emails.&lt;/p&gt;
+
+&lt;p&gt;So here is challenge #2.  I've used another common algorithm which
+is no longer encumbered by a patent.  The ciphertext is still slightly
+less than 125 bits.  It is not impossible to crack by any means, but
+it is much harder (in terms of CPU time necessary) than the previous
+one.  And there's always the possibility that I screwed something up
+and left a big back door in it, which is a good reason for proposing
+the challenge in the first place.&lt;/p&gt;
+
+&lt;p&gt;The code:
+&lt;br /&gt;&lt;a href=&quot;/code/keydecode2.cpp.txt&quot;&gt;keydecode2.cpp&lt;/a&gt; - challenge #2 decoder
+&lt;br /&gt;&lt;a href=&quot;/code/bn.h.txt&quot;&gt;bn.h&lt;/a&gt; - quick and dirty bignums (updated from
+last time)&lt;/p&gt;
+
+&lt;p&gt;I plan on issuing one further challenge next week, and there's a
+good chance that this one will be broken before then if it receives
+the same level of attention as the first one did.&lt;/p&gt;
+
+&lt;p&gt;&lt;a
+href=&quot;http://www.reddit.com/r/programming/comments/89vma/hacker_challenge_part_2_solution_to_part_1_and_a/&quot;&gt;Here&lt;/a&gt;
+is the reddit thread for part 2.&lt;/p&gt;
+
+&lt;p&gt;&lt;b&gt;Update&lt;/b&gt;: &lt;a href=&quot;/2009/11/17/hacker-challenge-2-solution.html&quot;&gt;The
+  solution to part 2&lt;/a&gt; has been posted.&lt;/p&gt;
+</content>
+  </entry>
+  
+  
+  
+  <entry>
+    <id>http://a1k0n.net/2009/03/31/hacker-challenge</id>
+    <link type="text/html" rel="alternate" href="http://a1k0n.net/2009/03/31/hacker-challenge.html"/>
+    <title>Hacker challenge&#58; Can you make a keygen?</title>
+    <updated>2009-03-31T00:00:00-05:00</updated>
+    <author>
+      <name>Andy Sloane</name>
+      <uri>http://a1k0n.net/</uri>
+    </author>
+    <content type="html">&lt;p&gt;I like to reverse-engineer things, and I like number theory.  These
+hobbies happen to intersect in the art of reverse-engineering software
+license keys.&lt;/p&gt;
+
+&lt;p&gt;I won't lie: I've cracked programs.  I've created key generators for
+programs.  But I also never distribute them.  I do it for the
+challenge, not for the program.&lt;/p&gt;
+
+&lt;p&gt;But from a warez d00d perspective, it is infinitely preferable if you
+can create a key generator instead of cracking, because then you can
+typically get further software updates, and things are just easier for
+everyone. &lt;/p&gt;
+
+&lt;p&gt;It is sometimes shockingly easy to create a key generator.  Often a
+program that checks a license key is structured like this:  &lt;/p&gt;
+
+&lt;pre&gt;
+  licensestr = get_license_key_modal_dialog()
+  validlicensestr = make_valid_license(licensestr);
+  if(licensestr == validlicensestr) { ... }
+&lt;/pre&gt;
+  
+&lt;p&gt;So now all I have to do is extract your make_valid_license code, feed
+it random garbage, and I have a key generator for your program.  One
+time I just replaced the call to strcmp() with puts() in a program and
+turned it into its own key generator.&lt;/p&gt;
+
+&lt;p&gt;Other key generators cycle through a hash of some sort (the hash is
+sometimes srand() / rand()) and ensure some check digits, or whatever.
+Any way you slice it, it's security through obscurity: you're giving
+the end user the code, and if end user can read and understand that
+code, they can break it.&lt;/p&gt;
+
+&lt;p&gt;It doesn't have to be this way.  I have created a self-contained
+license key decoder, and I'm distributing the source code to it.  In
+my next post, I will reveal all the details and how to create keys for
+it.  For now, I want to see whether anyone can break it without having
+the &quot;official&quot; key generator.  If so, there's a flaw in my reasoning.
+It uses a well-known, public-domain algorithm; that's all I'm going to
+say for now.&lt;/p&gt;
+
+&lt;p&gt;The code is here:&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;http://a1k0n.net/code/keydecode.cpp.txt&quot;&gt;keydecode.cpp&lt;/a&gt; - key
+decoder&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;http://a1k0n.net/code/bn.h.txt&quot;&gt;bn.h&lt;/a&gt; - quick and dirty bignums&lt;/p&gt;
+
+&lt;p&gt;(The web host I'm using has the wrong MIME types on .cpp and .h, so they're
+.txts - sorry)&lt;/p&gt;
+
+&lt;p&gt;I would like to open up a &lt;a
+href=&quot;http://www.reddit.com/r/programming/comments/890yf/hacker_challenge_can_you_make_a_key_generator/&quot;&gt;discussion
+on reddit&lt;/a&gt;.  Undoubtedly many people there will recognize the
+algorithm and maybe poke holes in what I'm doing.&lt;/p&gt;
+
+&lt;p&gt;&lt;b&gt;Update&lt;/b&gt;: &quot;maybe poke holes in what I'm doing&quot;.  Ha.  More like
+drive a cement mixer through it in minutes.  I was pleasantly
+surprised to find that this reached #1 on the programming subreddit.
+LoneStar309 found a gaping hole which I patched, and tharkban also
+found a bug in the final if statement, also fixed.  It's fair game to
+make keys that way for the challenge I proposed, I suppose, but I
+wanted to see whether the idea would work, not necessarily my poor
+implementation of it.  Turns out: no, it won't, and unsurprisingly
+it's been done before.  Part 2 coming later.&lt;/p&gt;
+
+&lt;p&gt;&lt;b&gt;Update 2&lt;/b&gt;: &lt;a href=&quot;/2009/04/03/hacker-challenge-2.html&quot;&gt;Hacker
+challenge part 2&lt;/a&gt; has been posted.&lt;/p&gt;
+
+</content>
+  </entry>
+  
+  
+  
+  <entry>
+    <id>http://a1k0n.net/2007/10/12/obfuscated-c-vendetta-online</id>
+    <link type="text/html" rel="alternate" href="http://a1k0n.net/2007/10/12/obfuscated-c-vendetta-online.html"/>
+    <title>The source code to Vendetta Online</title>
+    <updated>2007-10-12T00:00:00-05:00</updated>
+    <author>
+      <name>Andy Sloane</name>
+      <uri>http://a1k0n.net/</uri>
+    </author>
+    <content type="html">By request: &lt;a href=&quot;/code/vosource.c.txt&quot;&gt;Vendetta Online's source code&lt;/a&gt;.
+&lt;pre&gt;
+                                                           _
+                                                           ,
+                                                           i
+                                                           ,
+                                                           z
+                                                  ,x       ,
+                                                  y,       o
+                                                  ,b[1840],A
+                                          =0;p(n,c){
+      for(;n--;x++)c==10?y+=80,x=o-1:x&amp;gt;0 ?80 &amp;gt;x? !(
+     c==64)?b[y+x]=c:0:0:0;}c(q,l,r,o,s) char *l, *r   ,*s;{while(q&amp;gt;
+    0)q= (s[_ /6]- 62&amp;gt; _++% 6&amp;amp;1? r[q] :l[ q]) -o ;;  return q;}u(q,l,
+   r,o)  char *l,* r;{ return c(q ,l,r ,o, &quot;A&quot;   &quot;mv&quot; &quot;jjQLQm\\polpxwq&quot;
+  &quot;{pIw&quot; &quot;hR&quot; &quot;|h&quot; &quot;ZO&quot; &quot;LF&quot; &quot;MR&quot; &quot;{g&quot; &quot;H&quot; &quot;E&quot;   &quot;ws&quot; &quot;&quot;        &quot;&quot;    &quot;&quot;
+  &quot;[LQm&quot; &quot;lq&quot; &quot;_m&quot; &quot;}L&quot; &quot;?&quot;) ;}v( q,l, r,o )     char *l        ,     *r;
+ {return c(q, l,r, o,&quot;&quot; &quot;&amp;gt;K&quot; &quot;su&quot; &quot;f]&quot; &quot;mz&quot; &quot;G&quot;  &quot;kM&quot; &quot;&quot;        &quot;&quot;     &quot;&quot;
+&quot;quZljq&quot; &quot;{b&quot; &quot;m]&quot; &quot;tu&quot; &quot;YJ&quot; &quot;sQ&quot; &quot;mZ&quot; &quot;GK&quot; &quot;J&quot;  &quot;hD&quot; );        }      vu
+(a,b){for(o=x =a,y =80* b,_= 0;(( 283&amp;gt; _)); )a=  &quot;*/&quot; &quot;&quot;        &quot;&quot;     &quot;&quot;
+&quot;)([\n@&quot; &quot;\\&quot; &quot;_ &quot; [u(8 ,&quot;\&quot; *,'&quot; &quot;&amp;amp;%&quot; &quot;.0&quot; ,&quot;&quot;  &quot;$#&quot; &quot;&quot;        &quot;&quot;     &quot;&quot;
+&quot;+!)(-/&quot; &quot;1&quot;, 42)+ 10], p(&quot;&quot; &quot;#$&quot; &quot;%&amp;amp;&quot; &quot;'(&quot;  &quot;)&quot; &quot;*,&quot; [u        (      7,
+&quot;$#'&amp;amp;*\&quot;-/&quot;,  &quot;(%&quot; &quot;)!&quot; &quot;+,. &quot;,41 )+9] -34,  a); }va( a,        b      ){for
+(o=x=a,y =80* b,_= 0;(( 201&amp;gt; _)); )a=   &quot;@/ ]\n-&quot; &quot;\\_.&quot;        [       v(7,
+&quot;# )&amp;amp;\&quot;&quot; &quot;*,&quot; &quot;.&quot;, &quot;(%&quot; &quot;!$&quot; &quot;'+&quot; &quot;-/&quot; ,41) + 9], p(  &quot;#$%&amp;amp;')&quot;[v(4,&quot;#\&quot;$!)&quot;,
+&quot;%&amp;amp;'( &quot;, 38)+ 6]-  34,a );}  main (){  puts ( &quot;\033[&quot; &quot;2J&quot;);for(;;A++){for(i=
+0;i&amp;lt;1840 ;i++ )b[i ]=32 ;srand(0) ;for (i=0 ;i &amp;lt;100;i ++){z=rand()%20;b[(rand
+()%23)*80+(rand()-A*(1+z)/59 )%80 ]=&quot;.,o*&quot;[ z/ 5  ] ;} va(10,(int)(8.5+8.5*sin
+(A*0.02 /****/ )));; /****/ vu(55,(int)(6.5+6.5*cos(A*0.03/****/ ))); printf(
+&quot;%c[H&quot;/********/ , /********/ 27);for(i=1;i&amp;lt;80*23+1;i++ /********/
+     /***    ***/ /***    ***/                         /***    ***/
+     /**      **/ /**      **/ )putchar(i%80?b[i]:10); /**      **/
+     /***    ***/ /***    ***/         usleep(10000);}}/***    ***/
+      /********/   /********/                           /********/
+        /****/       /****/                               /****/
+&lt;/pre&gt;
+
+&lt;p&gt;(Updated 3/9/2010: I added a usleep in there, cause it runs way too
+fast)&lt;/p&gt;
+
+&lt;p&gt;(From &lt;a
+href=&quot;http://www.vendetta-online.com/x/msgboard/2/14902?page=2&quot;&gt;this
+thread&lt;/a&gt;, referencing an inside joke from a &lt;a
+href=&quot;http://www.vendetta-online.com/x/msgboard/1/2807#38314&quot;&gt;much
+earlier thread&lt;/a&gt;, but the message ordering got all mixed up at some
+point when I had to reindex the message IDs in the database (sigh)).&lt;/p&gt;
+
+
+</content>
+  </entry>
+  
+  
+  
+  <entry>
+    <id>http://a1k0n.net/2007/08/24/obfuscated-c-fire</id>
+    <link type="text/html" rel="alternate" href="http://a1k0n.net/2007/08/24/obfuscated-c-fire.html"/>
+    <title>Another short C program.</title>
+    <updated>2007-08-24T00:00:00-05:00</updated>
+    <author>
+      <name>Andy Sloane</name>
+      <uri>http://a1k0n.net/</uri>
+    </author>
+    <content type="html">&lt;pre&gt;
+b[2080];main(j){for(;;){printf(&quot;\x1b[H&quot;);for(j=1;j&amp;lt;2080;j++)b[j]=j&amp;lt;
+2000?(b[j+79]+b[j+80]+b[j]+b[j-1]+b[j+81])/5:rand()%4?0:512,j&amp;lt;1840?
+putchar((j%80)==79?'\n':&quot; .:*#$H@&quot;[b[j]&amp;gt;&amp;gt;5]):0;usleep(20000);}}
+&lt;/pre&gt;
+
+&lt;p&gt;It's supposed to be the old fire demo effect but in ASCII.  It looks kinda
+like camoflauge instead.&lt;/p&gt;
+
+&lt;p&gt;update: fixed a crashing bug.  It has other issues with uninitialized
+data, though.&lt;/p&gt;
+</content>
+  </entry>
+  
+  
+  
+  <entry>
+    <id>http://a1k0n.net/2006/09/20/obfuscated-c-donut-2</id>
+    <link type="text/html" rel="alternate" href="http://a1k0n.net/2006/09/20/obfuscated-c-donut-2.html"/>
+    <title>Embellishing the donut&#58; an old-school CG cliche</title>
+    <updated>2006-09-20T00:00:00-05:00</updated>
+    <author>
+      <name>Andy Sloane</name>
+      <uri>http://a1k0n.net/</uri>
+    </author>
+    <content type="html">&lt;pre&gt;
+_,x,y,o       ,N;char       b[1840]       ;p(n,c)
+{for(;n       --;x++)       c==10?y       +=80,x=
+o-1:x&amp;gt;=       0?80&amp;gt;x?       c!='~'?       b[y+x]=
+c:0:0:0       ;}c(q,l       ,r,o,v)       char*l,
+       *r;{for       (;q&amp;gt;=0;       )q=(&quot;A&quot;       &quot;YLrZ^&quot;
+       &quot;w^?EX&quot;           &quot;novne&quot;     &quot;bYV&quot;       &quot;dO}LE&quot;
+       &quot;{yWlw&quot;      &quot;Jl_Ja|[ur]zovpu&quot;   &quot;&quot;       &quot;i]e|y&quot;
+       &quot;ao_Be&quot;   &quot;osmIg}r]]r]m|wkZU}{O}&quot;         &quot;xys]]\
+x|ya|y&quot;        &quot;sm||{uel}|r{yIcsm||ya[{uE&quot;  &quot;{qY\
+w|gGor&quot;      &quot;VrVWioriI}Qac&amp;#123;{BIY[sXjjsVW]aM&quot;  &quot;T\
+tXjjss&quot;     &quot;sV_OUkRUlSiorVXp_qOM&amp;gt;E{BadB&quot;[_/6  ]-
+62&amp;gt;&amp;gt;_++    %6&amp;amp;1?r[q]:l[q])-o;return q;}E(a){for (
+       o= x=a,y=0,_=0;1095&amp;gt;_;)a= &quot; &amp;lt;.,`'/)(\n-&quot;  &quot;\\_~&quot;[
+       c  (12,&quot;!%*/')#3&quot;  &quot;&quot;     &quot;+-6,8&quot;,&quot;\&quot;(.$&quot; &quot;01245&quot;
+       &quot; &amp;amp;79&quot;,46)+14],  p(&quot;&quot;       &quot;#$%&amp;amp;'()0:439 &quot;[ c(10
+       , &quot;&amp;amp;(*#,./1345&quot; ,&quot;')&quot;       &quot;+%-$02\&quot;! &quot;, 44)+12]
+-34,a);  }main(k){float     A=0,B= 0,i,j,z[1840];
+puts(&quot;&quot;  &quot;\x1b[2J&quot;);;;      for(;; ){float e=sin
+(A), n=  sin(B),g=cos(      A),m=  cos(B);for(k=
+0;1840&amp;gt;   k;k++)y=-10-k/    80   ,o=41+(k%80-40
+       )* 1.3/y+n,N=A-100.0/y,b[k]=&quot;.#&quot;[o+N&amp;amp;1],  z[k]=0;
+       E(  80-(int)(9*B)%250);for(j=0;6.28&amp;gt;j;j   +=0.07)
+       for  (i=0;6.28&amp;gt;i;i+=0.02){float c=sin(    i),  d=
+       cos(  j),f=sin(j),h=d+2,D=15/(c*h*e+f     *g+5),l
+=cos(i)        ,t=c*h*g-f*e;x=40+2*D*(l*h*  m-t*n
+),y=12+       D  *(l*h*n+t*m),o=x+80*y,N  =8*((f*
+e-c*d*g       )*m   -c*d*e-f*g-l*d*n)     ;if(D&amp;gt;z
+[o])z[o       ]=D,b[     o]=&quot; .&quot;          &quot;.,,-+&quot;
+       &quot;+=#$@&quot;       [N&amp;gt;0?N:       0];;;;}       printf(
+       &quot;%c[H&quot;,       27);for       (k=1;18       *100+41
+       &amp;gt;k;k++)       putchar       (k%80?b       [k]:10)
+       ;;;;A+=       0.053;;       B+=0.03       ;;;;;}}
+&lt;/pre&gt;
+(as with the &lt;a href=&quot;/2006/09/15/obfuscated-c-donut.html&quot;&gt;first one&lt;/a&gt;, compile it with -lm, and it needs
+ANSI-ish terminal emulation)
+
+</content>
+  </entry>
+  
+  
+  
+  <entry>
+    <id>http://a1k0n.net/2006/09/15/obfuscated-c-donut</id>
+    <link type="text/html" rel="alternate" href="http://a1k0n.net/2006/09/15/obfuscated-c-donut.html"/>
+    <title>Have a donut.</title>
+    <updated>2006-09-15T00:00:00-05:00</updated>
+    <author>
+      <name>Andy Sloane</name>
+      <uri>http://a1k0n.net/</uri>
+    </author>
+    <content type="html">(compile with &lt;tt&gt;gcc -o donut donut.c -lm&lt;/tt&gt;, and it needs ANSI- or
+VT100-like emulation)
+&lt;pre&gt;
+             k;double sin()
+         ,cos();main(){float A=
+       0,B=0,i,j,z[1760];char b[
+     1760];printf(&quot;\x1b[2J&quot;);for(;;
+  ){memset(b,32,1760);memset(z,0,7040)
+  ;for(j=0;6.28&amp;gt;j;j+=0.07)for(i=0;6.28
+ &amp;gt;i;i+=0.02){float c=sin(i),d=cos(j),e=
+ sin(A),f=sin(j),g=cos(A),h=d+2,D=1/(c*
+ h*e+f*g+5),l=cos      (i),m=cos(B),n=s\
+in(B),t=c*h*g-f*        e;int x=40+30*D*
+(l*h*m-t*n),y=            12+15*D*(l*h*n
++t*m),o=x+80*y,          N=8*((f*e-c*d*g
+ )*m-c*d*e-f*g-l        *d*n);if(22&amp;gt;y&amp;amp;&amp;amp;
+ y&amp;gt;0&amp;amp;&amp;amp;x&amp;gt;0&amp;amp;&amp;amp;80&amp;gt;x&amp;amp;&amp;amp;D&amp;gt;z[o]){z[o]=D;;;b[o]=
+ &quot;.,-~:;=!*#$@&quot;[N&amp;gt;0?N:0];}}/*#****!!-*/
+  printf(&quot;\x1b[H&quot;);for(k=0;1761&amp;gt;k;k++)
+   putchar(k%80?b[k]:10);A+=0.04;B+=
+     0.02;}}/*****####*******!!=;:~
+       ~::==!!!**********!!!==::-
+         .,~~;;;========;;;:~-.
+             ..,--------,*/
+&lt;/pre&gt;
+
+(This was my first attempt at obfuscated C and I feel it's pretty amateurish;
+see &lt;a href=&quot;/2006/09/20/obfuscated-c-donut-2.html&quot;&gt;Donut Mark II&lt;/a&gt; for a more
+impressive demo &amp;mdash; though this one is simple and elegant in comparison.)
+</content>
+  </entry>
+  
+  
+  
+  <entry>
+    <id>http://a1k0n.net/2005/11/04/lisp-using-slime-over-ssh</id>
+    <link type="text/html" rel="alternate" href="http://a1k0n.net/2005/11/04/lisp-using-slime-over-ssh.html"/>
+    <title>Using SLIME over an SSH tunnel</title>
+    <updated>2005-11-04T00:00:00-06:00</updated>
+    <author>
+      <name>Andy Sloane</name>
+      <uri>http://a1k0n.net/</uri>
+    </author>
+    <content type="html">&lt;p&gt;If you'd like to use emacs on one computer (i.e. your windows box at home) and
+use &lt;a href=&quot;http://common-lisp.net/project/slime/&quot;&gt;SLIME&lt;/a&gt; to connect to a
+Common Lisp process on a remote computer (i.e. your server at work), here's how
+I do it.&lt;/p&gt;
+
+&lt;p&gt;First, create a startup file for your favorite Lisp implementation.&lt;/p&gt;
+
+&lt;h2&gt;lisp startup file&lt;/h2&gt;
+&lt;pre&gt;
+(require 'asdf)
+(asdf:oos 'asdf:load-op 'swank)
+ 
+; start swank
+(setf swank:*use-dedicated-output-stream* nil)
+(setf swank:*communication-style* :fd-handler)
+(swank:create-server :dont-close t)
+&lt;/pre&gt;
+ 
+&lt;p&gt;Now edit your ~/.emacs so that you've got something like the following in it:&lt;/p&gt;
+ 
+&lt;h2&gt;.emacs&lt;/h2&gt;
+&lt;pre&gt;
+(require 'slime)
+(require 'tramp)
+ 
+(add-hook 'lisp-mode-hook (lambda () (slime-mode t)))
+(add-hook 'inferior-lisp-mode-hook (lambda () (inferior-slime-mode t)))
+ 
+(setq lisp-indent-function 'common-lisp-indent-function
+      slime-complete-symbol-function 'slime-fuzzy-complete-symbol)
+ 
+(slime-setup)
+ 
+;;; If you want to tunnel through an intermediate host, such as your
+;;; work firewall, use the following couple lines.  If you're using a
+;;; Windows emacs, use 'plink' as below, otherwise substitute 'ssh'.
+(add-to-list
+ 'tramp-default-proxies-alist
+ '(&quot;\\.work-domain\\.com&quot; nil &quot;/plink:fwuserid@firewall.work-domain.com:/&quot;))
+(add-to-list
+ 'tramp-default-proxies-alist
+ '(&quot;firewall\\.work-domain\\.com&quot; nil nil))
+ 
+(defvar *my-box-tramp-path*
+  &quot;/ssh:me@my-box.work-domain.com:&quot;)
+ 
+(defvar *current-tramp-path* nil)
+(defun connect-to-host (path)
+  (setq *current-tramp-path* path)
+  (setq slime-translate-from-lisp-filename-function
+    (lambda (f)
+      (concat *current-tramp-path* f)))
+  (setq slime-translate-to-lisp-filename-function
+    (lambda (f)
+      (substring f (length *current-tramp-path*))))
+  (slime-connect &quot;localhost&quot; 4005))
+ 
+(defun my-box-slime ()
+  (interactive)
+  (connect-to-host *my-box-tramp-path*))
+ 
+(defun my-box-homedir ()
+  (interactive)
+  (find-file (concat *zarniwoop-tramp-path* &quot;/home/me/&quot;)))
+&lt;/pre&gt;
+
+&lt;p&gt;Now, load up the startup file you created on your host Lisp to start
+the swank server.  Then, create an ssh tunnel, i.e. &lt;tt&gt;ssh -L
+4005:localhost:4005 me@my-work.com&lt;/tt&gt;.&lt;/p&gt;
+
+&lt;p&gt;Now you can &lt;tt&gt;M-x my-box-slime&lt;/tt&gt; to connect through your SSH
+tunnel to your work box; SLIME's &lt;tt&gt;M-&lt;/tt&gt;. command will also
+correctly open up the file containing the defun of whatever's under
+your cursor, and &lt;tt&gt;C-c C-k&lt;/tt&gt; works correctly, etc.  If you want
+to open up some lisp file, &lt;tt&gt;M-x my-box-homedir&lt;/tt&gt; is a convenient
+shortcut.&lt;/p&gt;
+
+&lt;h2&gt;For Windows users&lt;/h2&gt;
+&lt;p&gt;If you're using Windows and want to also use a multi-hop tramp method
+(i.e. ssh into your work firewall, and then ssh from there to your
+server at work), be aware that tramp 2.1.4 and prior has a bug; it's
+fixed in CVS and probably 2.1.5, which is not out yet.  Information
+and a patch is available &lt;a
+href=&quot;http://lists.gnu.org/archive/html/tramp-devel/2005-10/msg00060.html&quot;&gt;here&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;You'll also want to use plink from the &lt;a
+href=&quot;http://www.chiark.greenend.org.uk/~sgtatham/putty/&quot;&gt;PuTTY&lt;/a&gt;
+distribution in lieu of ssh.  If you're doing multi-hop tramp, though,
+you need to use plink for the first hop (Windows box -&gt; &quot;firewall&quot;
+box) and ssh thereafter (&quot;firewall&quot; -&gt; &quot;server&quot;).&lt;/p&gt;
+
+</content>
+  </entry>
+  
+  
+  
+  <entry>
+    <id>http://a1k0n.net/2005/11/04/lisp-repl-vendetta-online</id>
+    <link type="text/html" rel="alternate" href="http://a1k0n.net/2005/11/04/lisp-repl-vendetta-online.html"/>
+    <title>Lisp REPL in Vendetta Online</title>
+    <updated>2005-11-04T00:00:00-06:00</updated>
+    <author>
+      <name>Andy Sloane</name>
+      <uri>http://a1k0n.net/</uri>
+    </author>
+    <content type="html">&lt;p&gt;&lt;a href=&quot;http://www.vendetta-online.com&quot;&gt;Vendetta Online&lt;/a&gt; has a
+Lisp environment (using SBCL) which controls much of its NPC behavior
+and will soon be in charge of generating player and NPC missions.
+Partly in order to get around some thread-safety issues, and partly
+for convenience we built an REPL into a secret chat channel.  (it only
+responds to developer accounts)&lt;/p&gt;
+
+&lt;a href=&quot;/lisp/vo-lisp-repl1.png&quot;&gt;&lt;img src=&quot;/lisp/vo-lisp-repl1_small.png&quot;&gt;&lt;/a&gt;&lt;br /&gt;
+
+&lt;a href=&quot;/lisp/vo-lisp-repl2.png&quot;&gt;&lt;img src=&quot;/lisp/vo-lisp-repl2_small.png&quot;&gt;&lt;/a&gt;&lt;br /&gt;
+
+&lt;p&gt;It also handles errors by printing a quick and dirty stack trace:&lt;/p&gt;
+
+&lt;a href=&quot;/lisp/vo-lisp-repl3.png&quot;&gt;&lt;img src=&quot;/lisp/vo-lisp-repl3_small.png&quot;&gt;&lt;/a&gt;&lt;br /&gt;
+
+Here's the code for the stack dump handler, for interested readers:&lt;br /&gt;
+
+&lt;pre&gt;
+(defun trap-and-log-error-handler (condition)
+  (format t &quot;Error signalled: ~A~%&quot; condition)
+  ;; this (write-string (with-output-to-string (s) ...) thing is odd,
+  ;; but seemingly necessary because print-frame-call seems
+  ;; uncooperative when using t for a stream argument.
+  (write-string (with-output-to-string (s)
+		  (do ((frame (sb-di:top-frame) (sb-di:frame-down frame))
+		       (i 0 (1+ i)))
+		      ((null frame))
+		    (format s &quot;~a: &quot; i)
+		    (sb-debug::print-frame-call frame s)
+		    (format s &quot;~%&quot;)))))
+
+(defmacro trap-and-log-errors (&amp;amp;body body)
+  `(ignore-errors
+     (handler-bind ((error #'trap-and-log-error-handler))
+       ,@body)))
+
+&lt;/pre&gt;
+
+and here's the REPL code (trap-and-log-errors is somewhere upstream
+from where this is called)
+
+&lt;pre&gt;
+;;; this is what interprets &quot;eval&quot; requests from developers; we have a
+;;; simple color code tag involving the non-printable character 
+;;; (code-char 127), so return values show up in red (like in SLIME)
+
+(define-server-function eval (&amp;amp;rest cmd)
+  (flet ((format-return-value (return-val)
+	   (with-output-to-string (os)
+	     (with-input-from-string (s (format nil &quot;~s~&amp;amp;&quot; return-val))
+	       (loop for line = (read-line s nil)
+		     while line do
+		     (format os &quot;~aff0000~a~%&quot; (code-char 127) line))))))
+    (let ((return-val (multiple-value-list (eval `(progn
+						   (in-package :com.guildsoftware.deliverator)
+						   ,@cmd)))))
+      (format t &quot;~&amp;amp;&quot;)
+      (dolist (val return-val)
+	(write-string (format-return-value val))))))
+
+
+&lt;/pre&gt;
+
+Why didn't I just use &lt;tt&gt;sb-debug:backtrace&lt;/tt&gt;?  I didn't know
+about it.  I just looked at how SLIME did it.
+
+</content>
+  </entry>
+  
+  
+ 
+</feed>
