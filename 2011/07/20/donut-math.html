@@ -8,7 +8,7 @@
   _gaq.push(['_trackPageview']);
   (function() {
     var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-    ga.src = 'http://www.google-analytics.com/ga.js';
+    ga.src = ('https:' == document.location.protocol ? 'https://' : 'http://') + 'stats.g.doubleclick.net/dc.js';
     var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
   })();
 <!--
@@ -26,7 +26,7 @@
 <body>
 <div style="width: 100%; background-color: #daf2ff; text-align: center; font-size: 12pt;"><a href="/" style="color: #1d3542;">a1k0n : Andy Sloane's weblog</a></div>
 <h1>Donut math&#58; how donut.c works</h1>
-<link type='text/css' href='/css/prettify.css' rel='stylesheet' /><script type='text/javascript' src='/js/prettify.js'>
+<link href='/css/prettify.css' type='text/css' rel='stylesheet' /><script type='text/javascript' src='/js/prettify.js'>
 </script><script src='/js/donut.js'>
 </script>
 <p>There has been a sudden resurgence of interest in my <a href='/2006/09/15/obfuscated-c-donut.html'>"donut" code from 2006</a>, and I&#8217;ve had a couple requests to explain this one. It&#8217;s been five years now, so it&#8217;s not exactly fresh in my memory, so I will reconstruct it from scratch, in great detail, and hopefully get approximately the same result.</p>
@@ -67,18 +67,18 @@ in(B),t=c*h*g-f*        e;int x=40+30*D*
 <p>So how do we do that? Well, let&#8217;s start with the basic math behind 3D perspective rendering. The following diagram is a side view of a person sitting in front of a screen, viewing a 3D object behind it.</p>
 <center><img src='/img/perspective.png' /></center>
 <p>To render a 3D object onto a 2D screen, we project each point (<em>x</em>,<em>y</em>,<em>z</em>) in 3D-space onto a plane located <em>z&#8217;</em> units away from the viewer, so that the corresponding 2D position is (<em>x&#8217;</em>,<em>y&#8217;</em>). Since we&#8217;re looking from the side, we can only see the <em>y</em> and <em>z</em> axes, but the math works the same for the <em>x</em> axis (just pretend this is a top view instead). This projection is really easy to obtain: notice that the origin, the <em>y</em>-axis, and point (<em>x</em>,<em>y</em>,<em>z</em>) form a right triangle, and a similar right triangle is formed with (<em>x&#8217;</em>,<em>y&#8217;</em>,<em>z&#8217;</em>). Thus the relative proportions are maintained:</p>
-<div class='maruku-equation'><img src='/img/latex/1b710772b17843b980f2e9ca46732e92.png' style='height: 10.1111111111111ex;' alt='$\begin{aligned}
+<div class='maruku-equation'><img alt='$\begin{aligned}
 \frac{y&apos;}{z&apos;} &amp;= \frac{y}{z}
 \\
 y&apos; &amp;= \frac{y z&apos;}{z}.
-\end{aligned}$' class='maruku-png' /><span class='maruku-eq-tex'><code style='display: none'>\begin{aligned}
+\end{aligned}$' style='height: 10.1111111111111ex;' class='maruku-png' src='/img/latex/1b710772b17843b980f2e9ca46732e92.png' /><span class='maruku-eq-tex'><code style='display: none'>\begin{aligned}
 \frac{y'}{z'} &amp;= \frac{y}{z}
 \\
 y' &amp;= \frac{y z'}{z}.
 \end{aligned}</code></span></div>
-<p>So to project a 3D coordinate to 2D, we scale a coordinate by the screen distance <em>z&#8217;</em>. Since <em>z&#8217;</em> is a fixed constant, and not functionally a coordinate, let&#8217;s rename it to <em>K<sub>1</sub></em>, so our projection equation becomes <span class='maruku-inline'><img src='/img/latex/177962348550aa653ef29eec5f04b1d6.png' style='vertical-align: -0.777777777777778ex;height: 2.77777777777778ex;' alt='$(x&apos;,y&apos;) = (\frac{K_1 x}{z}, \frac{K_1 y}{z})$' class='maruku-png' /></span>. We can choose <em>K<sub>1</sub></em> arbitrarily based on the field of view we want to show in our 2D window. For example, if we have a 100x100 window of pixels, then the view is centered at (50,50); and if we want to see an object which is 10 units wide in our 3D space, set back 5 units from the viewer, then <em>K<sub>1</sub></em> should be chosen so that the projection of the point <em>x</em>=10, <em>z</em>=5 is still on the screen with <em>x&#8217;</em> &lt; 50: 10<em>K<sub>1</sub></em>/5 &lt; 50, or <em>K<sub>1</sub></em> &lt; 25.</p>
+<p>So to project a 3D coordinate to 2D, we scale a coordinate by the screen distance <em>z&#8217;</em>. Since <em>z&#8217;</em> is a fixed constant, and not functionally a coordinate, let&#8217;s rename it to <em>K<sub>1</sub></em>, so our projection equation becomes <span class='maruku-inline'><img alt='$(x&apos;,y&apos;) = (\frac{K_1 x}{z}, \frac{K_1 y}{z})$' style='vertical-align: -0.777777777777778ex;height: 2.77777777777778ex;' class='maruku-png' src='/img/latex/177962348550aa653ef29eec5f04b1d6.png' /></span>. We can choose <em>K<sub>1</sub></em> arbitrarily based on the field of view we want to show in our 2D window. For example, if we have a 100x100 window of pixels, then the view is centered at (50,50); and if we want to see an object which is 10 units wide in our 3D space, set back 5 units from the viewer, then <em>K<sub>1</sub></em> should be chosen so that the projection of the point <em>x</em>=10, <em>z</em>=5 is still on the screen with <em>x&#8217;</em> &lt; 50: 10<em>K<sub>1</sub></em>/5 &lt; 50, or <em>K<sub>1</sub></em> &lt; 25.</p>
 
-<p>When we&#8217;re plotting a bunch of points, we might end up plotting different points at the same (<em>x&#8217;</em>,<em>y&#8217;</em>) location but at different depths, so we maintain a <a href='http://en.wikipedia.org/wiki/Z-buffering'>z-buffer</a> which stores the <em>z</em> coordinate of everything we draw. If we need to plot a location, we first check to see whether we&#8217;re plotting in front of what&#8217;s there already. It also helps to compute <em>z</em><sup>-1</sup> <span class='maruku-inline'><img src='/img/latex/ed0a093882a4dfd48f6e83aea38313e7.png' style='vertical-align: -0.777777777777778ex;height: 2.66666666666667ex;' alt='$= \frac{1}{z}$' class='maruku-png' /></span> and use that when depth buffering because:</p>
+<p>When we&#8217;re plotting a bunch of points, we might end up plotting different points at the same (<em>x&#8217;</em>,<em>y&#8217;</em>) location but at different depths, so we maintain a <a href='http://en.wikipedia.org/wiki/Z-buffering'>z-buffer</a> which stores the <em>z</em> coordinate of everything we draw. If we need to plot a location, we first check to see whether we&#8217;re plotting in front of what&#8217;s there already. It also helps to compute <em>z</em><sup>-1</sup> <span class='maruku-inline'><img alt='$= \frac{1}{z}$' style='vertical-align: -0.777777777777778ex;height: 2.66666666666667ex;' class='maruku-png' src='/img/latex/ed0a093882a4dfd48f6e83aea38313e7.png' /></span> and use that when depth buffering because:</p>
 
 <ul>
 <li><em>z</em><sup>-1</sup> = 0 corresponds to infinite depth, so we can pre-initialize our z-buffer to 0 and have the background be infinitely far away</li>
@@ -90,9 +90,9 @@ y' &amp;= \frac{y z'}{z}.
 revolution</a>, so one way to do it is to draw a 2D circle around some point in 3D space, and then rotate it around the central axis of the torus. Here is a cross-section through the center of a torus:</p>
 <center><img src='/img/torusxsec.png' /></center>
 <p>So we have a circle of radius <em>R</em><sub>1</sub> centered at point (<em>R</em><sub>2</sub>,0,0), drawn on the <em>xy</em>-plane. We can draw this by sweeping an angle &#8212; let&#8217;s call it <em>&#952;</em> &#8212; from 0 to 2&#960;:</p>
-<div class='maruku-equation'><img src='/img/latex/aca3f080178e9a3fe979c5f594e0beab.png' style='height: 2.33333333333333ex;' alt='$(x,y,z) = (R_2,0,0) + (R_1 \cos \theta, R_1 \sin \theta, 0)$' class='maruku-png' /><span class='maruku-eq-tex'><code style='display: none'>(x,y,z) = (R_2,0,0) + (R_1 \cos \theta, R_1 \sin \theta, 0)</code></span></div>
+<div class='maruku-equation'><img alt='$(x,y,z) = (R_2,0,0) + (R_1 \cos \theta, R_1 \sin \theta, 0)$' style='height: 2.33333333333333ex;' class='maruku-png' src='/img/latex/aca3f080178e9a3fe979c5f594e0beab.png' /><span class='maruku-eq-tex'><code style='display: none'>(x,y,z) = (R_2,0,0) + (R_1 \cos \theta, R_1 \sin \theta, 0)</code></span></div>
 <p>Now we take that circle and rotate it around the <em>y</em>-axis by another angle &#8212; let&#8217;s call it &#966;. To rotate an arbitrary 3D point around one of the cardinal axes, the standard technique is to multiply by a <a href='http://en.wikipedia.org/wiki/Rotation_matrix'>rotation matrix</a>. So if we take the previous points and rotate about the <em>y</em>-axis we get:</p>
-<div class='maruku-equation'><img src='/img/latex/0efcfa79c88e4aaf636d09cc932908b1.png' style='height: 8.11111111111111ex;' alt='$\left( \begin{matrix}
+<div class='maruku-equation'><img alt='$\left( \begin{matrix}
 R_2 + R_1 \cos \theta, &amp;
 R_1 \sin \theta, &amp;
 0 \end{matrix} \right)
@@ -105,7 +105,7 @@ R_1 \sin \theta, &amp;
 \left( \begin{matrix}
 (R_2 + R_1 \cos \theta)\cos \phi, &amp;
 R_1 \sin \theta, &amp;
--(R_2 + R_1 \cos \theta)\sin \phi \end{matrix} \right)$' class='maruku-png' /><span class='maruku-eq-tex'><code style='display: none'>\left( \begin{matrix}
+-(R_2 + R_1 \cos \theta)\sin \phi \end{matrix} \right)$' style='height: 8.11111111111111ex;' class='maruku-png' src='/img/latex/0efcfa79c88e4aaf636d09cc932908b1.png' /><span class='maruku-eq-tex'><code style='display: none'>\left( \begin{matrix}
 R_2 + R_1 \cos \theta, &amp;
 R_1 \sin \theta, &amp;
 0 \end{matrix} \right)
@@ -120,7 +120,7 @@ R_1 \sin \theta, &amp;
 R_1 \sin \theta, &amp;
 -(R_2 + R_1 \cos \theta)\sin \phi \end{matrix} \right)</code></span></div>
 <p>But wait: we also want the whole donut to spin around on at least two more axes for the animation. They were called <em>A</em> and <em>B</em> in the original code: it was a rotation about the <em>x</em>-axis by <em>A</em> and a rotation about the <em>z</em>-axis by <em>B</em>. This is a bit hairier, so I&#8217;m not even going write the result yet, but it&#8217;s a bunch of matrix multiplies.</p>
-<div class='maruku-equation'><img src='/img/latex/6c1370bb4d444fc1de289c06204d384c.png' style='height: 8.11111111111111ex;' alt='$\left( \begin{matrix}
+<div class='maruku-equation'><img alt='$\left( \begin{matrix}
 R_2 + R_1 \cos \theta, &amp;
 R_1 \sin \theta, &amp;
 0 \end{matrix} \right)
@@ -138,7 +138,7 @@ R_1 \sin \theta, &amp;
 \left( \begin{matrix}
 \cos B &amp; \sin B &amp; 0 \\
 -\sin B &amp; \cos B &amp; 0 \\
-0 &amp; 0 &amp; 1 \end{matrix} \right)$' class='maruku-png' /><span class='maruku-eq-tex'><code style='display: none'>\left( \begin{matrix}
+0 &amp; 0 &amp; 1 \end{matrix} \right)$' style='height: 8.11111111111111ex;' class='maruku-png' src='/img/latex/6c1370bb4d444fc1de289c06204d384c.png' /><span class='maruku-eq-tex'><code style='display: none'>\left( \begin{matrix}
 R_2 + R_1 \cos \theta, &amp;
 R_1 \sin \theta, &amp;
 0 \end{matrix} \right)
@@ -166,15 +166,15 @@ R_1 \sin \theta, &amp;
 </ul>
 
 <p>So we have another constant to pick, call it <em>K</em><sub>2</sub>, for the distance of the donut from the viewer, and our projection now looks like:</p>
-<div class='maruku-equation'><img src='/img/latex/2919c373ab68c31e37685cab52fad45a.png' style='height: 4.88888888888889ex;' alt='$\left( x&apos;, y&apos; \right)
+<div class='maruku-equation'><img alt='$\left( x&apos;, y&apos; \right)
 =
-\left( \frac{K_1 x}{K_2 + z} , \frac{K_1 y}{K_2 + z} \right)$' class='maruku-png' /><span class='maruku-eq-tex'><code style='display: none'>\left( x', y' \right)
+\left( \frac{K_1 x}{K_2 + z} , \frac{K_1 y}{K_2 + z} \right)$' style='height: 4.88888888888889ex;' class='maruku-png' src='/img/latex/2919c373ab68c31e37685cab52fad45a.png' /><span class='maruku-eq-tex'><code style='display: none'>\left( x', y' \right)
 =
 \left( \frac{K_1 x}{K_2 + z} , \frac{K_1 y}{K_2 + z} \right)</code></span></div>
 <p><em>K</em><sub>1</sub> and <em>K</em><sub>2</sub> can be tweaked together to change the field of view and flatten or exaggerate the depth of the object.</p>
 
 <p>Now, we could implement a 3x3 matrix multiplication routine in our code and implement the above in a straightforward way. But if our goal is to shrink the code as much as possible, then every 0 in the matrices above is an opportunity for simplification. So let&#8217;s multiply it out. Churning through a bunch of algebra (thanks Mathematica!), the full result is:</p>
-<div class='maruku-equation'><img src='/img/latex/30543268e7326534b0a18a1c84e24510.png' style='height: 8.11111111111111ex;' alt='$\left( \begin{matrix} x \\ y \\ z \end{matrix} \right) =
+<div class='maruku-equation'><img alt='$\left( \begin{matrix} x \\ y \\ z \end{matrix} \right) =
 \left( \begin{matrix}
  (R_2 + R_1 \cos \theta) (\cos B \cos \phi + \sin A \sin B \sin \phi) - 
    R_1 \cos A \sin B \sin \theta \\
@@ -182,7 +182,7 @@ R_1 \sin \theta, &amp;
  (R_2 + R_1 \cos \theta) (\cos \phi \sin B - \cos B \sin A \sin \phi) + 
    R_1 \cos A \cos B \sin \theta \\
  \cos A (R_2 + R_1 \cos \theta) \sin \phi + R_1 \sin A \sin \theta
-\end{matrix} \right)$' class='maruku-png' /><span class='maruku-eq-tex'><code style='display: none'>\left( \begin{matrix} x \\ y \\ z \end{matrix} \right) =
+\end{matrix} \right)$' style='height: 8.11111111111111ex;' class='maruku-png' src='/img/latex/30543268e7326534b0a18a1c84e24510.png' /><span class='maruku-eq-tex'><code style='display: none'>\left( \begin{matrix} x \\ y \\ z \end{matrix} \right) =
 \left( \begin{matrix}
  (R_2 + R_1 \cos \theta) (\cos B \cos \phi + \sin A \sin B \sin \phi) - 
    R_1 \cos A \sin B \sin \theta \\
@@ -191,7 +191,7 @@ R_1 \sin \theta, &amp;
    R_1 \cos A \cos B \sin \theta \\
  \cos A (R_2 + R_1 \cos \theta) \sin \phi + R_1 \sin A \sin \theta
 \end{matrix} \right)</code></span></div>
-<p>Well, that looks pretty hideous, but we we can precompute some common subexpressions (e.g. all the sines and cosines, and <span class='maruku-inline'><img src='/img/latex/54482053911d43204d56b95e4b58ed4b.png' style='vertical-align: -0.444444444444444ex;height: 2.0ex;' alt='$R_2 + R_1 \cos \theta$' class='maruku-png' /></span>) and reuse them in the code. In fact I came up with a completely different factoring in the original code but that&#8217;s left as an exercise for the reader. (The original code also swaps the sines and cosines of A, effectively rotating by 90 degrees, so I guess my initial derivation was a bit different but that&#8217;s OK.)</p>
+<p>Well, that looks pretty hideous, but we we can precompute some common subexpressions (e.g. all the sines and cosines, and <span class='maruku-inline'><img alt='$R_2 + R_1 \cos \theta$' style='vertical-align: -0.444444444444444ex;height: 2.0ex;' class='maruku-png' src='/img/latex/54482053911d43204d56b95e4b58ed4b.png' /></span>) and reuse them in the code. In fact I came up with a completely different factoring in the original code but that&#8217;s left as an exercise for the reader. (The original code also swaps the sines and cosines of A, effectively rotating by 90 degrees, so I guess my initial derivation was a bit different but that&#8217;s OK.)</p>
 
 <p>Now we know where to put the pixel, but we still haven&#8217;t even considered which shade to plot. To calculate illumination, we need to know the <a href='http://en.wikipedia.org/wiki/Surface_normal'>surface normal</a> &#8212; the direction perpendicular to the surface at each point. If we have that, then we can take the <a href='http://en.wikipedia.org/wiki/Dot_product'>dot
 product</a> of the surface normal with the light direction, which we can choose arbitrarily. That gives us the cosine of the angle between the light direction and the surface direction: If the dot product is &#62;0, the surface is facing the light and if it&#8217;s &#60;0, it faces away from the light. The higher the value, the more light falls on the surface.</p>
@@ -199,7 +199,7 @@ product</a> of the surface normal with the light direction, which we can choose 
 <p>The derivation of the surface normal direction turns out to be pretty much the same as our derivation of the point in space. We start with a point on a circle, rotate it around the torus&#8217;s central axis, and then make two more rotations. The surface normal of the point on the circle is fairly obvious: it&#8217;s the same as the point on a unit (radius=1) circle centered at the origin.</p>
 
 <p>So our surface normal (<em>N<sub>x</sub></em>, <em>N<sub>y</sub></em>, <em>N<sub>z</sub></em>) is derived the same as above, except the point we start with is just (cos <em>&#952;</em>, sin <em>&#952;</em>, 0). Then we apply the same rotations:</p>
-<div class='maruku-equation'><img src='/img/latex/b75b5020836f6ba6428f2ec6373d5566.png' style='height: 8.11111111111111ex;' alt='$\left( \begin{matrix}
+<div class='maruku-equation'><img alt='$\left( \begin{matrix}
 N_x, &amp;
 N_y, &amp;
 N_z \end{matrix} \right)
@@ -222,7 +222,7 @@ N_z \end{matrix} \right)
 \left( \begin{matrix}
 \cos B &amp; \sin B &amp; 0 \\
 -\sin B &amp; \cos B &amp; 0 \\
-0 &amp; 0 &amp; 1 \end{matrix} \right)$' class='maruku-png' /><span class='maruku-eq-tex'><code style='display: none'>\left( \begin{matrix}
+0 &amp; 0 &amp; 1 \end{matrix} \right)$' style='height: 8.11111111111111ex;' class='maruku-png' src='/img/latex/b75b5020836f6ba6428f2ec6373d5566.png' /><span class='maruku-eq-tex'><code style='display: none'>\left( \begin{matrix}
 N_x, &amp;
 N_y, &amp;
 N_z \end{matrix} \right)
@@ -246,8 +246,8 @@ N_z \end{matrix} \right)
 \cos B &amp; \sin B &amp; 0 \\
 -\sin B &amp; \cos B &amp; 0 \\
 0 &amp; 0 &amp; 1 \end{matrix} \right)</code></span></div>
-<p>So which lighting direction should we choose? How about we light up surfaces facing behind and above the viewer: <span class='maruku-inline'><img src='/img/latex/a630fbf79f8ae344d7f88ee29868f7b7.png' style='vertical-align: -0.555555555555556ex;height: 2.33333333333333ex;' alt='$(0,1,-1)$' class='maruku-png' /></span>. Technically this should be a normalized unit vector, and this vector has a magnitude of &#8730;2. That&#8217;s okay &#8211; we will compensate later. Therefore we compute the above (<em>x</em>,<em>y</em>,<em>z</em>), throw away the <em>x</em> and get our luminance <em>L</em> = <em>y</em>-<em>z</em>.</p>
-<div class='maruku-equation'><img src='/img/latex/d2a3805a6edac7e522c8956b00ebf10f.png' style='height: 5.66666666666667ex;' alt='$\begin{aligned}
+<p>So which lighting direction should we choose? How about we light up surfaces facing behind and above the viewer: <span class='maruku-inline'><img alt='$(0,1,-1)$' style='vertical-align: -0.555555555555556ex;height: 2.33333333333333ex;' class='maruku-png' src='/img/latex/a630fbf79f8ae344d7f88ee29868f7b7.png' /></span>. Technically this should be a normalized unit vector, and this vector has a magnitude of &#8730;2. That&#8217;s okay &#8211; we will compensate later. Therefore we compute the above (<em>x</em>,<em>y</em>,<em>z</em>), throw away the <em>x</em> and get our luminance <em>L</em> = <em>y</em>-<em>z</em>.</p>
+<div class='maruku-equation'><img alt='$\begin{aligned}
 L &amp;=
 \left( \begin{matrix}
 N_x, &amp;
@@ -262,7 +262,7 @@ N_z \end{matrix} \right)
 &amp;= 
 \cos \phi \cos \theta \sin B - \cos A \cos \theta \sin \phi - \sin A \sin \theta + 
  \cos B ( \cos A \sin \theta - \cos \theta \sin A \sin \phi)
-\end{aligned}$' class='maruku-png' /><span class='maruku-eq-tex'><code style='display: none'>\begin{aligned}
+\end{aligned}$' style='height: 5.66666666666667ex;' class='maruku-png' src='/img/latex/d2a3805a6edac7e522c8956b00ebf10f.png' /><span class='maruku-eq-tex'><code style='display: none'>\begin{aligned}
 L &amp;=
 \left( \begin{matrix}
 N_x, &amp;
@@ -285,7 +285,7 @@ N_z \end{matrix} \right)
 <p>I&#8217;ve taken the above equations and written a quick and dirty canvas implementation here, just plotting the pixels and the lighting values from the equations above. The result is not exactly the same as the original as some of my rotations are in opposite directions or off by 90 degrees, but it is qualitatively doing the same thing.</p>
 
 <p>Here it is: <button onclick='anim2();'>toggle animation</button></p>
-<canvas width='300' height='240' id='canvasdonut'>
+<canvas id='canvasdonut' width='300' height='240'>
 </canvas>
 <p>It&#8217;s slightly mind-bending because you can see right through the torus, but the math does work! Convert that to an ASCII rendering with <em>z</em>-buffering, and you&#8217;ve got yourself a clever little program.</p>
 
