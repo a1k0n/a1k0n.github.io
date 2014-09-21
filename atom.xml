@@ -4,7 +4,7 @@
   <title>a1k0n.net</title>
   <link href="http://a1k0n.net/"/>
   <link type="application/atom+xml" rel="self" href="http://a1k0n.net/atom.xml"/>
-  <updated>2014-09-20T21:06:29-05:00</updated>
+  <updated>2014-09-20T21:09:49-05:00</updated>
   <id>http://a1k0n.net/</id>
   <author>
     <name>Andy Sloane</name>
@@ -22,12 +22,12 @@
       <name>Andy Sloane</name>
       <uri>http://a1k0n.net/</uri>
     </author>
-    <content type="html">&lt;link type='text/css' href='/css/prettify.css' rel='stylesheet' /&gt;&lt;script src='/js/prettify.js' type='text/javascript'&gt;
+    <content type="html">&lt;link type='text/css' href='/css/prettify.css' rel='stylesheet' /&gt;&lt;script type='text/javascript' src='/js/prettify.js'&gt;
 &lt;/script&gt;&lt;script src='/js/donut.js'&gt;
 &lt;/script&gt;
 &lt;p&gt;There has been a sudden resurgence of interest in my &lt;a href='/2006/09/15/obfuscated-c-donut.html'&gt;&quot;donut&quot; code from 2006&lt;/a&gt;, and I&amp;#8217;ve had a couple requests to explain this one. It&amp;#8217;s been five years now, so it&amp;#8217;s not exactly fresh in my memory, so I will reconstruct it from scratch, in great detail, and hopefully get approximately the same result.&lt;/p&gt;
 
-&lt;p&gt;This is the code and the output, animated in Javascript: &lt;button onclick='anim1();'&gt;toggle animation&lt;/button&gt; &lt;table border='0' cellspacing='0' cellpadding='0'&gt;&lt;tr&gt;
+&lt;p&gt;This is the code and the output, animated in Javascript: &lt;button onclick='anim1();'&gt;toggle animation&lt;/button&gt; &lt;table cellspacing='0' cellpadding='0' border='0'&gt;&lt;tr&gt;
 &lt;td style='background-color:#000'&gt;
 &lt;pre style='background-color:#000; color:#ccc;'&gt;
              k;double sin()
@@ -281,7 +281,7 @@ N_z \end{matrix} \right)
 &lt;p&gt;I&amp;#8217;ve taken the above equations and written a quick and dirty canvas implementation here, just plotting the pixels and the lighting values from the equations above. The result is not exactly the same as the original as some of my rotations are in opposite directions or off by 90 degrees, but it is qualitatively doing the same thing.&lt;/p&gt;
 
 &lt;p&gt;Here it is: &lt;button onclick='anim2();'&gt;toggle animation&lt;/button&gt;&lt;/p&gt;
-&lt;canvas height='240' width='300' id='canvasdonut'&gt;
+&lt;canvas width='300' height='240' id='canvasdonut'&gt;
 &lt;/canvas&gt;
 &lt;p&gt;It&amp;#8217;s slightly mind-bending because you can see right through the torus, but the math does work! Convert that to an ASCII rendering with &lt;em&gt;z&lt;/em&gt;-buffering, and you&amp;#8217;ve got yourself a clever little program.&lt;/p&gt;
 

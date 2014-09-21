@@ -26,12 +26,12 @@
 <body>
 <div style="width: 100%; background-color: #daf2ff; text-align: center; font-size: 12pt;"><a href="/" style="color: #1d3542;">a1k0n : Andy Sloane's weblog</a></div>
 <h1>Donut math&#58; how donut.c works</h1>
-<link type='text/css' href='/css/prettify.css' rel='stylesheet' /><script src='/js/prettify.js' type='text/javascript'>
+<link type='text/css' href='/css/prettify.css' rel='stylesheet' /><script type='text/javascript' src='/js/prettify.js'>
 </script><script src='/js/donut.js'>
 </script>
 <p>There has been a sudden resurgence of interest in my <a href='/2006/09/15/obfuscated-c-donut.html'>"donut" code from 2006</a>, and I&#8217;ve had a couple requests to explain this one. It&#8217;s been five years now, so it&#8217;s not exactly fresh in my memory, so I will reconstruct it from scratch, in great detail, and hopefully get approximately the same result.</p>
 
-<p>This is the code and the output, animated in Javascript: <button onclick='anim1();'>toggle animation</button> <table border='0' cellspacing='0' cellpadding='0'><tr>
+<p>This is the code and the output, animated in Javascript: <button onclick='anim1();'>toggle animation</button> <table cellspacing='0' cellpadding='0' border='0'><tr>
 <td style='background-color:#000'>
 <pre style='background-color:#000; color:#ccc;'>
              k;double sin()
@@ -285,7 +285,7 @@ N_z \end{matrix} \right)
 <p>I&#8217;ve taken the above equations and written a quick and dirty canvas implementation here, just plotting the pixels and the lighting values from the equations above. The result is not exactly the same as the original as some of my rotations are in opposite directions or off by 90 degrees, but it is qualitatively doing the same thing.</p>
 
 <p>Here it is: <button onclick='anim2();'>toggle animation</button></p>
-<canvas height='240' width='300' id='canvasdonut'>
+<canvas width='300' height='240' id='canvasdonut'>
 </canvas>
 <p>It&#8217;s slightly mind-bending because you can see right through the torus, but the math does work! Convert that to an ASCII rendering with <em>z</em>-buffering, and you&#8217;ve got yourself a clever little program.</p>
 
