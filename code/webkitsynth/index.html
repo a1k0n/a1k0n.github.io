@@ -259,11 +259,11 @@ function makeKnob(parent, desc, initialpos, move_cb)
 var jsNode, gainNode;
 function init()
 {
-  ctx = new webkitAudioContext();
-  gainNode = ctx.createGainNode();
+  ctx = new AudioContext();
+  gainNode = ctx.createGain();
   gainNode.gain.value = 0.15;
 
-  jsNode = ctx.createJavaScriptNode(2048, 0, 1);
+  jsNode = ctx.createScriptProcessor(2048, 0, 2);
   jsNode.onaudioprocess = audio_cb;
   jsNode.connect(gainNode);
 
