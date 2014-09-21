@@ -1,7 +1,5 @@
-rm -rf img/latex
-rm -rf _site
 jekyll build
 cd _site
-git add .
+git add -A .
 git commit -m 'regenerated'
 git push github HEAD:master
