@@ -1,0 +1,505 @@
+<!doctype html>
+<html lang="en">
+
+  <head>
+    <meta charset="utf-8">
+
+    <title>Machine Learning at Spotify</title>
+
+    <meta name="description" content="">
+    <meta name="author" content="Andy Sloane">
+
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+
+    <link rel="stylesheet" href="css/reveal.css">
+    <link rel="stylesheet" href="css/theme/black.css" id="theme">
+
+    <!-- Code syntax highlighting -->
+    <link rel="stylesheet" href="lib/css/zenburn.css">
+
+    <!-- Printing and PDF exports -->
+    <script>
+      var link = document.createElement( 'link' );
+      link.rel = 'stylesheet';
+      link.type = 'text/css';
+      link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+      document.getElementsByTagName( 'head' )[0].appendChild( link );
+    </script>
+
+    <!--[if lt IE 9]>
+    <script src="lib/js/html5shiv.js"></script>
+    <![endif]-->
+  </head>
+
+  <body>
+
+    <div class="reveal">
+
+      <!-- Any section element inside of this container is displayed as a slide -->
+      <div class="slides">
+<!-- ***************************************************** -->
+
+<section>
+  <h1>Machine Learning &amp; Big Data @ </h1>
+  <img alt="Spotify" src="img/Spotify_Logo_RGB_Green.png" width="400">
+  <p>Andy Sloane<br>@a1k0n<br><a href="http://a1k0n.net/">http://a1k0n.net</a></p>
+  <p>Madison Big Data Meetup<br>Jan 27, 2015</p>
+</section>
+
+<section data-markdown>
+<script type="text/template">
+# Big data?
+ - **60M** Monthly Active Users (MAU)
+ - **50M** tracks in our catalog
+   - ...But many are identical copies from different releases (e.g. US and UK
+   releases of the same album)
+   - ...and only **4M** unique songs have been listened to >500 times
+</script>
+</section>
+
+<section data-markdown>
+<script type="text/template">
+# Big data?
+ - Raw material: application logs, delivered via Apache Kafka
+ - *Wake Me Up* by Avicii has been played **330M** times, by ~**6M** different users
+ - "EndSong": **500GB / day**
+   - ...But aggregated per-user play counts for a whole year fit in ~**60GB** ("medium data")
+</script>
+</section>
+
+<section data-background-color="#ffffff" data-background="img/Hadoop_at_Spotify.png" data-background-size="600px" data-markdown>
+  <script type="text/template">
+# Hadoop @ Spotify
+ - **900** nodes (all in London datacenter)
+ - **34 TB** RAM total
+ - ~**16000** typical concurrent tasks (mappers/reducers)
+ - **2GB RAM** per mapper/reducer slot
+  </script>
+</section>
+
+<section>
+  <h2>What do we need ML for?</h2>
+  <ul>
+    <li class="fragment">Recommendations</li>
+    <li class="fragment">Related Artists</li>
+    <li class="fragment">Radio</li>
+  </ul>
+</section>
+
+<section><h1>Recommendations</h1></section>
+
+<section data-background="img/discover.jpg" data-markdown data-background-transition="zoom">
+<script type="text/template">
+## The Discover page
+ - 4M tracks x 60M active users, rebuilt daily
+</script>
+</section>
+
+<section data-background-color="#1a1a1a">
+<h3>The Discover page</h3>
+<img src="img/discover-arch.png" alt="discover page architecture">
+<div class="fragment">Okay, but how do we come up with recommendations?</div>
+<div class="fragment">Collaborative filtering!</div>
+</section>
+
+<section data-markdown>
+<script type="text/template">
+### Collaborative filtering
+<img src="img/collabfilt.jpg">
+</script>
+</section>
+
+<section>
+<h3>Collaborative filtering</h3>
+<div>Great, but how does that actually work?</div>
+<ul class="fragment">
+  <li>Each time a user plays something, add it to a matrix</li>
+  <li>Compute similarity, somehow, between items based on who played what</li>
+</ul>
+<img class="fragment" src="img/countmatrix.png" alt="count matrix">
+</section>
+
+<section>
+<h3>Collaborative filtering</h3>
+<ul>
+  <li>So compute some distance between every pair of rows and columns</li>
+  <li class="fragment">That's just O($\frac{{60M}^2}{2}$) = O($1.8\times 10^{15}$) operations... O_O</li>
+  <li class="fragment">We need a better way...</li>
+</ul>
+<br>
+<div class="fragment" style="font-size: 0.6em; margin-top: 40px">(BTW: Twitter has a decent
+  approximation that can actually make this work, called DIMSUM:<br>
+  https://blog.twitter.com/2014/all-pairs-similarity-via-dimsum)<br>
+  I've tried it but don't have results to report here yet :(
+</div>
+</section>
+
+<section data-background='#ffffff'>
+<h3>Collaborative filtering</h3>
+<h4>Latent factor models</h4>
+<p>Instead, we use a "small" representation for each user &amp; item:
+$f$-dimensional vectors</p>
+<img src="img/matrixfact2.png" alt="matrix factorization">
+<p>(here, $f=2$)</p>
+<p>and approximate the big matrix with it.</p>
+</section>
+
+<section data-background-color="#ffffff">
+<h2>Why vectors?</h2>
+<img src="img/latentfact.png" alt="latent factor illustration">
+<ul>
+  <li>Very compact representation of musical style or user's taste</li>
+  <li>Only like 40-200 elements (2 shown above for illustration)</li>
+</ul>
+</section>
+
+<section data-markdown data-background-color="#ffffff">
+<script type="text/template">
+## Why vectors?
+ - Dot product between items = similarity between items
+ - Dot product between vectors = good/bad recommendation
+
+| user | x | item | |  | |
+|---|---|---|---|---|---|
+| 2 | x | 4  | = | | 8 |
+| -4 | x | 0  | = | | 0 |
+| 2  | x | -2  | = | | -4  |
+| -1  | x | 5  | = | + | -5  |
+| | | | | = | -1 |
+
+</script>
+</section>
+
+<section data-background-color="#ffffff">
+<h3>Recommendations via dot products</h3>
+<img src="img/dotprodrecs.png" alt="dot product recs">
+</section>
+
+<section data-background-color="#ffffff">
+<h3>Another example of tracks in two dimensions</h3>
+<img src="img/latent2dim.png" alt="graph of 2-dim latent factors">
+</section>
+
+<section>
+<h2>Implicit Matrix Factorization</h2>
+<p>Hu, Koren, Volinsky - <i>Collaborative Filtering for Implicit Feedback Datasets</i></p>
+<p>Tries to predict whether user $u$ listens to item $i$:<p>
+\[P = \left( \begin{array}{cccc}
+0 & 0 & 0 & 1 \\
+0 & 1 & 1 & 0 \\
+0 & 0 & 1 & 0 \\
+1 & 0 & 0 & 1 \end{array} \right) 
+\approx
+\left( \begin{array}{ccc} & X & \end{array} \right)
+\left( \begin{array}{c} \\ Y^T \\ \\ \end{array} \right)
+\]
+  <p>$Y$ is all item vectors, $X$ is all user vectors</p>
+  <p class="fragment">"implicit" because users don't <i>tell us</i> what they like, we only observe what they do/don't listen to</p>
+</section>
+
+<section>
+<h2>Implicit Matrix Factorization</h2>
+Goal: make $x_u \cdot y_i$ close to 1 for things each user has listened to, 0 for everything else.
+<ul>
+  <li>$x_u$ &mdash; user $u$'s vector</li>
+  <li>$y_i$ &mdash; item $i$'s vector</li>
+  <li>$p_{ui}$ &mdash; 1 if user $u$ played item $i$, 0 otherwise</li>
+  <li>$c_{ui}$ &mdash; "confidence", ad-hoc weight based on number of times user $u$ played item $i$; e.g., $1 + \alpha \cdot \tt{plays}_{ui}$</li>
+  <li>$\lambda$ &mdash; regularization penalty to avoid overfitting</li>
+</ul>
+<div class="fragment" style="margin-top: 30px">
+ Minimize:
+
+\[ \sum_{u,i} c_{ui} \left( p_{ui} - x_{u}^{T} y_{i} \right)^2 + \lambda \left(\sum_u ||x_u||^2 + \sum_i ||y_i||^2 \right) \]
+</div>
+
+</section>
+
+<section>
+<h2>Alternating Least Squares</h2>
+Solution: alternate solving for all users $x_u$:
+\[ x_u = (Y^T Y + Y^T (C^u - I) Y + \lambda I)^{-1} Y^T C^u p_{u\cdot} \]
+and all items $y_i$:
+\[ y_i = (X^T X + X^T (C^i - I) X + \lambda I)^{-1} X^T C^i p_{\cdot i} \]
+<br>
+<ul>
+  <li>$Y^T Y$ = $f$ x $f$ matrix, sum of outer products of all items</li>
+  <li>$Y^T (C^u - I) Y$ same, except only items the user played</li>
+  <li>$Y^T C^u p_u$ = weighted $f$-dimensional sum of items the user played</li>
+</ul>
+</section>
+
+<section>
+<h2>Alternating Least Squares</h2>
+<p>Key point: each iteration is linear in size of input, even though we are
+solving for all users x all items, and needs only $f^2$ memory to solve</p>
+<p class="fragment">No learning rates, just a few tunable parameters ($f$, $\lambda$, $\alpha$)</p>
+<p class="fragment">All you do is add stuff up, solve an $f$x$f$ matrix problem, and repeat!</p>
+<p class="fragment">We use $f = 40$ dimensional vectors for recommendations
+<p class="fragment">Matrix/vector math using numpy in Python, breeze in scala</p>
+</section>
+
+<section>
+<h2>Alternating Least Squares</h2>
+<h3>Adding lots of stuff up</h3>
+<ul>
+  <li>Problem: any user (<b>60M</b>) can play any item (<b>4M</b>)
+  <ul class="fragment">
+    <li>thus we may need to add any user's vector to any item's vector</li>
+  </ul>
+  <li class="fragment">If we put user vectors in memory, it takes a lot of RAM!</li>
+  <li class="fragment">Worst case: 60M users * 40 dimensions * sizeof(float) = 9.6GB of user vectors</li>
+  <li class="fragment">...too big to fit in a mapper slot on our cluster</li>
+</ul>
+</section>
+
+<section data-background-color="#ffffff">
+  <h3>Adding lots of stuff up</h3>
+Solution: Split the data into a matrix
+
+   <img src="img/korenmr1.png" alt="IMF mapreduce iteration">
+   <br>
+
+Most recent run made a 14 x 112 grid
+</section>
+
+<section data-background-color="#ffffff">
+<h2>One map shard</h2>
+Input is a bunch of <b>(user, item, count)</b> tuples<br>
+<b>user</b> is the same modulo K for all users<br>
+<b>item</b> is the same modulo L for all items
+<img src="img/korenmr2.png" alt="IMF mapreduce one user"><br>
+e.g., if K = 4, mapper #1 gets users 1, 5, 9, 13, ...
+</section>
+
+<section>
+<h3>Adding stuff up</h3>
+Add up vectors from every <b>(user, item, count)</b> data point<br>
+<pre><code data-trim>
+def mapper(self, input):  # Luigi-style python job
+  user, item, count = parse(input)
+  conf = AdHocConfidenceFunction(count)   # e.g. 1 + alpha*count
+  # add up user vectors from previous iteration
+  term1 = conf * self.user_vectors[user]
+  term2 = np.outer(user_vectors[user], user_vectors[user])
+          * (conf - 1)
+ yield item, np.array([term1, term2])
+
+def reducer(self, item, terms):
+  term1, term2 = sum(terms)
+  item_vector = np.solve(
+    self.YTY + term2 + self.l2penalty * np.identity(self.dim),
+    term1)
+  yield item, item_vector
+</code></pre>
+Then flip users &harr; items and repeat!
+</section>
+
+<section data-markdown>
+<script type="text/template">
+## Alternating Least Squares
+- Implemented in Java Map-Reduce framework which runs other models, too
+- After about 20 iterations, we converge
+- Each iteration takes about 20 minutes, so about 7-8 hours total
+- Recomputed from scratch weekly
+- User vectors recomputed daily, keeping items fixed
+<li class="fragment">So we have vectors, now what?</li>
+</script>
+</section>
+
+<section>
+<h2>Finding Recommendations</h2>
+60M users x 4M recommendable items
+
+<ul>
+  <li>For each user, how do we find the best items given their vector?</li>
+  <li class="fragment">Brute force is O(60M x 4M x 40) = O(9 peta-operations)!</li>
+  <li class="fragment">Instead, use an approximation based on locality
+  sensitive hashing (LSH)</li>
+</script>
+</section>
+
+<section data-background-color="#ffffff" data-background-image="img/annoy.png">
+<h2>Approximate Nearest Neighbors / </h2>
+<h2>Locality-Sensitive Hashing</h2>
+<h3>Annoy - github.com/spotify/annoy</h3>
+</section>
+
+<section data-background-color="#ffffff">
+<h3>Annoy - <a href="https://github.com/spotify/annoy">github.com/spotify/annoy</a></h3>
+<ul>
+  <li>Pre-built read-only database of item vectors</li>
+  <li class="fragment">Internally, recursively splits random hyperplanes
+  <ul>
+    <li>Nearby points likely on the same side of random split</li>
+    <li>Builds several random trees (a forest) for better approximation</li>
+  </ul>
+  </li>
+  <li class="fragment">Given an $f$-dimensional query vector, finds similar
+  items in database</li>
+  <li class="fragment">Index loads via <code>mmap</code>, so all processes on the same
+  machine share RAM</li>
+  <li class="fragment">Queries are very, very fast, but approximate</li>
+  <li class="fragment">Python implementation available, Java forthcoming</li>
+</ul>
+</section>
+
+<section>
+<h3>Generating recommendations</h3>
+<ul>
+  <li>Annoy index for all items is only 1.2GB</li>
+  <li class="fragment">I have one on my laptop... Live demo!</li>
+  <li class="fragment">Could serve up nearest neighbors at load time, but we
+  precompute Discover on Hadoop</li>
+</ul>
+</section>
+
+<section data-background-color="#ffffff">
+<h3>Generating recommendations in parallel</h3>
+<img src="img/annuserrecs.png">
+<ul>
+  <li>Send annoy index in distributed cache, load it via
+  <code>mmap</code> in map-reduce process</li>
+  <li>Reducer loads vectors + user stats, looks up ANN, generates recommendations.</li>
+</ul>
+</section>
+
+<section data-background="img/related-artists.jpg" data-background-transition="zoom">
+<h1>Related Artists</h1>
+</section>
+
+<section>
+<h2>Related Artists</h2>
+<ul>
+  <li>Great for music discovery</li>
+  <li>Essential for finding believable reasons for latent factor-based recommendations
+  <img src="img/similarto.jpg" alt="similar to">
+  </li>
+  <li>When generating recommendations, run through a list of related artists to find potential reasons
+</ul>
+</section>
+
+<section data-background-color="#ffffff">
+<h3>Similar items use cosine distance</h3>
+<ul>
+  <li>Cosine is similar to dot product; just add a normalization step</li>
+  <li>Helps "factor out" popularity from similarity</li>
+</ul>
+<img src="img/cosinesim.png" alt="cosine similarity">
+</section>
+
+
+<section>
+<h2>Related Artists</h2>
+<h3>How we build it</h3>
+<ul>
+  <li>Similar to user recommendations, but with more models, not necessarily collaborative filtering based
+  <ul>
+    <li class="fragment">Implicit Matrix Factorization (shown previously)</li>
+    <li class="fragment">"Vector-Exp", similar model but probabilistic in nature, trained with
+    gradient descent</li>
+    <li class="fragment">Google word2vec on playlists</li>
+    <li class="fragment">Echo Nest "cultural similarity" &mdash; based on scraping web pages about music!</li>
+  </ul>
+  </li>
+  <li class="fragment">Query ANNs to generate candidates</li>
+  <li class="fragment">Score candidates from all models, combine and rank</li>
+  <li class="fragment">Pre-build table of 20 nearest artists to each artist</li>
+</ul>
+</section>
+
+<section data-background-image="img/radio.jpg" data-background-transition="zoom">
+<h1>Radio</h1>
+</section>
+
+<section>
+<h1>Radio</h1>
+ML-wise, exactly the same as Related Artists!
+<ul>
+  <li class="fragment">For each track, generate candidates with ANN from each model</li>
+  <li class="fragment">Score w/ all models, rank with ensemble</li>
+  <li class="fragment">Store top 250 nearest neighbors in a database (Cassandra)</li>
+  <li class="fragment">User plays radio &rarr; load 250 tracks and shuffle</li>
+  <li class="fragment">Thumbs up &rarr; load more tracks from the thumbed-up song</li>
+  <li class="fragment">Thumbs down &rarr; remove that song / re-weight tracks</li>
+</ul>
+</section>
+
+<section>
+<h1>Upcoming work</h1>
+<div class="fragment">
+  <h3>Deep learning based item similarity</h3>
+  <img src="img/spotify_convnet.png" height="400" alt="convnet"><br>
+  <a href="http://benanne.github.io/2014/08/05/spotify-cnns.html">http://benanne.github.io/2014/08/05/spotify-cnns.html</a>
+</div>
+</section>
+  
+<section data-background-color="#1a1a1a">
+<h1>Upcoming work</h1>
+  <img src="img/echonest.gif" style="float: right" alt="the echo nest">
+  <h3>Audio fingerprint based content deduplication</h3>
+<ul>
+  <li class="fragment">~<b>1500</b> Echo Nest Musical Fingerprints per track</li>
+  <li class="fragment"><a href="http://en.wikipedia.org/wiki/MinHash">Min-Hash</a> based matching to accelerate all-pairs similarity</li>
+  <li class="fragment">Fast connected components using Hash-to-Min algorithm - $O(\log d)$ mapreduce steps<br><a href="http://arxiv.org/pdf/1203.5387.pdf">http://arxiv.org/pdf/1203.5387.pdf</a></li>
+</ul>
+</section>
+
+<section data-background="img/Spotify_Icon_RGB_Green.png" data-background-size="200px" data-background-transition="zoom">
+<h1>Thanks!</h1>
+<div style="float:left; text-align: left">
+<p>I can be reached here:</p>
+<p>Andy Sloane<br>
+Email: <a style="color: #ffffff; text-decoration: underline;" href="mailto:andy@a1k0n.net">andy@a1k0n.net</a></br>
+Twitter: <a style="color: #ffffff; text-decoration: underline;" href="https://twitter.com/a1k0n">@a1k0n</a><br>
+<a style="color: #ffffff; text-decoration: underline;" href="http://a1k0n.net/">http://a1k0n.net</a>
+</p>
+<p>Special thanks to <a href="http://erikbern.com">Erik Bernhardsson</a>, whose slides I plagiarized mercilessly</p>
+</div>
+</section>
+
+<!-- ***************************************************** -->
+      </div>
+
+    </div>
+
+    <script src="lib/js/head.min.js"></script>
+    <script src="js/reveal.js"></script>
+
+    <script>
+
+      // Full list of configuration options available at:
+      // https://github.com/hakimel/reveal.js#configuration
+      Reveal.initialize({
+        controls: false,
+        progress: false,
+        history: true,
+        center: true,
+
+        transition: 'slide', // none/fade/slide/convex/concave/zoom
+
+        math: {
+          mathjax: 'http://cdn.mathjax.org/mathjax/latest/MathJax.js',
+          config: 'TeX-AMS_HTML-full'  // See http://docs.mathjax.org/en/latest/config-files.html
+        },
+
+
+        // Optional reveal.js plugins
+        dependencies: [
+          { src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+          { src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+          { src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+          { src: 'plugin/highlight/highlight.js', async: true, condition: function() { return !!document.querySelector( 'pre code' ); }, callback: function() { hljs.initHighlightingOnLoad(); } },
+          { src: 'plugin/zoom-js/zoom.js', async: true },
+          { src: 'plugin/notes/notes.js', async: true },
+          { src: 'plugin/math/math.js', async: true }
+        ]
+      });
+
+    </script>
+
+  </body>
+</html>
