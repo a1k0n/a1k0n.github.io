@@ -4,7 +4,7 @@
   <title>a1k0n.net</title>
   <link href="http://a1k0n.net/"/>
   <link type="application/atom+xml" rel="self" href="http://a1k0n.net/atom.xml"/>
-  <updated>2015-06-10T14:37:57-05:00</updated>
+  <updated>2015-06-10T15:26:22-05:00</updated>
   <id>http://a1k0n.net/</id>
   <author>
     <name>Andy Sloane</name>
@@ -890,54 +890,6 @@ for the contest.
   
   
   <entry>
-    <id>http://a1k0n.net/2009/12/08/cheap-blackberry-charger</id>
-    <link type="text/html" rel="alternate" href="http://a1k0n.net/2009/12/08/cheap-blackberry-charger.html"/>
-    <title>Super high-tech BlackBerry charger</title>
-    <updated>2009-12-08T00:00:00-06:00</updated>
-    <author>
-      <name>Andy Sloane</name>
-      <uri>http://a1k0n.net/</uri>
-    </author>
-    <content type="html">&lt;p&gt;I got a BlackBerry 8350i from ebay to use with a &lt;a href=&quot;http://boostmobile.com&quot;&gt;Boost Mobile&lt;/a&gt; prepaid plan.  Boost (as
-prepaid plans are in general) is much, much cheaper than the
-alternatives when you don’t talk on the phone a lot.  And (slow)
-unlimited wireless internet is only 35 cents a day which works out to
-a little over $10/month.&lt;/p&gt;
-
-&lt;p&gt;But anyway, my used BlackBerry turned out to have a broken USB port.
-It was mounted entirely with cold solder joints and fell right off
-like it wasn’t even soldered on when I first tried to charge it up.&lt;/p&gt;
-
-&lt;p&gt;Most people would avail themselves of the return policy, but I’m not
-most people.&lt;/p&gt;
-
-&lt;p&gt;I needed to get updated firmware to get SMS and GPS to work, so I &lt;a href=&quot;http://www.flickr.com/photos/asloane/4164714965/&quot;&gt;soldered some
-wires on&lt;/a&gt;, clipped them to a USB cable, and that worked flawlessly,
-to my surprise.&lt;/p&gt;
-
-&lt;p&gt;That let me charge it up, too.  So then I had a phone with a full
-charge, upgraded firmware, working everything, except it does me no
-good just sitting on my desk tethered to a bunch of flimsy wires.  I
-clipped off all the wires and ordered a replacement USB port as well
-as a cradle charger, and all was well until the battery died.  Which
-it pretty much did the next day.&lt;/p&gt;
-
-&lt;p&gt;So last night I came up with this:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/img/hackberry1.jpg&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/img/hackberry2.jpg&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/img/hackberry3.jpg&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;Two nails driven through a block of wood connected to USB +5V and
-ground.  Works like a charm.&lt;/p&gt;
-</content>
-  </entry>
-  
-  
-  
-  <entry>
     <id>http://a1k0n.net/2009/11/17/hacker-challenge-2-solution</id>
     <link type="text/html" rel="alternate" href="http://a1k0n.net/2009/11/17/hacker-challenge-2-solution.html"/>
     <title>Hacker challenge part 2 solution</title>
@@ -1540,86 +1492,6 @@ href=&quot;http://www.chiark.greenend.org.uk/~sgtatham/putty/&quot;&gt;PuTTY&lt;
 distribution in lieu of ssh.  If you&#39;re doing multi-hop tramp, though,
 you need to use plink for the first hop (Windows box -&gt; &quot;firewall&quot;
 box) and ssh thereafter (&quot;firewall&quot; -&gt; &quot;server&quot;).&lt;/p&gt;
-
-</content>
-  </entry>
-  
-  
-  
-  <entry>
-    <id>http://a1k0n.net/2005/11/04/lisp-repl-vendetta-online</id>
-    <link type="text/html" rel="alternate" href="http://a1k0n.net/2005/11/04/lisp-repl-vendetta-online.html"/>
-    <title>Lisp REPL in Vendetta Online</title>
-    <updated>2005-11-04T00:00:00-06:00</updated>
-    <author>
-      <name>Andy Sloane</name>
-      <uri>http://a1k0n.net/</uri>
-    </author>
-    <content type="html">&lt;p&gt;&lt;a href=&quot;http://www.vendetta-online.com&quot;&gt;Vendetta Online&lt;/a&gt; has a
-Lisp environment (using SBCL) which controls much of its NPC behavior
-and will soon be in charge of generating player and NPC missions.
-Partly in order to get around some thread-safety issues, and partly
-for convenience we built an REPL into a secret chat channel.  (it only
-responds to developer accounts)&lt;/p&gt;
-
-&lt;a href=&quot;/lisp/vo-lisp-repl1.png&quot;&gt;&lt;img src=&quot;/lisp/vo-lisp-repl1_small.png&quot;&gt;&lt;/a&gt;&lt;br /&gt;
-
-&lt;a href=&quot;/lisp/vo-lisp-repl2.png&quot;&gt;&lt;img src=&quot;/lisp/vo-lisp-repl2_small.png&quot;&gt;&lt;/a&gt;&lt;br /&gt;
-
-&lt;p&gt;It also handles errors by printing a quick and dirty stack trace:&lt;/p&gt;
-
-&lt;a href=&quot;/lisp/vo-lisp-repl3.png&quot;&gt;&lt;img src=&quot;/lisp/vo-lisp-repl3_small.png&quot;&gt;&lt;/a&gt;&lt;br /&gt;
-
-Here&#39;s the code for the stack dump handler, for interested readers:&lt;br /&gt;
-
-&lt;pre&gt;
-(defun trap-and-log-error-handler (condition)
-  (format t &quot;Error signalled: ~A~%&quot; condition)
-  ;; this (write-string (with-output-to-string (s) ...) thing is odd,
-  ;; but seemingly necessary because print-frame-call seems
-  ;; uncooperative when using t for a stream argument.
-  (write-string (with-output-to-string (s)
-		  (do ((frame (sb-di:top-frame) (sb-di:frame-down frame))
-		       (i 0 (1+ i)))
-		      ((null frame))
-		    (format s &quot;~a: &quot; i)
-		    (sb-debug::print-frame-call frame s)
-		    (format s &quot;~%&quot;)))))
-
-(defmacro trap-and-log-errors (&amp;amp;body body)
-  `(ignore-errors
-     (handler-bind ((error #&#39;trap-and-log-error-handler))
-       ,@body)))
-
-&lt;/pre&gt;
-
-and here&#39;s the REPL code (trap-and-log-errors is somewhere upstream
-from where this is called)
-
-&lt;pre&gt;
-;;; this is what interprets &quot;eval&quot; requests from developers; we have a
-;;; simple color code tag involving the non-printable character 
-;;; (code-char 127), so return values show up in red (like in SLIME)
-
-(define-server-function eval (&amp;amp;rest cmd)
-  (flet ((format-return-value (return-val)
-	   (with-output-to-string (os)
-	     (with-input-from-string (s (format nil &quot;~s~&amp;amp;&quot; return-val))
-	       (loop for line = (read-line s nil)
-		     while line do
-		     (format os &quot;~aff0000~a~%&quot; (code-char 127) line))))))
-    (let ((return-val (multiple-value-list (eval `(progn
-						   (in-package :com.guildsoftware.deliverator)
-						   ,@cmd)))))
-      (format t &quot;~&amp;amp;&quot;)
-      (dolist (val return-val)
-	(write-string (format-return-value val))))))
-
-
-&lt;/pre&gt;
-
-Why didn&#39;t I just use &lt;tt&gt;sb-debug:backtrace&lt;/tt&gt;?  I didn&#39;t know
-about it.  I just looked at how SLIME did it.
 
 </content>
   </entry>
