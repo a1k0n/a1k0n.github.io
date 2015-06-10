@@ -1,7 +1,9 @@
-pygments: true
-markdown: maruku
-maruku:
-  use_tex: true
-  png_dir: img/latex
-  png_url: /img/latex/
+highlighter: true
+markdown: kramdown
+kramdown:
+  math_engine: mathjax
+#maruku:
+#  use_tex: true
+#  png_dir: img/latex
+#  png_url: /img/latex/
 #  use_divs: true

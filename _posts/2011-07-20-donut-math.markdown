@@ -71,18 +71,17 @@ to obtain: notice that the origin, the *y*-axis, and point (*x*,*y*,*z*) form a
 right triangle, and a similar right triangle is formed with (*x'*,*y'*,*z'*).
 Thus the relative proportions are maintained:
 
-\[
+$$
 \begin{aligned}
-\frac{y'}{z'} &= \frac{y}{z}
-\\
+\frac{y'}{z'} &= \frac{y}{z} \\
 y' &= \frac{y z'}{z}.
 \end{aligned}
- \]
+$$
 
 So to project a 3D coordinate to 2D, we scale a coordinate by the screen
 distance *z'*.  Since *z'* is a fixed constant, and not functionally a
 coordinate, let's rename it to *K<sub>1</sub>*, so our projection equation
-becomes $(x',y') = (\frac{K_1 x}{z}, \frac{K_1 y}{z})$.  We can choose
+becomes $$(x',y') = (\frac{K_1 x}{z}, \frac{K_1 y}{z})$$.  We can choose
 *K<sub>1</sub>* arbitrarily based on the field of view we want to show in our
 2D window.  For example, if we have a 100x100 window of pixels, then the view
 is centered at (50,50); and if we want to see an object which is 10 units wide
@@ -95,7 +94,7 @@ points at the same (*x'*,*y'*) location but at different depths, so we maintain
 a <a href="http://en.wikipedia.org/wiki/Z-buffering">z-buffer</a> which stores
 the *z* coordinate of everything we draw.  If we need to plot a location, we
 first check to see whether we're plotting in front of what's there already.  It
-also helps to compute *z*<sup>-1</sup> $= \frac{1}{z}$ and use that when depth
+also helps to compute *z*<sup>-1</sup> $$= \frac{1}{z}$$ and use that when depth
 buffering because:
 
  * *z*<sup>-1</sup> = 0 corresponds to infinite depth, so we can pre-initialize
@@ -117,9 +116,9 @@ So we have a circle of radius *R*<sub>1</sub> centered at point
 (*R*<sub>2</sub>,0,0), drawn on the *xy*-plane.  We can draw this by sweeping
 an angle &mdash; let's call it *&theta;* &mdash; from 0 to 2&pi;:
 
-\[
+\\[
 (x,y,z) = (R_2,0,0) + (R_1 \cos \theta, R_1 \sin \theta, 0)
-\]
+\\]
 
 Now we take that circle and rotate it around the *y*-axis by another angle
 &mdash; let's call it &phi;.  To rotate an arbitrary 3D point around one of the
@@ -127,7 +126,7 @@ cardinal axes, the standard technique is to multiply by a <a
 href="http://en.wikipedia.org/wiki/Rotation_matrix">rotation matrix</a>.  So if
 we take the previous points and rotate about the *y*-axis we get:
 
-\[
+$$
 \left( \begin{matrix}
 R_2 + R_1 \cos \theta, &
 R_1 \sin \theta, &
@@ -142,7 +141,7 @@ R_1 \sin \theta, &
 (R_2 + R_1 \cos \theta)\cos \phi, &
 R_1 \sin \theta, &
 -(R_2 + R_1 \cos \theta)\sin \phi \end{matrix} \right)
-\]
+$$
 
 But wait: we also want the whole donut to spin around on at least two more axes
 for the animation.  They were called *A* and *B* in the original code: it was a
@@ -150,7 +149,7 @@ rotation about the *x*-axis by *A* and a rotation about the *z*-axis by *B*.
 This is a bit hairier, so I'm not even going write the result yet, but it's a
 bunch of matrix multiplies.
 
-\[
+$$
 \left( \begin{matrix}
 R_2 + R_1 \cos \theta, &
 R_1 \sin \theta, &
@@ -170,7 +169,7 @@ R_1 \sin \theta, &
 \cos B & \sin B & 0 \\
 -\sin B & \cos B & 0 \\
 0 & 0 & 1 \end{matrix} \right)
-\]
+$$
 
 Churning through the above gets us an (*x*,*y*,*z*) point on the surface of our
 torus, rotated around two axes, centered at the origin.  To actually get screen
@@ -183,11 +182,11 @@ coordinates, we need to:
 So we have another constant to pick, call it *K*<sub>2</sub>, for the distance
 of the donut from the viewer, and our projection now looks like:
 
-\[
+\\[
 \left( x', y' \right)
 =
 \left( \frac{K_1 x}{K_2 + z} , \frac{K_1 y}{K_2 + z} \right)
-\]
+\\]
 
 *K*<sub>1</sub> and *K*<sub>2</sub> can be tweaked together to change the field
 of view and flatten or exaggerate the depth of the object.
@@ -198,7 +197,7 @@ code as much as possible, then every 0 in the matrices above is an opportunity
 for simplification.  So let's multiply it out.  Churning through a bunch of
 algebra (thanks Mathematica!), the full result is:
 
-\[
+$$
 \left( \begin{matrix} x \\ y \\ z \end{matrix} \right) =
 \left( \begin{matrix}
  (R_2 + R_1 \cos \theta) (\cos B \cos \phi + \sin A \sin B \sin \phi) - 
@@ -208,10 +207,10 @@ algebra (thanks Mathematica!), the full result is:
    R_1 \cos A \cos B \sin \theta \\
  \cos A (R_2 + R_1 \cos \theta) \sin \phi + R_1 \sin A \sin \theta
 \end{matrix} \right)
-\]
+$$
 
 Well, that looks pretty hideous, but we we can precompute some common
-subexpressions (e.g. all the sines and cosines, and $R_2 + R_1 \cos \theta$)
+subexpressions (e.g. all the sines and cosines, and $$R_2 + R_1 \cos \theta$$)
 and reuse them in the code.  In fact I came up with a completely different
 factoring in the original code but that's left as an exercise for the reader.
 (The original code also swaps the sines and cosines of A, effectively rotating
@@ -239,7 +238,7 @@ So our surface normal (*N<sub>x</sub>*, *N<sub>y</sub>*, *N<sub>z</sub>*) is
 derived the same as above, except the point we start with is just (cos
 *&theta;*, sin *&theta;*, 0).  Then we apply the same rotations:
 
-\[
+$$
 \left( \begin{matrix}
 N_x, &
 N_y, &
@@ -264,15 +263,15 @@ N_z \end{matrix} \right)
 \cos B & \sin B & 0 \\
 -\sin B & \cos B & 0 \\
 0 & 0 & 1 \end{matrix} \right)
-\]
+$$
 
 So which lighting direction should we choose?  How about we light up surfaces
-facing behind and above the viewer: $(0,1,-1)$.  Technically
+facing behind and above the viewer: $$(0,1,-1)$$.  Technically
 this should be a normalized unit vector, and this vector has a magnitude of
 &radic;2.  That's okay -- we will compensate later.  Therefore we compute the
 above (*x*,*y*,*z*), throw away the *x* and get our luminance *L* = *y*-*z*.
 
-\[
+$$
 \begin{aligned}
 L &=
 \left( \begin{matrix}
@@ -289,7 +288,7 @@ N_z \end{matrix} \right)
 \cos \phi \cos \theta \sin B - \cos A \cos \theta \sin \phi - \sin A \sin \theta + 
  \cos B ( \cos A \sin \theta - \cos \theta \sin A \sin \phi)
 \end{aligned}
-\]
+$$
 
 Again, not too pretty, but not terrible once we've precomputed all the sines
 and cosines.
