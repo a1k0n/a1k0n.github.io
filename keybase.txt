@@ -1,0 +1,73 @@
+==================================================================
+https://keybase.io/a1k0n
+--------------------------------------------------------------------
+
+I hereby claim:
+
+  * I am an admin of http://www.a1k0n.net
+  * I am a1k0n (https://keybase.io/a1k0n) on keybase.
+  * I have a public key with fingerprint 54C6 0ED3 608C E889 0913  6C06 D257 0C60 21DB 3514
+
+To do so, I am signing this object:
+
+{
+    "body": {
+        "key": {
+            "fingerprint": "54c60ed3608ce88909136c06d2570c6021db3514",
+            "host": "keybase.io",
+            "key_id": "d2570c6021db3514",
+            "kid": "010160c30c657f93d07fbcab344b0ebba60b704ead142837863cd6173514a05eecb50a",
+            "uid": "010fd11c22e9be94134f2d7ae826e400",
+            "username": "a1k0n"
+        },
+        "revoke": {
+            "sig_ids": [
+                "bcac422b9d176bced66c26d8703868da1766614d4554e4a5bf5c712875ab789f0f"
+            ]
+        },
+        "service": {
+            "hostname": "www.a1k0n.net",
+            "protocol": "http:"
+        },
+        "type": "web_service_binding",
+        "version": 1
+    },
+    "ctime": 1434060399,
+    "expire_in": 157680000,
+    "prev": "8dc33da3b09f75a0ed6952095d2df4cf6a5f8da24ac560163cc0a5337eb85e0d",
+    "seqno": 8,
+    "tag": "signature"
+}
+
+which yields the signature:
+
+-----BEGIN PGP MESSAGE-----
+Version: Keybase OpenPGP v2.0.8
+Comment: https://keybase.io/crypto
+
+yMJdAnicbZJraFRHFMc3RqMulZSCBhVEJkW0ruvcO697V2rRUmqkflAUlJqu87rJ
+NXrvunuz0dr4aiBWfFJFEUQt1EeLVgr1gVDSEIOSxYhoRD9EW/BFKsEkIPSDOnfR
+b50vw5zzn9/5nznTNaEykaxY/oda9nT80oMVPX8dbU6s+LYq3AxEqDaBzGbQpMub
+5wcNOp/L+0EEMoBgSaFWiEJHasdxoWshKiFVNmHQpGxLCUQsDFKgMSzENwxG8IJO
++6GJmUPWVyb6P/qmcgJa0KJQIpMkzHORgswTkguEsYBaCE6hYBBrrixsO4g5FElF
+LRZDOCRaS0EgN7jm9zhPWZa0be0K7WILYc9WjGvHphpDGAsLOh/w9dqoudUEA9Ca
+AnldDJt03H7BbzCOCyDzNTA2JLZt4SqLUSG1olTaVDkMIoc6ipsopRZWmBCsMSfC
+I5JZtsMIF8xxPeiBesM25Yq+LMPjJ3pXuqWlJV0unw50ZFzl8mEUynCdSTVGUS4T
+u4o25cpSLbLvIFnhB8oMyFwo6nzBDwOQsYxSRn5MtTDCkELkuimgN+b8vM76sYIw
+6kCz4jK6aJCOkggpjgR0PWPXTJi6xIYuUbbysPQoJ57p0MZcEmoGhKSEnCDEtHCI
+hgrEbW0IQpBxjE3eYJDm4QIeNec1aO3sWD06UZFMVI0ZFX+xRHL8h+8/3qXesa9n
+DFc/WHjn0azF02/8Nhz2HOqbeyds/QptS1zf/cWqedmbt86+PNDePnZi9vT9thXJ
+/1ofzvjxcGng6uyPtvrfkXsX7Kk7z6+fdGLni5dXh0bmRHWjn/ekUv6RD/p7f4bb
+HvvH+8cNvlj7fDITtVPb7v7wqn7kzKljC/6+lB7qK+6bcq5u45Thru1LP9s+6Muq
+mr1PLi4+sWbo11NLwprOZwPV2VddfT0dx9o/763b9csN9v3ePWOu1ZZw9+3Mqu5x
+/1a8KfXP/+Ryksz0Bw62zdpAdoxyF1V3jwyWpt/7fcuEP1n9fruGTrvcMDv9zbKT
+V9aCo4XKXYffZD79p7T7yzUXBn9KrHxYe/Ljt/FzQfU=
+=iUmy
+-----END PGP MESSAGE-----
+
+And finally, I am proving ownership of this host by posting or
+appending to this document.
+
+View my publicly-auditable identity here: https://keybase.io/a1k0n
+
+==================================================================
