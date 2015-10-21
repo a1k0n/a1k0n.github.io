@@ -4,7 +4,7 @@
   <title>a1k0n.net</title>
   <link href="http://a1k0n.net/"/>
   <link type="application/atom+xml" rel="self" href="http://a1k0n.net/atom.xml"/>
-  <updated>2015-06-11T17:14:23-05:00</updated>
+  <updated>2015-10-21T16:56:24-07:00</updated>
   <id>http://a1k0n.net/</id>
   <author>
     <name>Andy Sloane</name>
@@ -17,7 +17,7 @@
     <id>http://a1k0n.net/2011/07/20/donut-math</id>
     <link type="text/html" rel="alternate" href="http://a1k0n.net/2011/07/20/donut-math.html"/>
     <title>Donut math&#58; how donut.c works</title>
-    <updated>2011-07-20T00:00:00-05:00</updated>
+    <updated>2011-07-20T00:00:00-07:00</updated>
     <author>
       <name>Andy Sloane</name>
       <uri>http://a1k0n.net/</uri>
@@ -424,13 +424,17 @@ render_frame(float A, float B) {
   <entry>
     <id>http://a1k0n.net/2011/06/26/obfuscated-c-yahoo-logo</id>
     <link type="text/html" rel="alternate" href="http://a1k0n.net/2011/06/26/obfuscated-c-yahoo-logo.html"/>
-    <title>Yahoo! Logo ASCII Animation in six lines of C</title>
-    <updated>2011-06-26T00:00:00-05:00</updated>
+    <title>Yahoo! Logo ASCII Animation in 462 bytes of C</title>
+    <updated>2011-06-26T00:00:00-07:00</updated>
     <author>
       <name>Andy Sloane</name>
       <uri>http://a1k0n.net/</uri>
     </author>
-    <content type="html">&lt;p&gt;[&lt;b&gt;Update 6/28/2011:&lt;/b&gt; added Javascript version; press button below to see the
+    <content type="html">&lt;p&gt;[&lt;b&gt;Update 10/21/2015:&lt;/b&gt; Changed the title from &quot;six lines of C&quot; to &quot;462
+bytes of C&quot; to avoid endless arguments about what consitutes a line of C
+code.]&lt;/p&gt;
+
+&lt;p&gt;[&lt;b&gt;Update 6/28/2011:&lt;/b&gt; added Javascript version; press button below to see the
 output without compiling the code.]&lt;/p&gt;
 
 &lt;p&gt;[&lt;b&gt;Update 7/9/2011:&lt;/b&gt; if you&#39;re using a compiler other than gcc, you
@@ -595,7 +599,7 @@ when typing this up, but you get the idea.&lt;/p&gt;
     <id>http://a1k0n.net/2010/03/04/google-ai-postmortem</id>
     <link type="text/html" rel="alternate" href="http://a1k0n.net/2010/03/04/google-ai-postmortem.html"/>
     <title>Google AI Challenge post-mortem</title>
-    <updated>2010-03-04T00:00:00-06:00</updated>
+    <updated>2010-03-04T00:00:00-08:00</updated>
     <author>
       <name>Andy Sloane</name>
       <uri>http://a1k0n.net/</uri>
@@ -893,7 +897,7 @@ for the contest.
     <id>http://a1k0n.net/2009/11/17/hacker-challenge-2-solution</id>
     <link type="text/html" rel="alternate" href="http://a1k0n.net/2009/11/17/hacker-challenge-2-solution.html"/>
     <title>Hacker challenge part 2 solution</title>
-    <updated>2009-11-17T00:00:00-06:00</updated>
+    <updated>2009-11-17T00:00:00-08:00</updated>
     <author>
       <name>Andy Sloane</name>
       <uri>http://a1k0n.net/</uri>
@@ -987,7 +991,7 @@ that for another day, or perhaps for another person.&lt;/p&gt;
     <id>http://a1k0n.net/2009/04/03/hacker-challenge-2</id>
     <link type="text/html" rel="alternate" href="http://a1k0n.net/2009/04/03/hacker-challenge-2.html"/>
     <title>Hacker challenge part 2</title>
-    <updated>2009-04-03T00:00:00-05:00</updated>
+    <updated>2009-04-03T00:00:00-07:00</updated>
     <author>
       <name>Andy Sloane</name>
       <uri>http://a1k0n.net/</uri>
@@ -1131,7 +1135,7 @@ is the reddit thread for part 2.&lt;/p&gt;
     <id>http://a1k0n.net/2009/03/31/hacker-challenge</id>
     <link type="text/html" rel="alternate" href="http://a1k0n.net/2009/03/31/hacker-challenge.html"/>
     <title>Hacker challenge&#58; Can you make a keygen?</title>
-    <updated>2009-03-31T00:00:00-05:00</updated>
+    <updated>2009-03-31T00:00:00-07:00</updated>
     <author>
       <name>Andy Sloane</name>
       <uri>http://a1k0n.net/</uri>
@@ -1214,7 +1218,7 @@ challenge part 2&lt;/a&gt; has been posted.&lt;/p&gt;
     <id>http://a1k0n.net/2007/10/12/obfuscated-c-vendetta-online</id>
     <link type="text/html" rel="alternate" href="http://a1k0n.net/2007/10/12/obfuscated-c-vendetta-online.html"/>
     <title>The source code to Vendetta Online</title>
-    <updated>2007-10-12T00:00:00-05:00</updated>
+    <updated>2007-10-12T00:00:00-07:00</updated>
     <author>
       <name>Andy Sloane</name>
       <uri>http://a1k0n.net/</uri>
@@ -1276,7 +1280,7 @@ point when I had to reindex the message IDs in the database (sigh)).&lt;/p&gt;
     <id>http://a1k0n.net/2007/08/24/obfuscated-c-fire</id>
     <link type="text/html" rel="alternate" href="http://a1k0n.net/2007/08/24/obfuscated-c-fire.html"/>
     <title>Another short C program.</title>
-    <updated>2007-08-24T00:00:00-05:00</updated>
+    <updated>2007-08-24T00:00:00-07:00</updated>
     <author>
       <name>Andy Sloane</name>
       <uri>http://a1k0n.net/</uri>
@@ -1301,7 +1305,7 @@ data, though.&lt;/p&gt;
     <id>http://a1k0n.net/2006/09/20/obfuscated-c-donut-2</id>
     <link type="text/html" rel="alternate" href="http://a1k0n.net/2006/09/20/obfuscated-c-donut-2.html"/>
     <title>Embellishing the donut&#58; an old-school CG cliche</title>
-    <updated>2006-09-20T00:00:00-05:00</updated>
+    <updated>2006-09-20T00:00:00-07:00</updated>
     <author>
       <name>Andy Sloane</name>
       <uri>http://a1k0n.net/</uri>
@@ -1354,7 +1358,7 @@ ANSI-ish terminal emulation)
     <id>http://a1k0n.net/2006/09/15/obfuscated-c-donut</id>
     <link type="text/html" rel="alternate" href="http://a1k0n.net/2006/09/15/obfuscated-c-donut.html"/>
     <title>Have a donut.</title>
-    <updated>2006-09-15T00:00:00-05:00</updated>
+    <updated>2006-09-15T00:00:00-07:00</updated>
     <author>
       <name>Andy Sloane</name>
       <uri>http://a1k0n.net/</uri>
@@ -1397,7 +1401,7 @@ impressive demo &amp;mdash; though this one is simple and elegant in comparison.
     <id>http://a1k0n.net/2005/11/04/lisp-using-slime-over-ssh</id>
     <link type="text/html" rel="alternate" href="http://a1k0n.net/2005/11/04/lisp-using-slime-over-ssh.html"/>
     <title>Using SLIME over an SSH tunnel</title>
-    <updated>2005-11-04T00:00:00-06:00</updated>
+    <updated>2005-11-04T00:00:00-08:00</updated>
     <author>
       <name>Andy Sloane</name>
       <uri>http://a1k0n.net/</uri>
