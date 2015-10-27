@@ -139,6 +139,15 @@ function next_row() {
         console.log("channel", i, "invalid volume", v.toString(16));
       } else if (v <= 0x50) {
         ch.vol = v - 0x10;
+      } else if (v >= 0x80 && v < 0x90) {  // fine volume slide down
+        ch.vol = Math.max(0, ch.vol - (v & 0x0f));
+      } else if (v >= 0x90 && v < 0xa0) {  // fine volume slide up
+        ch.vol = Math.min(64, ch.vol + (v & 0x0f));
+      } else if (v >= 0xc0 && v < 0xd0) {  // set panning
+        ch.pan = 16 * (v & 0x0f);
+        console.log("channel", i, "pan", ch.pan);
+      } else {
+        console.log("channel", i, "volume effect", v.toString(16));
       }
     }
 
@@ -221,9 +230,9 @@ function EnvelopeFollower(env) {
   this.tick = 0;
 }
 
-EnvelopeFollower.prototype.Tick = function(release) {
+EnvelopeFollower.prototype.Tick = function(release, defaultval) {
   if (this.env === undefined) {
-    return 64;
+    return defaultval;
   }
   var value = this.env.Get(this.tick);
   if (this.env.type & 1) {  // sustain?
@@ -256,9 +265,95 @@ function next_tick() {
       ch.effectfn(ch);
     }
     if (inst === undefined) continue;
-    ch.volE = ch.env_vol.Tick(ch.release);
-    ch.panE = ch.env_pan.Tick(ch.release);
+    ch.volE = ch.env_vol.Tick(ch.release, 64);
+    ch.panE = ch.env_pan.Tick(ch.release, 32);
   }
+}
+
+// This function gradually brings the channel back down to zero if it isn't
+// already to avoid clicks and pops when samples end.
+function MixSilenceIntoBuf(ch, start, end, dataL, dataR) {
+  var s = ch.filterstate[1];
+  for (var i = start; i < end; i++) {
+    if (Math.abs(s) < 1.526e-5)  // == 1/65536.0
+      break;
+    dataL[i] += s * ch.vL;
+    dataR[i] += s * ch.vR;
+    s *= popfilter_alpha;
+  }
+  ch.filterstate[1] = s;
+  ch.filterstate[2] = s;
+  return 0;
+}
+
+function MixChannelIntoBuf(ch, start, end, dataL, dataR) {
+  var inst = ch.inst;
+  var samp, sample_end;
+  var loop = false;
+  var looplen = 0;
+
+  // nothing on this channel, just filter the last dc offset back down to zero
+  if (inst === undefined || ch.mute) {
+    return MixSilenceIntoBuf(ch, start, end, dataL, dataR);
+  }
+
+  samp = inst.sampledata;
+  sample_end = inst.len;
+  if ((inst.type & 3) == 1) { // todo: support pingpong
+    loop = true;
+    looplen = inst.looplen;
+    sample_end = looplen + inst.loop;
+  }
+  var samplen = inst.len;
+  var volE = ch.volE / 64.0;    // current volume envelope
+  var panE = 4*(ch.panE - 32);  // current panning envelope
+  var p = panE + ch.pan - 128;  // final pan
+  var volL = volE * (128 - p) * ch.vol / 8192.0;
+  var volR = volE * (128 + p) * ch.vol / 8192.0;
+  if (volL < 0) volL = 0;
+  if (volR < 0) volR = 0;
+  if (volR == 0 && volL == 0)
+    return;
+  var k = ch.off;
+  var dk = ch.doff;
+  var Vrms = 0;
+  for (var i = start; i < end; i++) {
+    var s = 0;
+    // if ((k|0) != (k-dk)|0)
+    s = samp[k|0];
+    // we low-pass filter here since we are resampling some arbitrary
+    // frequency to f_smp; this is an anti-aliasing filter and is
+    // implemented as an IIR butterworth filter (usually we'd use an FIR
+    // brick wall filter, but this is much simpler computationally and
+    // sounds fine)
+    var si = ch.filter[0] * (s + ch.filterstate[0]) +
+      ch.filter[1]*ch.filterstate[1] + ch.filter[2]*ch.filterstate[2];
+    ch.filterstate[2] = ch.filterstate[1];
+    ch.filterstate[1] = si; ch.filterstate[0] = s;
+    // we also low-pass filter volume changes with a simple one-zero,
+    // one-pole filter to avoid pops and clicks when volume changes.
+    ch.vL = popfilter_alpha * ch.vL + (1 - popfilter_alpha) * (volL + ch.vLprev) * 0.5;
+    ch.vR = popfilter_alpha * ch.vR + (1 - popfilter_alpha) * (volR + ch.vRprev) * 0.5;
+    ch.vLprev = volL;
+    ch.vRprev = volR;
+    dataL[i] += ch.vL * si;
+    dataR[i] += ch.vR * si;
+    Vrms += (ch.vL + ch.vR) * si * si;
+    k += dk;
+    if (k >= sample_end) {  // TODO: implement pingpong looping
+      if (loop) {
+        k -= looplen;
+      } else {
+        // kill sample
+        ch.inst = undefined;
+        // fill rest of buf with filtered dc offset using loop above
+        return Vrms + MixSilenceIntoBuf(ch, i+1, end, dataL, dataR);
+      }
+    }
+  }
+  ch.off = k;
+  ch.doff = dk;
+  return Vrms * 0.5;
 }
 
 function audio_cb(e) {
@@ -289,86 +384,8 @@ function audio_cb(e) {
     }
     var tickduration = Math.min(buflen, ticklen - cur_ticksamp);
     for (var j = 0; j < nchan; j++) {
-      var ch = channelinfo[j];
-      var inst = ch.inst;
-      var samp, sample_end;
-      var loop = false;
-      var looplen = 0;
-      if (inst === undefined) {
-        continue;
-      }
-      samp = inst.sampledata;
-      sample_end = inst.len;
-      if ((inst.type & 3) == 1) { // todo: support pingpong
-        loop = true;
-        looplen = inst.looplen;
-        sample_end = looplen + inst.loop;
-      }
-      var samplen = inst.len;
-      var volE = ch.volE / 64.0;
-      var panE = (ch.panE - 32);
-      var p = panE + ch.pan - 128;
-      var volL = volE * (128 - p) * ch.vol / 8192.0;
-      var volR = volE * (128 + p) * ch.vol / 8192.0;
-      if (volL < 0) volL = 0;
-      if (volR < 0) volR = 0;
-      if (volR == 0 && volL == 0)
-        continue;
-      var k = ch.off;
-      var dk = ch.doff;
-      var Vrms = 0;
-      // console.log(j, offset, ch);
-      for (var i = offset; i < offset+tickduration; i++) {
-        if (ch.mute) break;
-        var s = samp[k|0];
-        // we low-pass filter here since we are resampling some arbitrary
-        // frequency to f_smp; this is an anti-aliasing filter and is
-        // implemented as an IIR butterworth filter (usually we'd use an FIR
-        // brick wall filter, but this is much simpler computationally and
-        // sounds fine)
-        var si = ch.filter[0] * (s + ch.filterstate[0]) +
-          ch.filter[1]*ch.filterstate[1] + ch.filter[2]*ch.filterstate[2];
-        ch.filterstate[2] = ch.filterstate[1];
-        ch.filterstate[1] = si; ch.filterstate[0] = s;
-        // we also low-pass filter volume changes with a simple one-zero,
-        // one-pole filter to avoid pops and clicks when volume changes.
-        ch.vL = popfilter_alpha * ch.vL + (1 - popfilter_alpha) * (volL + ch.vLprev) * 0.5;
-        ch.vR = popfilter_alpha * ch.vR + (1 - popfilter_alpha) * (volR + ch.vRprev) * 0.5;
-        ch.vLprev = volL;
-        ch.vRprev = volR;
-        dataL[i] += ch.vL * si;
-        dataR[i] += ch.vR * si;
-        Vrms += ch.vL * ch.vR * si * si;
-        k += dk;
-        if (k >= sample_end) {  // TODO: implement pingpong looping
-          if (loop) {
-            k -= looplen;
-          } else {
-            // kill sample
-            ch.inst = undefined;
-            // ramp down to zero with the pop filter
-            // if the sample ends right before the end of the tick (or the end
-            // of the buffer), we could still get a pop but *usually* it's
-            // hidden behind other changes in the tick... there's only so much
-            // we can do here, anyway.  i guess we could hold the dc offset...
-            var rampend = Math.min(offset+tickduration, i+200);
-            for (i++; i < rampend; i++) {
-              // fill rest of buffer with filtered silence to avoid a pop
-              var si = popfilter[0] * (ch.filterstate[0]) +
-                popfilter[1]*ch.filterstate[1] +
-                popfilter[2]*ch.filterstate[2];
-              ch.filterstate[2] = ch.filterstate[1];
-              ch.filterstate[1] = si; ch.filterstate[0] = 0;
-              dataL[i] += ch.vL * si;
-              dataR[i] += ch.vR * si;
-            }
-            break;
-          }
-        }
-      }
-      ch.off = k;
-      ch.doff = dk;
-      VU[j] += Vrms;
+      VU[j] += MixChannelIntoBuf(
+          channelinfo[j], offset, offset + tickduration, dataL, dataR);
     }
     offset += tickduration;
     cur_ticksamp += tickduration;
@@ -568,6 +585,7 @@ function playXM(arrayBuf) {
       vL: 0, vR: 0,   // left right volume envelope followers (changes per sample)
       vLprev: 0, vRprev: 0,
       mute: 0,
+      volE: 0, panE: 0
     })
   }
   console.log("header len " + hlen);
@@ -679,6 +697,8 @@ function playXM(arrayBuf) {
             samptype, prettify_note(sampnote), sampfinetune, samppan);
         console.log("           vol env", env_vol, env_vol_sustain,
             env_vol_loop_start, env_vol_loop_end, "type", env_vol_type);
+        console.log("           pan env", env_pan, env_pan_sustain,
+            env_pan_loop_start, env_pan_loop_end, "type", env_pan_type);
         idx += samplen + samphdrsiz;
       }
       inst = {
