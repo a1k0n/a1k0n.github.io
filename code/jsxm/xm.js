@@ -6,7 +6,6 @@ audioContext = window.AudioContext || window.webkitAudioContext;
 function prettify_note(note) {
   if (note < 0) return "---";
   if (note == 96) return "^^^";
-  note += 11;
   return _note_names[note%12] + ~~(note/12);
 }
 
@@ -35,7 +34,7 @@ function prettify_notedata(note, inst, vol, efftype, effparam) {
 }
 
 function getstring(dv, offset, len) {
-  var str = []
+  var str = [];
   for (var i = offset; i < offset+len; i++) {
     var c = dv.getUint8(i);
     if (c == 0) break;
@@ -51,9 +50,11 @@ var tempo = 4;
 // Return 2-pole Butterworth lowpass filter coefficients for
 // center frequncy f_c (relative to sampling frequency)
 function FilterCoeffs(f_c) {
-//  if (f_c > 0.5) {  // we can't lowpass above the nyquist frequency...
-//    return [1, 0, 0];
-//  }
+  //  if (f_c > 0.5) {  // we can't lowpass above the nyquist frequency...
+  //    return [1, 0, 0];
+  //  }
+  //  what happens instead is the filter wraps around to an alias frequency,
+  //  and that also works OK, though it isn't strictly right... FIXME
   var wct = Math.sqrt(2) * Math.PI * f_c;
   var e = Math.exp(-wct);
   var c = e * Math.cos(wct);
@@ -75,16 +76,11 @@ function PeriodForNote(ch, note) {
   return 1920 - note*16 - ch.inst.fine / 8.0;
 }
 
-function UpdateChannelNote(ch, note) {
-  ch.period = PeriodForNote(ch, note);
-  UpdateChannelPeriod(ch, ch.period);
-}
-
 var cur_songpos = -1, cur_pat = -1, cur_row = 64, cur_ticksamp = 0;
 var cur_tick = 6;
 var patdisplay = [];
 function next_row() {
-  if (cur_row >= 64) {
+  if (cur_pat == -1 || cur_row >= patterns[cur_pat].length) {
     cur_row = 0;
     cur_songpos++;
     if (cur_songpos >= songpats.length)
@@ -102,7 +98,7 @@ function next_row() {
     // instrument trigger
     if (r[i][1] != -1) {
       var inst = instruments[r[i][1] - 1];
-      if (inst !== undefined) {
+      if (inst != undefined) {
         ch.inst = inst;
         // retrigger unless overridden below
         triggernote = true;
@@ -121,15 +117,14 @@ function next_row() {
         // assume linear frequency table (flags header & 1 == 1)
         // is this true in kamel.xm?
         var inst = ch.inst;
-        if (inst === undefined) {
-          continue;
+        if (inst != undefined) {
+          var note = r[i][0] + inst.note;
+          ch.note = note;
+          triggernote = true;
+          // if there's an instrument and a note, set the volume
+          ch.pan = inst.pan;
+          ch.vol = inst.vol;
         }
-        var note = r[i][0] + inst.note;
-        ch.note = note;
-        triggernote = true;
-        // if there's an instrument and a note, set the volume
-        ch.pan = inst.pan;
-        ch.vol = inst.vol;
       }
     }
     if (r[i][2] != -1) {  // volume column
@@ -144,8 +139,7 @@ function next_row() {
       } else if (v >= 0x90 && v < 0xa0) {  // fine volume slide up
         ch.vol = Math.min(64, ch.vol + (v & 0x0f));
       } else if (v >= 0xc0 && v < 0xd0) {  // set panning
-        ch.pan = 16 * (v & 0x0f);
-        console.log("channel", i, "pan", ch.pan);
+        ch.pan = (v & 0x0f) * 0x11;
       } else {
         console.log("channel", i, "volume effect", v.toString(16));
       }
@@ -168,13 +162,13 @@ function next_row() {
         ch.periodtarget = PeriodForNote(ch, ch.note);
       }
       triggernote = false;
-      if (ch.release) {
+      if (ch.release && inst != undefined) {
         // reset envelopes if note was released but leave offset/pitch/etc
         // alone
         ch.envtick = 0;
         ch.release = 0;
-        ch.env_vol = new EnvelopeFollower(inst.env_vol);
-        ch.env_pan = new EnvelopeFollower(inst.env_pan);
+        ch.env_vol = new EnvelopeFollower(inst.env_vol, inst.fadeout);
+        ch.env_pan = new EnvelopeFollower(inst.env_pan, 0);
       }
     }
 
@@ -183,20 +177,15 @@ function next_row() {
       ch.release = 0;
       ch.envtick = 0;
       ch.vibratopos = 0;
-      ch.env_vol = new EnvelopeFollower(inst.env_vol);
-      ch.env_pan = new EnvelopeFollower(inst.env_pan);
-      UpdateChannelNote(ch, note);
+      ch.env_vol = new EnvelopeFollower(inst.env_vol, inst.fadeout);
+      ch.env_pan = new EnvelopeFollower(inst.env_pan, 0);
+      ch.period = PeriodForNote(ch, note);
     }
   }
-  var debug = document.getElementById("debug");
-  debug.innerHTML = 'pat ' + cur_pat + ' row ' + (cur_row-1);
-
-  var pat = document.getElementById("pattern");
   patdisplay.push(pretty_row.join("  "));
   if (patdisplay.length > 16) {
     patdisplay.shift();
   }
-  pat.innerHTML = patdisplay.join("\n");
 }
 
 function Envelope(points, type, sustain, loopstart, loopend) {
@@ -225,14 +214,22 @@ Envelope.prototype.Get = function(ticks) {
   return y0;
 }
 
-function EnvelopeFollower(env) {
+function EnvelopeFollower(env, fadeout) {
   this.env = env;
+  this.fadeout = 64.0 * fadeout / 65536.0;
   this.tick = 0;
 }
 
 EnvelopeFollower.prototype.Tick = function(release, defaultval) {
+  // no envelope, just emit full volume
   if (this.env === undefined) {
-    return defaultval;
+    if (release) {
+      var value = Math.min(0, defaultval - this.tick * this.fadeout);
+      this.tick++;
+      return value;
+    } else {
+      return defaultval;
+    }
   }
   var value = this.env.Get(this.tick);
   if (this.env.type & 1) {  // sustain?
@@ -261,12 +258,18 @@ function next_tick() {
   for (var j = 0; j < nchan; j++) {
     var ch = channelinfo[j];
     var inst = ch.inst;
-    if (ch.effectfn) {
+    ch.periodoffset = 0;
+    if (cur_tick != 0 && ch.effectfn) {
       ch.effectfn(ch);
     }
-    if (inst === undefined) continue;
+    if (inst == undefined) continue;
+    if (ch.env_vol == undefined) {
+      console.log("channel", j, "env_vol defined but not inst?", ch);
+      continue;
+    }
     ch.volE = ch.env_vol.Tick(ch.release, 64);
     ch.panE = ch.env_pan.Tick(ch.release, 32);
+    UpdateChannelPeriod(ch, ch.period + ch.periodoffset);
   }
 }
 
@@ -274,15 +277,25 @@ function next_tick() {
 // already to avoid clicks and pops when samples end.
 function MixSilenceIntoBuf(ch, start, end, dataL, dataR) {
   var s = ch.filterstate[1];
+  if (isNaN(s)) {
+    console.log("NaN filterstate?", ch.filterstate, ch.filter);
+    return;
+  }
   for (var i = start; i < end; i++) {
-    if (Math.abs(s) < 1.526e-5)  // == 1/65536.0
+    if (Math.abs(s) < 1.526e-5) {  // == 1/65536.0
+      s = 0;
       break;
+    }
     dataL[i] += s * ch.vL;
     dataR[i] += s * ch.vR;
     s *= popfilter_alpha;
   }
   ch.filterstate[1] = s;
   ch.filterstate[2] = s;
+  if (isNaN(s)) {
+    console.log("NaN filterstate after adding silence?", ch.filterstate, ch.filter, i);
+    return;
+  }
   return 0;
 }
 
@@ -290,10 +303,10 @@ function MixChannelIntoBuf(ch, start, end, dataL, dataR) {
   var inst = ch.inst;
   var samp, sample_end;
   var loop = false;
-  var looplen = 0;
+  var looplen = 0, loopstart = 0;
 
   // nothing on this channel, just filter the last dc offset back down to zero
-  if (inst === undefined || ch.mute) {
+  if (inst == undefined || ch.mute) {
     return MixSilenceIntoBuf(ch, start, end, dataL, dataR);
   }
 
@@ -301,8 +314,9 @@ function MixChannelIntoBuf(ch, start, end, dataL, dataR) {
   sample_end = inst.len;
   if ((inst.type & 3) == 1) { // todo: support pingpong
     loop = true;
+    loopstart = inst.loop;
     looplen = inst.looplen;
-    sample_end = looplen + inst.loop;
+    sample_end = loopstart + looplen;
   }
   var samplen = inst.len;
   var volE = ch.volE / 64.0;    // current volume envelope
@@ -314,45 +328,132 @@ function MixChannelIntoBuf(ch, start, end, dataL, dataR) {
   if (volR < 0) volR = 0;
   if (volR == 0 && volL == 0)
     return;
+  if (isNaN(volR) || isNaN(volL)) {
+    console.log("NaN volume!?", volL, volR, colE, panE, ch.vol);
+    return;
+  }
   var k = ch.off;
   var dk = ch.doff;
   var Vrms = 0;
-  for (var i = start; i < end; i++) {
-    var s = 0;
-    // if ((k|0) != (k-dk)|0)
-    s = samp[k|0];
-    // we low-pass filter here since we are resampling some arbitrary
-    // frequency to f_smp; this is an anti-aliasing filter and is
-    // implemented as an IIR butterworth filter (usually we'd use an FIR
-    // brick wall filter, but this is much simpler computationally and
-    // sounds fine)
-    var si = ch.filter[0] * (s + ch.filterstate[0]) +
-      ch.filter[1]*ch.filterstate[1] + ch.filter[2]*ch.filterstate[2];
-    ch.filterstate[2] = ch.filterstate[1];
-    ch.filterstate[1] = si; ch.filterstate[0] = s;
-    // we also low-pass filter volume changes with a simple one-zero,
-    // one-pole filter to avoid pops and clicks when volume changes.
-    ch.vL = popfilter_alpha * ch.vL + (1 - popfilter_alpha) * (volL + ch.vLprev) * 0.5;
-    ch.vR = popfilter_alpha * ch.vR + (1 - popfilter_alpha) * (volR + ch.vRprev) * 0.5;
-    ch.vLprev = volL;
-    ch.vRprev = volR;
-    dataL[i] += ch.vL * si;
-    dataR[i] += ch.vR * si;
-    Vrms += (ch.vL + ch.vR) * si * si;
-    k += dk;
+  var f0 = ch.filter[0], f1 = ch.filter[1], f2 = ch.filter[2];
+  var fs0 = ch.filterstate[0], fs1 = ch.filterstate[1], fs2 = ch.filterstate[2];
+
+  // we also low-pass filter volume changes with a simple one-zero,
+  // one-pole filter to avoid pops and clicks when volume changes.
+  var vL = popfilter_alpha * ch.vL + (1 - popfilter_alpha) * (volL + ch.vLprev) * 0.5;
+  var vR = popfilter_alpha * ch.vR + (1 - popfilter_alpha) * (volR + ch.vRprev) * 0.5;
+  var pf_8 = Math.pow(popfilter_alpha, 8);
+  ch.vLprev = volL;
+  ch.vRprev = volR;
+
+  // we can mix up to this many bytes before running into a sample end/loop
+  var i = start;
+  while (i < end) {
     if (k >= sample_end) {  // TODO: implement pingpong looping
       if (loop) {
-        k -= looplen;
+        k = loopstart + (k - loopstart) % looplen;
       } else {
         // kill sample
         ch.inst = undefined;
         // fill rest of buf with filtered dc offset using loop above
-        return Vrms + MixSilenceIntoBuf(ch, i+1, end, dataL, dataR);
+        return Vrms + MixSilenceIntoBuf(ch, i, end, dataL, dataR);
       }
+    }
+    var next_event = Math.min(end, i + (sample_end - k) / dk);
+    // this is the inner loop of the player
+
+    // unrolled 8x
+    for (; i + 8 < next_event; i+=8) {
+      var s = samp[k|0];
+      var y = f0 * (s + fs0) + f1*fs1 + f2*fs2;
+      fs2 = fs1; fs1 = y; fs0 = s;
+      k += dk;
+      dataL[i] += vL * y;
+      dataR[i] += vR * y;
+      Vrms += (vL + vR) * y * y;
+
+      var s = samp[k|0];
+      var y = f0 * (s + fs0) + f1*fs1 + f2*fs2;
+      fs2 = fs1; fs1 = y; fs0 = s;
+      k += dk;
+      dataL[i+1] += vL * y;
+      dataR[i+1] += vR * y;
+      Vrms += (vL + vR) * y * y;
+
+      var s = samp[k|0];
+      var y = f0 * (s + fs0) + f1*fs1 + f2*fs2;
+      fs2 = fs1; fs1 = y; fs0 = s;
+      k += dk;
+      dataL[i+2] += vL * y;
+      dataR[i+2] += vR * y;
+      Vrms += (vL + vR) * y * y;
+
+      var s = samp[k|0];
+      var y = f0 * (s + fs0) + f1*fs1 + f2*fs2;
+      fs2 = fs1; fs1 = y; fs0 = s;
+      k += dk;
+      dataL[i+3] += vL * y;
+      dataR[i+3] += vR * y;
+      Vrms += (vL + vR) * y * y;
+
+      var s = samp[k|0];
+      var y = f0 * (s + fs0) + f1*fs1 + f2*fs2;
+      fs2 = fs1; fs1 = y; fs0 = s;
+      k += dk;
+      dataL[i+4] += vL * y;
+      dataR[i+4] += vR * y;
+      Vrms += (vL + vR) * y * y;
+
+      var s = samp[k|0];
+      var y = f0 * (s + fs0) + f1*fs1 + f2*fs2;
+      fs2 = fs1; fs1 = y; fs0 = s;
+      k += dk;
+      dataL[i+5] += vL * y;
+      dataR[i+5] += vR * y;
+      Vrms += (vL + vR) * y * y;
+
+      var s = samp[k|0];
+      var y = f0 * (s + fs0) + f1*fs1 + f2*fs2;
+      fs2 = fs1; fs1 = y; fs0 = s;
+      k += dk;
+      dataL[i+6] += vL * y;
+      dataR[i+6] += vR * y;
+      Vrms += (vL + vR) * y * y;
+
+      var s = samp[k|0];
+      var y = f0 * (s + fs0) + f1*fs1 + f2*fs2;
+      fs2 = fs1; fs1 = y; fs0 = s;
+      k += dk;
+      dataL[i+7] += vL * y;
+      dataR[i+7] += vR * y;
+      Vrms += (vL + vR) * y * y;
+
+      vL = pf_8 * vL + (1 - pf_8) * volL;
+      vR = pf_8 * vR + (1 - pf_8) * volR;
+    }
+
+    for (; i < next_event; i++) {
+      var s = samp[k|0];
+      // we low-pass filter here since we are resampling some arbitrary
+      // frequency to f_smp; this is an anti-aliasing filter and is
+      // implemented as an IIR butterworth filter (usually we'd use an FIR
+      // brick wall filter, but this is much simpler computationally and
+      // sounds fine)
+      var y = f0 * (s + fs0) + f1*fs1 + f2*fs2;
+      fs2 = fs1; fs1 = y; fs0 = s;
+      dataL[i] += vL * y;
+      dataR[i] += vR * y;
+      Vrms += (vL + vR) * y * y;
+      k += dk;
     }
   }
   ch.off = k;
   ch.doff = dk;
+  ch.filterstate[0] = fs0;
+  ch.filterstate[1] = fs1;
+  ch.filterstate[2] = fs2;
+  ch.vL = vL;
+  ch.vR = vR;
   return Vrms * 0.5;
 }
 
@@ -362,15 +463,9 @@ function audio_cb(e) {
   var dataL = e.outputBuffer.getChannelData(0);
   var dataR = e.outputBuffer.getChannelData(1);
 
-  // backward compat w/ no array.fill
-  if (dataL.fill === undefined) {
-    for (var i = 0; i < buflen; i++) {
-      dataL[i] = 0;
-      dataR[i] = 0;
-    }
-  } else {
-    dataL.fill(0);
-    dataR.fill(0);
+  for (var i = 0; i < buflen; i++) {
+    dataL[i] = 0;
+    dataR[i] = 0;
   }
 
   var offset = 0;
@@ -392,17 +487,24 @@ function audio_cb(e) {
     buflen -= tickduration;
   }
 
-  // update VU meters
-  var canvas = document.getElementById("vu");
-  var ctx = canvas.getContext("2d");
-  ctx.fillStyle = '#000';
-  ctx.fillRect(0, 0, 300, 64);
-  ctx.fillStyle = '#0f0';
-  for (var j = 0; j < nchan; j++) {
-    var rms = VU[j] / e.outputBuffer.length;
-    var y = -Math.log(rms)*10;
-    ctx.fillRect(j*16, y, 15, 64-y);
-  }
+  window.requestAnimationFrame(function() {
+    // update VU meters
+    var canvas = document.getElementById("vu");
+    var ctx = canvas.getContext("2d");
+    ctx.fillStyle = '#000';
+    ctx.fillRect(0, 0, 16 * nchan, 64);
+    ctx.fillStyle = '#0f0';
+    for (var j = 0; j < nchan; j++) {
+      var rms = VU[j] / e.outputBuffer.length;
+      var y = -Math.log(rms)*10;
+      ctx.fillRect(j*16, y, 15, 64-y);
+    }
+
+    var debug = document.getElementById("debug");
+    debug.innerHTML = 'pat ' + cur_pat + ' row ' + (cur_row-1);
+    var pat = document.getElementById("pattern");
+    pat.innerHTML = patdisplay.join("\n");
+  });
 }
 
 function eff_t0_0(ch, data) {  // arpeggio
@@ -437,6 +539,14 @@ function eff_t0_4(ch, data) {  // vibrato
   eff_t1_4(ch, data);
 }
 
+function eff_t0_8(ch, data) {  // set panning
+  ch.pan = data;
+}
+
+function eff_t0_9(ch, data) {  // sample offset
+  ch.off = data * 256;
+}
+
 function eff_t0_a(ch, data) {  // volume slide
   if (data) {
     if (data & 0x0f) {
@@ -444,6 +554,69 @@ function eff_t0_a(ch, data) {  // volume slide
     } else {
       ch.volumeslide = data >> 4;
     }
+  }
+}
+
+function eff_t0_b(ch, data) {  // song jump (untested)
+  if (data < songpats.length) {
+    cur_songpos = data
+    cur_pat = songpats[cur_songpos];
+  }
+}
+
+function eff_t0_c(ch, data) {  // set volume
+  ch.vol = data & 0x3f;
+}
+
+function eff_t0_d(ch, data) {  // pattern jump
+  cur_songpos++;
+  if (cur_songpos >= songpats.length)
+    cur_songpos = song_looppos;
+  cur_pat = songpats[cur_songpos];
+  cur_row = data;
+}
+
+function eff_t0_e(ch, data) {  // extended effects!
+  var eff = data >> 4;
+  data = data & 0x0f;
+  switch (eff) {
+    case 1:  // fine porta up
+      ch.period -= data;
+      break;
+    case 2:  // fine porta down
+      ch.period += data;
+      break;
+    case 8:  // panning
+      ch.pan = data * 0x11;
+      break;
+    case 0x0a:  // fine vol slide up (with memory)
+      if (data == 0 && ch.finevolup != undefined)
+        data = ch.finevolup;
+      ch.vol = Math.min(64, ch.vol + data);
+      ch.finevolup = data;
+      break;
+    case 0x0b:  // fine vol slide down
+      if (data == 0 && ch.finevoldown != undefined)
+        data = ch.finevoldown;
+      ch.vol = Math.max(0, ch.vol - data);
+      ch.finevoldown = data;
+      break;
+    case 0x0c:  // note cut handled in eff_t1_e
+      break;
+    default:
+      console.log("unimplemented extended effect E", ch.effect.toString(16));
+      break;
+  }
+}
+
+function eff_t0_f(ch, data) {  // set tempo
+  if (data == 0) {
+    console.log("tempo 0?");
+    return;
+  } else if(data < 0x20) {
+    tempo = data;
+  } else {
+    bpm = data;
   }
 }
 
@@ -456,39 +629,39 @@ var effects_t0 = [  // effect functions on tick 0
   eff_t0_1,
   eff_t0_2,
   eff_t0_3,
-  eff_t0_4,
-  eff_unimplemented_t0,  // 5
-  eff_unimplemented_t0,  // 6
+  eff_t0_4,  // 4
+  eff_t0_a,  // 5, same as A on first tick
+  eff_t0_a,  // 6, same as A on first tick
   eff_unimplemented_t0,  // 7
-  eff_unimplemented_t0,  // 8
-  eff_unimplemented_t0,  // 9
-  eff_t0_a,
-  eff_unimplemented_t0,  // b
-  eff_unimplemented_t0,  // c
-  eff_unimplemented_t0,  // d
-  eff_unimplemented_t0,  // e
-  eff_unimplemented_t0,  // f
+  eff_t0_8,  // 8
+  eff_t0_9,  // 9
+  eff_t0_a,  // a
+  eff_t0_b,  // b
+  eff_t0_c,  // c
+  eff_t0_d,  // d
+  eff_t0_e,  // e
+  eff_t0_f,  // f
 ];
 
 function eff_t1_0(ch) {  // arpeggio
-  if (ch.effectdata != 0) {
+  if (ch.effectdata != 0 && ch.inst != undefined) {
     var arpeggio = [0, ch.effectdata>>4, ch.effectdata&15];
     var note = ch.note + arpeggio[cur_tick % 3];
-    UpdateChannelNote(ch, note);
+    ch.period = PeriodForNote(ch, note);
   }
 }
 
 function eff_t1_1(ch) {  // pitch slide up
   if (ch.slideupspeed !== undefined) {
+    // is this limited? it appears not
     ch.period -= ch.slideupspeed;
-    UpdateChannelPeriod(ch, ch.period);
   }
 }
 
 function eff_t1_2(ch) {  // pitch slide down
   if (ch.slidedownspeed !== undefined) {
-    ch.period += ch.slidedownspeed;
-    UpdateChannelPeriod(ch, ch.period);
+    // 1728 is the period for C-1
+    ch.period = Math.min(1728, ch.period + ch.slidedownspeed);
   }
 }
 
@@ -499,15 +672,23 @@ function eff_t1_3(ch) {  // portamento
     } else {
       ch.period = Math.min(ch.periodtarget, ch.period + ch.portaspeed);
     }
-    UpdateChannelPeriod(ch, ch.period);
   }
 }
 
 function eff_t1_4(ch) {  // vibrato
-  ch.period += Math.sin(ch.vibratopos * Math.PI / 32) * ch.vibratodepth;
-  UpdateChannelPeriod(ch, ch.period);
+  ch.periodoffset = Math.sin(ch.vibratopos * Math.PI / 32) * ch.vibratodepth;
   ch.vibratopos += ch.vibratospeed;
   ch.vibratopos &= 63;
+}
+
+function eff_t1_5(ch) {  // portamento + volume slide
+  eff_t1_a(ch);
+  eff_t1_3(ch);
+}
+
+function eff_t1_6(ch) {  // vibrato + volume slide
+  eff_t1_a(ch);
+  eff_t1_4(ch);
 }
 
 function eff_t1_a(ch) {  // volume slide
@@ -516,6 +697,17 @@ function eff_t1_a(ch) {  // volume slide
   }
 }
 
+function eff_t1_e(ch) {  // note cut
+  switch (ch.effectdata >> 4) {
+    case 0x0c:
+      if (cur_tick == (ch.effectdata & 0x0f)) {
+        ch.vol = 0;
+      }
+      break;
+  }
+}
+
+function eff_nop() {}
 function eff_unimplemented() {}
 var effects_t1 = [  // effect functions on tick 1+
   eff_t1_0,
@@ -523,17 +715,17 @@ var effects_t1 = [  // effect functions on tick 1+
   eff_t1_2,
   eff_t1_3,
   eff_t1_4,
-  eff_unimplemented,  // 5
-  eff_unimplemented,  // 6
+  eff_t1_5,  // 5
+  eff_t1_6,  // 6
   eff_unimplemented,  // 7
-  eff_unimplemented,  // 8
-  eff_unimplemented,  // 9
+  eff_nop,   // 8
+  eff_nop,   // 9
   eff_t1_a,  // a
-  eff_unimplemented,  // b
-  eff_unimplemented,  // c
-  eff_unimplemented,  // d
-  eff_unimplemented,  // e
-  eff_unimplemented,  // f
+  eff_nop,   // b
+  eff_nop,   // c
+  eff_nop,   // d
+  eff_t1_e,  // e
+  eff_nop,   // f
 ];
 
 function ConvertSample(array, bits) {
@@ -545,7 +737,7 @@ function ConvertSample(array, bits) {
       acc += array[k];
       var b = acc&255;
       if (b & 128) b = b-256;
-      samp[k] = (b - 128) / 128.0;
+      samp[k] = b / 128.0;
     }
     return samp;
   } else {
@@ -559,6 +751,37 @@ function ConvertSample(array, bits) {
     }
     return samp;
   }
+}
+
+// optimization: unroll short sample loops so we can run our inner mixing loop
+// uninterrupted for as long as possible; this also handles pingpong loops.
+function UnrollSampleLoop(inst) {
+  var nloops = ((2048 + inst.looplen - 1) / inst.looplen) | 0;
+  var pingpong = inst.type & 2;
+  if (pingpong) {
+    // make sure we have an even number of loops if we are pingponging
+    nloops = (nloops + 1) & (~1);
+  }
+  var samplesiz = inst.loop + nloops * inst.looplen;
+  var samp = new Float32Array(samplesiz);
+  for (var i = 0; i < inst.loop; i++) {
+    samp[i] = inst.sampledata[i];
+  }
+  for (var j = 0; j < nloops; j++) {
+    if ((j&1) && pingpong) {
+      for (var k = inst.looplen - 1; k >= 0; k--) {
+        samp[i++] = inst.sampledata[inst.loop + k];
+      }
+    } else {
+      for (var k = 0; k < inst.looplen; k++) {
+        samp[i++] = inst.sampledata[inst.loop + k];
+      }
+    }
+  }
+  console.log("unrolled sample loop", inst.number, "looplen", inst.looplen, "x", nloops, " = ", samplesiz);
+  inst.sampledata = samp;
+  inst.looplen = nloops * inst.looplen;
+  inst.type = 1;
 }
 
 function playXM(arrayBuf) {
@@ -575,17 +798,18 @@ function playXM(arrayBuf) {
   var flags = dv.getUint16(0x4a, true);
   tempo = dv.getUint16(0x4c, true);
   bpm = dv.getUint16(0x4e, true);
+  document.getElementById('vu').width = 16 * nchan;
   for (var i = 0; i < nchan; i++) {
     channelinfo.push({
       filterstate: new Float32Array(3),
-      popfilter: FilterCoeffs(200.0 / 44100.0),
-      popfilterstate: [new Float32Array(3), new Float32Array(3)],
       vol: 0,
       pan: 128,
       vL: 0, vR: 0,   // left right volume envelope followers (changes per sample)
       vLprev: 0, vRprev: 0,
       mute: 0,
-      volE: 0, panE: 0
+      volE: 0, panE: 0,
+      vibratodepth: 1,
+      vibratospeed: 1,
     })
   }
   console.log("header len " + hlen);
@@ -603,13 +827,13 @@ function playXM(arrayBuf) {
   var idx = hlen;
   patterns = [];
   for (var i = 0; i < npat; i++) {
-    var pattern = []
+    var pattern = [];
     var patheaderlen = dv.getUint32(idx, true);
     var patrows = dv.getUint16(idx + 5, true);
     var patsize = dv.getUint16(idx + 7, true);
     console.log("pattern %d: %d bytes, %d rows", i, patsize, patrows);
     idx += 9;
-    for (var j = 0; j < patrows; j++) {
+    for (var j = 0; patsize > 0 && j < patrows; j++) {
       row = [];
       pretty_row = [];
       for (var k = 0; k < nchan; k++) {
@@ -643,8 +867,6 @@ function playXM(arrayBuf) {
         pretty_row.push(prettify_notedata(note, inst, vol, efftype, effparam));
         row.push([note, inst, vol, efftype, effparam]);
       }
-      if (i == 12)
-        console.log(pretty_row.join("  "));
       pattern.push(row);
     }
     patterns.push(pattern);
@@ -655,31 +877,33 @@ function playXM(arrayBuf) {
     var hdrsiz = dv.getUint32(idx, true);
     var instname = getstring(dv, idx+0x4, 22);
     var nsamp = dv.getUint16(idx+0x1b, true);
-    var env_nvol = dv.getUint8(idx+225);
-    var env_vol_type = dv.getUint8(idx+233);
-    var env_vol_sustain = dv.getUint8(idx+227);
-    var env_vol_loop_start = dv.getUint8(idx+228);
-    var env_vol_loop_end = dv.getUint8(idx+229);
-    var env_npan = dv.getUint8(idx+226);
-    var env_pan_type = dv.getUint8(idx+234);
-    var env_pan_sustain = dv.getUint8(idx+230);
-    var env_pan_loop_start = dv.getUint8(idx+231);
-    var env_pan_loop_end = dv.getUint8(idx+232);
-    env_vol = [];
-    for (var j = 0; j < env_nvol*2; j++) {
-      env_vol.push(dv.getUint16(idx+129+j*2, true));
-    }
-    env_pan = [];
-    for (var j = 0; j < env_npan*2; j++) {
-      env_pan.push(dv.getUint16(idx+177+j*2, true));
-    }
     if (nsamp > 0) {
+      var env_nvol = dv.getUint8(idx+225);
+      var env_vol_type = dv.getUint8(idx+233);
+      var env_vol_sustain = dv.getUint8(idx+227);
+      var env_vol_loop_start = dv.getUint8(idx+228);
+      var env_vol_loop_end = dv.getUint8(idx+229);
+      var env_npan = dv.getUint8(idx+226);
+      var env_pan_type = dv.getUint8(idx+234);
+      var env_pan_sustain = dv.getUint8(idx+230);
+      var env_pan_loop_start = dv.getUint8(idx+231);
+      var env_pan_loop_end = dv.getUint8(idx+232);
+      var vol_fadeout = dv.getUint16(idx+239);
+      var env_vol = [];
+      for (var j = 0; j < env_nvol*2; j++) {
+        env_vol.push(dv.getUint16(idx+129+j*2, true));
+      }
+      var env_pan = [];
+      for (var j = 0; j < env_npan*2; j++) {
+        env_pan.push(dv.getUint16(idx+177+j*2, true));
+      }
       // FIXME: ignoring keymaps for now and assuming 1 sample / instrument
       // var keymap = getarray(dv, idx+0x21);
       var samphdrsiz = dv.getUint32(idx+0x1d, true);
       console.log("hdrsiz %d; instrument %d: '%s' %d samples, samphdrsiz %d",
           hdrsiz, i, instname, nsamp, samphdrsiz);
       idx += hdrsiz;
+      var totalsamples = 0;
       for (var j = 0; j < nsamp; j++) {
         var samplen = dv.getUint32(idx, true);
         var samploop = dv.getUint32(idx+4, true);
@@ -688,28 +912,49 @@ function playXM(arrayBuf) {
         var sampfinetune = dv.getInt8(idx+13);
         var samptype = dv.getUint8(idx+14);
         var samppan = dv.getUint8(idx+15);
-        var sampnote = dv.getUint8(idx+16);
+        var sampnote = dv.getInt8(idx+16);
         var sampname = getstring(dv, idx+18, 22);
         var sampleoffset = idx + samphdrsiz;
         console.log("sample %d: len %d name '%s' loop %d/%d vol %d",
             j, samplen, sampname, samploop, samplooplen, sampvol);
-        console.log("           type %d note %s finetune %d pan %d",
-            samptype, prettify_note(sampnote), sampfinetune, samppan);
+        console.log("           type %d note %s(%d) finetune %d pan %d",
+            samptype, prettify_note(sampnote + 12*4), sampnote, sampfinetune, samppan);
         console.log("           vol env", env_vol, env_vol_sustain,
-            env_vol_loop_start, env_vol_loop_end, "type", env_vol_type);
+            env_vol_loop_start, env_vol_loop_end, "type", env_vol_type,
+            "fadeout", vol_fadeout);
         console.log("           pan env", env_pan, env_pan_sustain,
             env_pan_loop_start, env_pan_loop_end, "type", env_pan_type);
-        idx += samplen + samphdrsiz;
+        idx += samphdrsiz;
+        totalsamples += samplen;
       }
+      idx += totalsamples;
       inst = {
         'name': instname,
+        'number': i,
         'len': samplen, 'loop': samploop,
         'looplen': samplooplen, 'note': sampnote, 'fine': sampfinetune,
         'pan': samppan, 'type': samptype, 'vol': sampvol,
         'fine': sampfinetune,
-        'sampledata': ConvertSample(new Uint8Array(arrayBuf, sampleoffset, samplen), samptype & 4),
+        'fadeout': vol_fadeout,
+        'sampledata': ConvertSample(new Uint8Array(arrayBuf, sampleoffset, samplen), samptype & 16),
       };
+      if (samptype & 16) {
+        inst.len /= 2;
+        inst.loop /= 2;
+        inst.looplen /= 2;
+      }
+
+      // unroll short loops and any pingpong loops
+      if ((inst.type & 3) && (inst.looplen < 2048 || (inst.type & 2))) {
+        UnrollSampleLoop(inst);
+      }
+
       if (env_vol_type) {
+        // insert an automatic fadeout to 0 at the end of the envelope
+        var env_end_tick = env_vol[env_vol.length-2];
+        var fadeout_ticks = 65536.0 / inst.fadeout;
+        env_vol.push(env_end_tick + fadeout_ticks);
+        env_vol.push(0);
         inst.env_vol = new Envelope(
             env_vol,
             env_vol_type,
@@ -727,6 +972,8 @@ function playXM(arrayBuf) {
       }
       instruments.push(inst);
     } else {
+      idx += hdrsiz;
+      console.log("empty instrument", i, hdrsiz, idx);
       instruments.push(null);
     }
   }
@@ -747,7 +994,11 @@ function playXM(arrayBuf) {
 }
 
 var xmReq = new XMLHttpRequest();
-xmReq.open("GET", "kamel.xm", true);
+var uri = location.search.substr(1);
+if (uri == "") {
+  uri = "kamel.xm";
+}
+xmReq.open("GET", uri, true);
 xmReq.responseType = "arraybuffer";
 xmReq.onload = function (xmEvent) {
   var arrayBuffer = xmReq.response;
