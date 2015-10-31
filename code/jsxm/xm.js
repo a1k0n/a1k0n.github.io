@@ -219,20 +219,23 @@ function next_row() {
   cur_row++;
   for (var i = 0; i < r.length; i++) {
     var ch = channelinfo[i];
+    var inst = ch.inst;
     ch.update = false;
     var triggernote = false;
     // instrument trigger
     if (r[i][1] != -1) {
-      var inst = instruments[r[i][1] - 1];
+      inst = instruments[r[i][1] - 1];
       if (inst != undefined) {
         ch.inst = inst;
         // retrigger unless overridden below
         triggernote = true;
-        // new instrument doesn ot reset volume!
+        ch.pan = inst.pan;
+        ch.vol = inst.vol;
       } else {
         // console.log("invalid inst", r[i][1], instruments.length);
       }
     }
+
     // note trigger
     if (r[i][0] != -1) {
       if (r[i][0] == 96) {
@@ -241,23 +244,30 @@ function next_row() {
       } else {
         // assume linear frequency table (flags header & 1 == 1)
         // is this true in kamel.xm?
-        var inst = ch.inst;
         if (inst != undefined) {
           var note = r[i][0] + inst.note;
           ch.note = note;
           triggernote = true;
-          // if there's an instrument and a note, set the volume
-          ch.pan = inst.pan;
-          ch.vol = inst.vol;
         }
       }
     }
+
+    ch.voleffectfn = undefined;
     if (r[i][2] != -1) {  // volume column
       var v = r[i][2];
+      ch.voleffectdata = v & 0x0f;
       if (v < 0x10) {
         console.log("channel", i, "invalid volume", v.toString(16));
       } else if (v <= 0x50) {
         ch.vol = v - 0x10;
+      } else if (v >= 0x60 && v < 0x70) {  // volume slide down
+        ch.voleffectfn = function() {
+          ch.vol = Math.max(0, ch.vol - ch.voleffectdata);
+        }
+      } else if (v >= 0x70 && v < 0x80) {  // volume slide up
+        ch.voleffectfn = function() {
+          ch.vol = Math.min(64, ch.vol + ch.voleffectdata);
+        }
       } else if (v >= 0x80 && v < 0x90) {  // fine volume slide down
         ch.vol = Math.max(0, ch.vol - (v & 0x0f));
       } else if (v >= 0x90 && v < 0xa0) {  // fine volume slide up
@@ -309,7 +319,7 @@ function next_row() {
       ch.vibratopos = 0;
       ch.env_vol = new EnvelopeFollower(inst.env_vol);
       ch.env_pan = new EnvelopeFollower(inst.env_pan);
-      ch.period = PeriodForNote(ch, note);
+      ch.period = PeriodForNote(ch, ch.note);
     }
   }
 }
@@ -373,8 +383,9 @@ function next_tick() {
     var ch = channelinfo[j];
     var inst = ch.inst;
     ch.periodoffset = 0;
-    if (cur_tick != 0 && ch.effectfn) {
-      ch.effectfn(ch);
+    if (cur_tick != 0) {
+      if(ch.voleffectfn) ch.voleffectfn(ch);
+      if(ch.effectfn) ch.effectfn(ch);
     }
     if (isNaN(ch.period)) {
       console.log(prettify_notedata(patterns[cur_pat][cur_row-1][j]),
@@ -448,7 +459,7 @@ function MixChannelIntoBuf(ch, start, end, dataL, dataR) {
   if (volR == 0 && volL == 0)
     return;
   if (isNaN(volR) || isNaN(volL)) {
-    console.log("NaN volume!?", volL, volR, colE, panE, ch.vol);
+    console.log("NaN volume!?", volL, volR, volE, panE, ch.vol);
     return;
   }
   var k = ch.off;
@@ -623,10 +634,6 @@ function audio_cb(e) {
   }
 }
 
-function eff_t0_0(ch, data) {  // arpeggio
-  // nothing to do here, arpeggio will be done on ch.effectdata
-}
-
 function eff_t0_1(ch, data) {  // pitch slide up
   if (data != 0) {
     ch.slideupspeed = data;
@@ -741,7 +748,7 @@ function eff_unimplemented_t0(ch, data) {
 }
 
 var effects_t0 = [  // effect functions on tick 0
-  eff_t0_0,
+  eff_t1_0,  // 1, arpeggio is processed on all ticks
   eff_t0_1,
   eff_t0_2,
   eff_t0_3,
