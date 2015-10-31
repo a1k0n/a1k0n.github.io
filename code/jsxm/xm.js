@@ -126,11 +126,9 @@ var tempo = 4;
 // Return 2-pole Butterworth lowpass filter coefficients for
 // center frequncy f_c (relative to sampling frequency)
 function FilterCoeffs(f_c) {
-  //  if (f_c > 0.5) {  // we can't lowpass above the nyquist frequency...
-  //    return [1, 0, 0];
-  //  }
-  //  what happens instead is the filter wraps around to an alias frequency,
-  //  and that also works OK, though it isn't strictly right... FIXME
+  if (f_c > 0.5) {  // we can't lowpass above the nyquist frequency...
+    f_c = 0.5;
+  }
   var wct = Math.sqrt(2) * Math.PI * f_c;
   var e = Math.exp(-wct);
   var c = e * Math.cos(wct);
@@ -184,8 +182,11 @@ function RedrawScreen() {
   if (e.row != shown_row) {
     var gfx = document.getElementById("gfxpattern");
     if (e.pat != pat_canvas_patnum) {
-      RenderPattern(pat_canvas, patterns[e.pat]);
-      pat_canvas_patnum = e.pat;
+      var p = patterns[e.pat];
+      if (p != undefined) {
+        RenderPattern(pat_canvas, patterns[e.pat]);
+        pat_canvas_patnum = e.pat;
+      }
     }
     var ctx = gfx.getContext('2d');
     ctx.fillStyle = '#000';
