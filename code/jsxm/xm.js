@@ -15,6 +15,7 @@ audioContext = window.AudioContext || window.webkitAudioContext;
 
 var _fontmap_notes = [8*5, 8*22, 8*28];
 var _pattern_cellwidth = 16 + 4 + 8 + 4 + 8 + 16 + 4;
+var _scope_width = _pattern_cellwidth - 1;
 var _pattern_border = 20;
 var pat_canvas_patnum;
 function RenderPattern(canv, pattern) {
@@ -52,7 +53,9 @@ function RenderPattern(canv, pattern) {
       // render instrument
       var inst = data[1];
       if (inst != -1) {  // no instrument = render nothing
-        ctx.drawImage(fontimg, 8*(inst>>4), 4*8, 4, 8, dx, dy, 4, 8);
+        if (inst > 15) {
+          ctx.drawImage(fontimg, 8*(inst>>4), 4*8, 4, 8, dx, dy, 4, 8);
+        }
         ctx.drawImage(fontimg, 8*(inst&15), 4*8, 4, 8, dx+4, dy, 4, 8);
       }
       dx += 12;
@@ -164,16 +167,36 @@ function RedrawScreen() {
   } while(e.t < t && audio_events.length > 0);
   if (e == undefined) return;
   var VU = e.vu;
+  var scopes = e.scopes;
 
-  // update VU meters
-  var canvas = document.getElementById("vu");
-  var ctx = canvas.getContext("2d");
-  ctx.fillStyle = '#000';
-  ctx.fillRect(0, 0, 16 * nchan, 64);
-  ctx.fillStyle = '#0f0';
-  for (var j = 0; j < nchan; j++) {
-    var y = -Math.log(VU[j])*10;
-    ctx.fillRect(j*16, y, 15, 64-y);
+  if (e.scopes != undefined) {
+    // update VU meters & oscilliscopes
+    var canvas = document.getElementById("vu");
+    var ctx = canvas.getContext("2d");
+    ctx.fillStyle = '#000';
+    ctx.fillRect(0, 0, canvas.width, 64);
+    ctx.fillStyle = '#0f0';
+    ctx.strokeStyle = '#55acff';
+    for (var j = 0; j < nchan; j++) {
+      var x = _pattern_border + j * _pattern_cellwidth;
+      // render channel number
+      if (j >= 10) {
+        ctx.drawImage(fontimg, 8*((j/10)|0), 4*8, 4, 8, x, 1, 4, 8);
+      }
+      ctx.drawImage(fontimg, 8*(j%10), 4*8, 4, 8, x+4, 1, 4, 8);
+
+      // volume in dB as a green bar
+      var vu_y = -Math.log(VU[j])*10;
+      ctx.fillRect(x, vu_y, 2, 64-vu_y);
+
+      // oscilloscope
+      var scope = scopes[j];
+      ctx.beginPath();
+      for (var k = 0; k < _scope_width; k++) {
+        ctx.lineTo(x + 1 + k, 32 - 16 * scope[k]);
+      }
+      ctx.stroke();
+    }
   }
 
   var debug = document.getElementById("debug");
@@ -221,7 +244,6 @@ function next_row() {
   for (var i = 0; i < r.length; i++) {
     var ch = channelinfo[i];
     var inst = ch.inst;
-    ch.update = false;
     var triggernote = false;
     // instrument trigger
     if (r[i][1] != -1) {
@@ -243,8 +265,6 @@ function next_row() {
         ch.release = 1;
         triggernote = false;
       } else {
-        // assume linear frequency table (flags header & 1 == 1)
-        // is this true in kamel.xm?
         if (inst != undefined) {
           var note = r[i][0] + inst.note;
           ch.note = note;
@@ -262,11 +282,11 @@ function next_row() {
       } else if (v <= 0x50) {
         ch.vol = v - 0x10;
       } else if (v >= 0x60 && v < 0x70) {  // volume slide down
-        ch.voleffectfn = function() {
+        ch.voleffectfn = function(ch) {
           ch.vol = Math.max(0, ch.vol - ch.voleffectdata);
         }
       } else if (v >= 0x70 && v < 0x80) {  // volume slide up
-        ch.voleffectfn = function() {
+        ch.voleffectfn = function(ch) {
           ch.vol = Math.min(64, ch.vol + ch.voleffectdata);
         }
       } else if (v >= 0x80 && v < 0x90) {  // fine volume slide down
@@ -282,13 +302,14 @@ function next_row() {
 
     ch.effect = r[i][3];
     ch.effectdata = r[i][4];
-    if (ch.effect < 16) {
+    if (ch.effect < 36) {
       ch.effectfn = effects_t1[ch.effect];
-      if (effects_t0[ch.effect](ch, ch.effectdata)) {
+      var eff_t0 = effects_t0[ch.effect];
+      if (eff_t0 && eff_t0(ch, ch.effectdata)) {
         triggernote = false;
       }
     } else {
-      console.log("channel", i, "effect > 16", ch.effect);
+      console.log("channel", i, "effect > 36", ch.effect);
     }
 
     // special handling for portamentos: don't trigger the note
@@ -320,7 +341,9 @@ function next_row() {
       ch.vibratopos = 0;
       ch.env_vol = new EnvelopeFollower(inst.env_vol);
       ch.env_pan = new EnvelopeFollower(inst.env_pan);
-      ch.period = PeriodForNote(ch, ch.note);
+      if (ch.note != undefined) {
+        ch.period = PeriodForNote(ch, ch.note);
+      }
     }
   }
 }
@@ -460,7 +483,7 @@ function MixChannelIntoBuf(ch, start, end, dataL, dataR) {
   if (volR == 0 && volL == 0)
     return;
   if (isNaN(volR) || isNaN(volL)) {
-    console.log("NaN volume!?", volL, volR, volE, panE, ch.vol);
+    console.log("NaN volume!?", ch.number, volL, volR, volE, panE, ch.vol);
     return;
   }
   var k = ch.off;
@@ -614,14 +637,32 @@ function audio_cb(e) {
     }
     var tickduration = Math.min(buflen, ticklen - cur_ticksamp);
     var VU = new Float32Array(nchan);
+    var scopes = undefined;
     for (var j = 0; j < nchan; j++) {
+      var scope;
+      if (tickduration >= _scope_width) {
+        scope = new Float32Array(_scope_width);
+        for (var k = 0; k < _scope_width; k++) {
+          scope[k] = -dataL[offset+k] - dataR[offset+k];
+        }
+      }
+
       VU[j] = MixChannelIntoBuf(
           channelinfo[j], offset, offset + tickduration, dataL, dataR) /
         tickduration;
+
+      if (tickduration >= _scope_width) {
+        for (var k = 0; k < _scope_width; k++) {
+          scope[k] += dataL[offset+k] + dataR[offset+k];
+        }
+        if (scopes == undefined) scopes = [];
+        scopes.push(scope);
+      }
     }
     audio_events.push({
       t: e.playbackTime + (0.0 + offset) / f_smp,
       vu: VU,
+      scopes: scopes,
       songpos: cur_songpos,
       pat: cur_pat,
       row: cur_row - 1
@@ -634,227 +675,6 @@ function audio_cb(e) {
     buflen -= tickduration;
   }
 }
-
-function eff_t0_1(ch, data) {  // pitch slide up
-  if (data != 0) {
-    ch.slideupspeed = data;
-  }
-}
-
-function eff_t0_2(ch, data) {  // pitch slide down
-  if (data != 0) {
-    ch.slidedownspeed = data;
-  }
-}
-
-function eff_t0_3(ch, data) {  // portamento
-  if (data != 0) {
-    ch.portaspeed = data;
-  }
-}
-
-function eff_t0_4(ch, data) {  // vibrato
-  if (data & 0x0f) {
-    ch.vibratodepth = data & 0x0f;
-  }
-  if (data >> 4) {
-    ch.vibratospeed = data >> 4;
-  }
-  eff_t1_4(ch, data);
-}
-
-function eff_t0_8(ch, data) {  // set panning
-  ch.pan = data;
-}
-
-function eff_t0_9(ch, data) {  // sample offset
-  ch.off = data * 256;
-}
-
-function eff_t0_a(ch, data) {  // volume slide
-  if (data) {
-    if (data & 0x0f) {
-      ch.volumeslide = -(data & 0x0f);
-    } else {
-      ch.volumeslide = data >> 4;
-    }
-  }
-}
-
-function eff_t0_b(ch, data) {  // song jump (untested)
-  if (data < songpats.length) {
-    cur_songpos = data
-    cur_pat = songpats[cur_songpos];
-  }
-}
-
-function eff_t0_c(ch, data) {  // set volume
-  ch.vol = Math.min(64, data);
-}
-
-function eff_t0_d(ch, data) {  // pattern jump
-  cur_songpos++;
-  if (cur_songpos >= songpats.length)
-    cur_songpos = song_looppos;
-  cur_pat = songpats[cur_songpos];
-  cur_row = data;
-}
-
-function eff_t0_e(ch, data) {  // extended effects!
-  var eff = data >> 4;
-  data = data & 0x0f;
-  switch (eff) {
-    case 1:  // fine porta up
-      ch.period -= data;
-      break;
-    case 2:  // fine porta down
-      ch.period += data;
-      break;
-    case 8:  // panning
-      ch.pan = data * 0x11;
-      break;
-    case 0x0a:  // fine vol slide up (with memory)
-      if (data == 0 && ch.finevolup != undefined)
-        data = ch.finevolup;
-      ch.vol = Math.min(64, ch.vol + data);
-      ch.finevolup = data;
-      break;
-    case 0x0b:  // fine vol slide down
-      if (data == 0 && ch.finevoldown != undefined)
-        data = ch.finevoldown;
-      ch.vol = Math.max(0, ch.vol - data);
-      ch.finevoldown = data;
-      break;
-    case 0x0c:  // note cut handled in eff_t1_e
-      break;
-    default:
-      console.log("unimplemented extended effect E", ch.effect.toString(16));
-      break;
-  }
-}
-
-function eff_t0_f(ch, data) {  // set tempo
-  if (data == 0) {
-    console.log("tempo 0?");
-    return;
-  } else if(data < 0x20) {
-    tempo = data;
-  } else {
-    bpm = data;
-  }
-}
-
-function eff_unimplemented_t0(ch, data) {
-  console.log("unimplemented effect", ch.effect.toString(16), data.toString(16));
-}
-
-var effects_t0 = [  // effect functions on tick 0
-  eff_t1_0,  // 1, arpeggio is processed on all ticks
-  eff_t0_1,
-  eff_t0_2,
-  eff_t0_3,
-  eff_t0_4,  // 4
-  eff_t0_a,  // 5, same as A on first tick
-  eff_t0_a,  // 6, same as A on first tick
-  eff_unimplemented_t0,  // 7
-  eff_t0_8,  // 8
-  eff_t0_9,  // 9
-  eff_t0_a,  // a
-  eff_t0_b,  // b
-  eff_t0_c,  // c
-  eff_t0_d,  // d
-  eff_t0_e,  // e
-  eff_t0_f,  // f
-];
-
-function eff_t1_0(ch) {  // arpeggio
-  if (ch.effectdata != 0 && ch.inst != undefined) {
-    var arpeggio = [0, ch.effectdata>>4, ch.effectdata&15];
-    var note = ch.note + arpeggio[cur_tick % 3];
-    ch.period = PeriodForNote(ch, note);
-  }
-}
-
-function eff_t1_1(ch) {  // pitch slide up
-  if (ch.slideupspeed !== undefined) {
-    // is this limited? it appears not
-    ch.period -= ch.slideupspeed;
-  }
-}
-
-function eff_t1_2(ch) {  // pitch slide down
-  if (ch.slidedownspeed !== undefined) {
-    // 1728 is the period for C-1
-    ch.period = Math.min(1728, ch.period + ch.slidedownspeed);
-  }
-}
-
-function eff_t1_3(ch) {  // portamento
-  if (ch.periodtarget !== undefined && ch.portaspeed !== undefined) {
-    if (ch.period > ch.periodtarget) {
-      ch.period = Math.max(ch.periodtarget, ch.period - ch.portaspeed);
-    } else {
-      ch.period = Math.min(ch.periodtarget, ch.period + ch.portaspeed);
-    }
-  }
-}
-
-function eff_t1_4(ch) {  // vibrato
-  ch.periodoffset = Math.sin(ch.vibratopos * Math.PI / 32) * ch.vibratodepth;
-  if (isNaN(ch.periodoffset)) {
-    console.log("vibrato periodoffset NaN?", ch.vibratopos, ch.vibratodepth);
-    ch.periodoffset = 0;
-  }
-  ch.vibratopos += ch.vibratospeed;
-  ch.vibratopos &= 63;
-}
-
-function eff_t1_5(ch) {  // portamento + volume slide
-  eff_t1_a(ch);
-  eff_t1_3(ch);
-}
-
-function eff_t1_6(ch) {  // vibrato + volume slide
-  eff_t1_a(ch);
-  eff_t1_4(ch);
-}
-
-function eff_t1_a(ch) {  // volume slide
-  if (ch.volumeslide !== undefined) {
-    ch.vol = Math.max(0, Math.min(64, ch.vol + ch.volumeslide));
-  }
-}
-
-function eff_t1_e(ch) {  // note cut
-  switch (ch.effectdata >> 4) {
-    case 0x0c:
-      if (cur_tick == (ch.effectdata & 0x0f)) {
-        ch.vol = 0;
-      }
-      break;
-  }
-}
-
-function eff_nop() {}
-function eff_unimplemented() {}
-var effects_t1 = [  // effect functions on tick 1+
-  eff_t1_0,
-  eff_t1_1,
-  eff_t1_2,
-  eff_t1_3,
-  eff_t1_4,
-  eff_t1_5,  // 5
-  eff_t1_6,  // 6
-  eff_unimplemented,  // 7
-  eff_nop,   // 8
-  eff_nop,   // 9
-  eff_t1_a,  // a
-  eff_nop,   // b
-  eff_nop,   // c
-  eff_nop,   // d
-  eff_t1_e,  // e
-  eff_nop,   // f
-];
 
 function ConvertSample(array, bits) {
   var len = array.length;
@@ -926,9 +746,10 @@ function playXM(arrayBuf) {
   var flags = dv.getUint16(0x4a, true);
   tempo = dv.getUint16(0x4c, true);
   bpm = dv.getUint16(0x4e, true);
-  document.getElementById('vu').width = 16 * nchan;
+  document.getElementById('vu').width = _pattern_border + _pattern_cellwidth * nchan;
   for (var i = 0; i < nchan; i++) {
     channelinfo.push({
+      number: i,
       filterstate: new Float32Array(3),
       vol: 0,
       pan: 128,
@@ -937,6 +758,7 @@ function playXM(arrayBuf) {
       vLprev: 0, vRprev: 0,
       mute: 0,
       volE: 0, panE: 0,
+      retrig: 0,
       vibratodepth: 1,
       vibratospeed: 1,
     })
@@ -1136,6 +958,17 @@ function playXM(arrayBuf) {
   debug.innerHTML = songname;
   var gfxpattern = document.getElementById("gfxpattern");
   gfxpattern.width = _pattern_cellwidth * nchan + _pattern_border;
+
+  var instrlist = document.getElementById("instruments");
+  var list = [];
+  for (var i = 0; i < ninst; i++) {
+    var inst = instruments[i];
+    if (inst == null) continue;
+    var n = (i+1).toString(16);
+    if (i < 15) n = ' ' + n;
+    list.push(n + " " + inst.name);
+  }
+  instrlist.innerHTML = list.join("\n");
 
   // start playing
   gainNode.connect(audioctx.destination);
