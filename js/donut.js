@@ -101,7 +101,6 @@ var _onload = function() {
 
   asciiframe();
   canvasframe();
-  window.prettyPrint();
 }
 
 if(document.all)

@@ -18,11 +18,11 @@ everyone. </p>
 <p>It is sometimes shockingly easy to create a key generator.  Often a
 program that checks a license key is structured like this:  </p>
 
-<pre>
-  licensestr = get_license_key_modal_dialog()
-  validlicensestr = make_valid_license(licensestr);
-  if(licensestr == validlicensestr) { ... }
-</pre>
+{% highlight c %}
+licensestr = get_license_key_modal_dialog()
+validlicensestr = make_valid_license(licensestr);
+if(licensestr == validlicensestr) { ... }
+{% endhighlight %}
   
 <p>So now all I have to do is extract your make_valid_license code, feed
 it random garbage, and I have a key generator for your program.  One
@@ -45,10 +45,10 @@ say for now.</p>
 
 <p>The code is here:</p>
 
-<p><a href="http://a1k0n.net/code/keydecode.cpp.txt">keydecode.cpp</a> - key
+<p><a href="/code/keydecode.cpp.txt">keydecode.cpp</a> - key
 decoder</p>
 
-<p><a href="http://a1k0n.net/code/bn.h.txt">bn.h</a> - quick and dirty bignums</p>
+<p><a href="/code/bn.h.txt">bn.h</a> - quick and dirty bignums</p>
 
 <p>(The web host I'm using has the wrong MIME types on .cpp and .h, so they're
 .txts - sorry)</p>

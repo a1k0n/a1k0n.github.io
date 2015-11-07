@@ -2,15 +2,16 @@
 title: Using SLIME over an SSH tunnel
 layout: post
 ---
-<p>If you'd like to use emacs on one computer (i.e. your windows box at home) and
-use <a href="http://common-lisp.net/project/slime/">SLIME</a> to connect to a
+If you'd like to use emacs on one computer (i.e. your windows box at home) and
+use [SLIME](http://common-lisp.net/project/slime/) to connect to a
 Common Lisp process on a remote computer (i.e. your server at work), here's how
-I do it.</p>
+I do it.
 
-<p>First, create a startup file for your favorite Lisp implementation.</p>
+First, create a startup file for your favorite Lisp implementation.
 
-<h2>lisp startup file</h2>
-<pre>
+## lisp startup file
+
+{% highlight lisp %}
 (require 'asdf)
 (asdf:oos 'asdf:load-op 'swank)
  
@@ -18,12 +19,13 @@ I do it.</p>
 (setf swank:*use-dedicated-output-stream* nil)
 (setf swank:*communication-style* :fd-handler)
 (swank:create-server :dont-close t)
-</pre>
+{% endhighlight %}
  
-<p>Now edit your ~/.emacs so that you've got something like the following in it:</p>
+Now edit your `~/.emacs` so that you've got something like the following in it:
  
-<h2>.emacs</h2>
-<pre>
+## .emacs
+
+{% highlight lisp %}
 (require 'slime)
 (require 'tramp)
  
@@ -65,31 +67,30 @@ I do it.</p>
  
 (defun my-box-homedir ()
   (interactive)
-  (find-file (concat *zarniwoop-tramp-path* "/home/me/")))
-</pre>
+  (find-file (concat *server-tramp-path* "/home/me/")))
+{% endhighlight %}
 
-<p>Now, load up the startup file you created on your host Lisp to start
-the swank server.  Then, create an ssh tunnel, i.e. <tt>ssh -L
-4005:localhost:4005 me@my-work.com</tt>.</p>
+Now, load up the startup file you created on your host Lisp to start
+the swank server.  Then, create an ssh tunnel, i.e. `ssh -L
+4005:localhost:4005 me@my-work.com`.
 
-<p>Now you can <tt>M-x my-box-slime</tt> to connect through your SSH
-tunnel to your work box; SLIME's <tt>M-</tt>. command will also
+Now you can `M-x my-box-slime` to connect through your SSH
+tunnel to your work box; SLIME's `M-`. command will also
 correctly open up the file containing the defun of whatever's under
-your cursor, and <tt>C-c C-k</tt> works correctly, etc.  If you want
-to open up some lisp file, <tt>M-x my-box-homedir</tt> is a convenient
-shortcut.</p>
+your cursor, and `C-c C-k` works correctly, etc.  If you want
+to open up some lisp file, `M-x my-box-homedir` is a convenient
+shortcut.
 
-<h2>For Windows users</h2>
-<p>If you're using Windows and want to also use a multi-hop tramp method
-(i.e. ssh into your work firewall, and then ssh from there to your
-server at work), be aware that tramp 2.1.4 and prior has a bug; it's
-fixed in CVS and probably 2.1.5, which is not out yet.  Information
-and a patch is available <a
-href="http://lists.gnu.org/archive/html/tramp-devel/2005-10/msg00060.html">here</a>.</p>
+## For Windows users
 
-<p>You'll also want to use plink from the <a
-href="http://www.chiark.greenend.org.uk/~sgtatham/putty/">PuTTY</a>
-distribution in lieu of ssh.  If you're doing multi-hop tramp, though,
-you need to use plink for the first hop (Windows box -> "firewall"
-box) and ssh thereafter ("firewall" -> "server").</p>
+If you're using Windows and want to also use a multi-hop tramp method (i.e. ssh
+into your work firewall, and then ssh from there to your server at work), be
+aware that tramp 2.1.4 and prior has a bug; it's fixed in CVS and probably
+2.1.5, which is not out yet.  Information and a patch is available [here](
+http://lists.gnu.org/archive/html/tramp-devel/2005-10/msg00060.html).
 
+You'll also want to use `plink` from the [PuTTY](
+http://www.chiark.greenend.org.uk/~sgtatham/putty/) distribution in lieu of
+ssh.  If you're doing multi-hop tramp, though, you need to use plink for the
+first hop (Windows box -> "firewall" box) and ssh thereafter ("firewall" ->
+"server").

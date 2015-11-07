@@ -1,25 +1,21 @@
 ---
 title: Donut math&#58; how donut.c works
 layout: post
+headhtml: |
+  <script type="text/javascript"
+      src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+  </script>
+  <script src="https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js"></script>
+  <script src="/js/donut.js"></script>
 ---
-<link href="/css/prettify.css" type="text/css" rel="stylesheet" />
-<script type="text/javascript" src="/js/prettify.js">
-</script>
-
-<script src="/js/donut.js">
-</script>
-
 There has been a sudden resurgence of interest in my <a
 href="/2006/09/15/obfuscated-c-donut.html">"donut" code from 2006</a>, and I've
 had a couple requests to explain this one.  It's been five years now, so it's
 not exactly fresh in my memory, so I will reconstruct it from scratch, in great
 detail, and hopefully get approximately the same result.
 
-This is the code and the output, animated in Javascript:
-<button onclick="anim1();">toggle animation</button>
-<table border="0" cellspacing="0" cellpadding="0"><tr>
-<td style="background-color:#000">
-<pre style="background-color:#000; color:#ccc;">
+This is the code:
+<pre style="font-size: 10pt;">
              k;double sin()
          ,cos();main(){float A=
        0,B=0,i,j,z[1760];char b[
@@ -42,11 +38,10 @@ in(B),t=c*h*g-f*        e;int x=40+30*D*
          .,~~;;;========;;;:~-.
              ..,--------,*/
 </pre>
-</td>
-<td style="background-color:#000">
-<pre id="d" style="background-color:#000; color:#ccc;">
+...and the output, animated in Javascript:
+<button onclick="anim1();">toggle animation</button>
+<pre id="d" style="background-color:#000; color:#ccc; font-size: 10pt;">
 </pre>
-</td></tr></table>
 
 At its core, it's a framebuffer and a Z-buffer into which I render pixels.
 Since it's just rendering relatively low-resolution ASCII art, I massively
@@ -136,8 +131,10 @@ R_1 \sin \theta, &
 \cos \phi & 0 & \sin \phi \\
 0 & 1 & 0 \\
 -\sin \phi & 0 & \cos \phi \end{matrix} \right)
-=
-\left( \begin{matrix}
+$$
+
+$$
+= \left( \begin{matrix}
 (R_2 + R_1 \cos \theta)\cos \phi, &
 R_1 \sin \theta, &
 -(R_2 + R_1 \cos \theta)\sin \phi \end{matrix} \right)

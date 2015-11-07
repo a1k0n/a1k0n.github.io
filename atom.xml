@@ -1,33 +1,24 @@
 ---
-layout: nil
+layout: null
 ---
-<?xml version="1.0"?>
-<feed xmlns="http://www.w3.org/2005/Atom">
- 
-  <title>a1k0n.net</title>
-  <link href="http://a1k0n.net/"/>
-  <link type="application/atom+xml" rel="self" href="http://a1k0n.net/atom.xml"/>
-  <updated>{{ site.time | date_to_xmlschema }}</updated>
-  <id>http://a1k0n.net/</id>
-  <author>
-    <name>Andy Sloane</name>
-    <email>andy@a1k0n.net</email>
-  </author>
 
-  {% for post in site.posts %}
-  {% if post.hide == null %}
-  <entry>
-    <id>http://a1k0n.net{{ post.id }}</id>
-    <link type="text/html" rel="alternate" href="http://a1k0n.net{{ post.url }}"/>
-    <title>{{ post.title }}</title>
-    <updated>{{ post.date | date_to_xmlschema }}</updated>
-    <author>
-      <name>Andy Sloane</name>
-      <uri>http://a1k0n.net/</uri>
-    </author>
-    <content type="html">{{ post.content | xml_escape }}</content>
-  </entry>
-  {% endif %}
-  {% endfor %}
- 
-</feed>
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>{{ site.title | xml_escape }}</title>
+    <description>{{ site.description | xml_escape }}</description>
+    <link>{{ site.url }}{{ site.baseurl }}/</link>
+    <atom:link href="{{ "/feed.xml" | prepend: site.baseurl | prepend: site.url }}" rel="self" type="application/rss+xml" />
+    {% for post in site.posts limit:10 %}
+    {% if post.hide == null %}
+      <item>
+        <title>{{ post.title | xml_escape }}</title>
+        <description>{{ post.content | xml_escape }}</description>
+        <pubDate>{{ post.date | date: "%a, %d %b %Y %H:%M:%S %z" }}</pubDate>
+        <link>{{ post.url | prepend: site.baseurl | prepend: site.url }}</link>
+        <guid isPermaLink="true">{{ post.url | prepend: site.baseurl | prepend: site.url }}</guid>
+      </item>
+    {% endif %}
+    {% endfor %}
+  </channel>
+</rss>
