@@ -32,7 +32,7 @@ headhtml: |
   <div style="display: none" id='filelist'></div>
 </div>
 
-# What is this thing?
+## What is this thing?
 
 Hit the play button above and it will play music; specifically, music composed
 with (or at least, compatible with) a program released in 1994 called
@@ -125,31 +125,79 @@ together, and watch your computer perform it live. I wanted to recreate that
 experience. There are other web-based .MOD players now, like
 [mod.haxor.fi](http://mod.haxor.fi), but I wanted to write my own just for fun.
 
-<h1>Real-time Audio Synthesis in Javascript</h1>
+## Real-time Audio Synthesis in Javascript
 
-The webkitAudioContext element was introduced to HTML a while back, and is
-now available in the standard as AudioContext. The API is fairly flexible, and
+The `webkitAudioContext` element was introduced to HTML a while back, and is
+now available in the standard as `AudioContext`. The API is fairly flexible, and
 one of the things you can do with it is get a Javascript callback which writes
 samples more or less directly to the output device, just like we used to do
-with DMA loop interrupts back in the day. It's called createScriptProcessor.
+with DMA loop interrupts back in the day. It's called `createScriptProcessor`.
 
+You can be up and running making all kinds of noise in a jiffy:
 {% highlight js %}
 function InitAudio() {
+  // Create an AudioContext, falling back to 
+  // webkitAudioContext (e.g., for Safari)
   var audioContext = window.AudioContext || window.webkitAudioContext;
   var audioctx = new audioContext();
+
+  // Create a "gain node" which will just multiply everything input
+  //  to it by some constant; this gives us a volume control.
   gainNode = audioctx.createGain();
   gainNode.gain.value = 0.1;  // master volume
-  // create a script processor node with 0 input channels, 2 output channels,
-  // and a 4096-sample buffer
+
+  // Create a script processor node with 0 input channels,
+  // 2 output channels, and a 4096-sample buffer size
   jsNode = audioctx.createScriptProcessor(4096, 0, 2);
   jsNode.onaudioprocess = function() {
     var buflen = e.outputBuffer.length;
     var dataL = e.outputBuffer.getChannelData(0);
     var dataR = e.outputBuffer.getChannelData(1);
+    // dataL and dataR are Float32Arrays; fill them with
+    // samples, and the framework will play them!
   };
+
+  // Now, form a pipeline where our script feeds samples to the
+  // gain node, and the gain node writes samples to the
+  // "destination" which actually makes noise.
+  jsNode.connect(gainNode);
   gainNode.connect(audioctx.destination);
 }
 {% endhighlight %}
+
+Your `onaudioprocess` function will be called back whenever new samples are
+needed to fill the output buffer. With a default samplerate of 44.1kHz, a
+4096-sample buffer will expire, and thus your callback will be called, every
+~92 milliseconds.
+
+Our goal is to fill this buffer up with the sum of each channel's output
+waveform. Each channel outputs a sample playing at a certain frequency and at a
+certain volume. But wait -- our output frequency is given (by
+`audioctx.sampleRate` as it happens) and we need to play samples at different
+frequencies for each note. How do we do that?
+
+## Resampling
+
+Playing a sample recorded at a different frequency from the output frequency is
+a surprisingly nontrivial problem.
+
+TODO:
+ - frequency content, up to nyquist
+ - aliasing phenomenon
+ - FFT, brick-wall filter, sinc
+ - amiga's approach, artists
+
+It turns out that if we use advanced resampling techniques to eliminate
+unwanted alias harmonics, many songs (especially "chiptunes" - songs with tiny
+looping square wave or triangle wave samples, to emulate simple vintage sound
+hardware chips) sound pretty bad. The original hardware and software that
+played these either used "zero-order hold" -- just output the sample closest to
+the interpolated time -- or "first-order hold" -- interpolate between the
+surrounding samples.
+
+I compromised with a very simple implementation that I think sounds pretty
+good. I use a combination of first-order hold and a per-channel two-pole
+low-pass filter, which has very low implementation complexity.
 
 <!--
  - background
