@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Playing Fasttracker 2 .XM files in Javascript &#8211; a1k0n.net</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="Andy Sloane">
+    <meta name="keywords" content="">
+    <link rel="canonical" href="http://www.a1k0n.net/2015/11/09/javascript-ft2-player.html">
+    <link rel="alternate" type="application/rss+xml" title="RSS Feed for a1k0n.net" href="/feed.xml" />
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/pixyll.css?201511080840" type="text/css">
+
+    <!-- Fonts -->
+    <link href='//fonts.googleapis.com/css?family=Merriweather:900,900italic,300,300italic' rel='stylesheet' type='text/css'>
+    <link href='//fonts.googleapis.com/css?family=Lato:900,300' rel='stylesheet' type='text/css'>
+    
+
+    <!-- Verifications -->
+    
+
+    <!-- Open Graph -->
+    <!-- From: https://github.com/mmistakes/hpstr-jekyll-theme/blob/master/_includes/head.html -->
+    <meta property="og:locale" content="en_US">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="Playing Fasttracker 2 .XM files in Javascript">
+    <meta property="og:description" content="">
+    <meta property="og:url" content="http://www.a1k0n.net/2015/11/09/javascript-ft2-player.html">
+    <meta property="og:site_name" content="a1k0n.net">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary" />
+    
+    <meta name="twitter:title" content="Playing Fasttracker 2 .XM files in Javascript" />
+    <meta name="twitter:description" content="" />
+    <meta name="twitter:url" content="http://www.a1k0n.net/2015/11/09/javascript-ft2-player.html" />
+
+    
+    <script type="text/javascript">
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-24584703-1']);
+      _gaq.push(['_trackPageview']);
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+    </script>
+    
+<script src="/code/jsxm/xm.js"></script>
+<script src="/code/jsxm/xmeffects.js"></script>
+<script src="http://a1k0n-pub.s3-website-us-west-1.amazonaws.com/xm/xmlist.js"></script>
+<style>
+
+.centered {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#filelist a { color: #fff; }
+
+.playercontainer {
+  background:#000; overflow: auto;
+}
+</style>
+
+</head>
+
+<body class="site">
+
+	
+
+  <div class="site-wrap">
+    <header class="site-header px2 px-responsive">
+  <div class="mt2 wrap">
+    <div class="measure">
+      <a href="/" class="site-title">a1k0n.net</a>
+      <nav class="site-nav">
+        <a href="/about.html">About</a>
+
+      </nav>
+      <div class="clearfix"></div>
+      
+    </div>
+  </div>
+</header>
+
+
+    <div class="post p2 p-responsive wrap" role="main">
+      <div class="measure">
+        <div class="post-header mb2">
+  <h1>Playing Fasttracker 2 .XM files in Javascript</h1>
+  <span class="post-meta">Nov 9, 2015</span><br>
+  
+</div>
+
+<article class="post-content">
+  <div class="playercontainer">
+  <div> <canvas class="centered" id="title" width="640" height="22"></canvas> </div>
+  <div> <canvas class="centered" id="vu" width="224" height="64"></canvas> </div>
+  <div> <canvas class="centered" id="gfxpattern" width="640" height="200"></canvas> </div>
+  <div id="instruments"></div>
+  <div>
+    <p style="text-align: center">
+      <button id="playpause" disabled="true" style="width: 100px">Play</button>
+      <button id="loadbutton" style="width: 100px">Load</button>
+    </p>
+  </div>
+  <div style="display: none" id="filelist"></div>
+</div>
+
+<h2 id="what-is-this-thing">What is this thing?</h2>
+
+<p>Hit the play button above and it will play music; specifically, music composed
+with (or at least, compatible with) a program released in 1994 called
+FastTracker 2; this is a Javascript homage I wrote in a fit of nostalgia.</p>
+
+<p>FastTracker 2 looks like this:</p>
+
+<p><img src="/img/ft2.png" /></p>
+
+<p>I am using the original font to render a pastiche of the FT2 interface above.</p>
+
+<h2 id="xm-files">.XM files</h2>
+
+<p>The ubiquitous .MOD music file format originated on the Commodore Amiga in the
+late 80s. It was more or less designed around the “Paula” chip inside the Amiga
+which plays four 8-bit PCM channels simultaneously. It is fairly amazing what
+artists are able to accomplish in just four voices; I’ve converted a few of
+Lizardking’s old four-channel .MODs to .XM format so they can be played in the
+player above; try them out with the load button above.</p>
+
+<p>FastTracker 2’s .XM (eXtended Module) format was created as a multi-channel
+extension to .MOD in the 90s; it was written by PC demo group
+<a href="http://www.pouet.net/groups.php?which=161">Triton</a>. There were other
+contemporaneous multi-channel MOD-type music trackers, like ScreamTracker 3’s
+.S3M and later Impulse Tracker’s .IT. Nearly all PC demos and many games in the
+90s and early 2000s played music in one of these formats.</p>
+
+<p>Underneath the hood, it’s several (14 in the case of the default song that
+comes up here) <em>channels</em> independently playing <em>samples</em> at various
+pitches and volume levels, controlled by the <em>pattern</em> which is what you
+see scrolling above.</p>
+
+<p>Patterns are a lot like assembly language for playing music, complete with a
+slew of hexadecimal numbers and opaque syntax, except they are laid out like a
+spreadsheet rather than a single column of instructions. Each cell contains an
+instruction for playing or releasing a note with a certain instrument,
+optionally modifying the volume, panning, or pitch with <em>effects</em>.</p>
+
+<p>Every sound that is played is one of the <em>samples</em>, shown at the top of this
+page as little waveforms and numbers in the table below the pattern. The idea
+is that the musician would record an instrument, like a piano or a bass, at a
+certain note, and then we play them back at higher or lower speeds to change
+the pitch.</p>
+
+<p>Theoretically each sample has a name like “piano” or “bass”, but in practice,
+musicians tended to erase those and write messages instead. Later trackers
+would add a song message field to avoid abuse of the instrument list.</p>
+
+<p><img src="/img/ft2pattern.png" /></p>
+
+<p>In the above example, we are about to play an E note in octave 5 with
+instrument number 2 on the first channel, and in the second channel we play the
+same note an octave higher with the same instrument, except we also lower the
+volume to 0x2C (maximum volume is 0x40, so this is between a half and 3/4ths
+full volume). The second channel is also going to play with effect 0, which is
+an arpeggio, switching between 0, 0x0c or 12, and 0 semitones higher – meaning
+it’s going to rapidly play a sequence of E-6, E-7, E-6, and repeat.</p>
+
+<p>XM <em>instruments</em> go beyond .MOD samples in that they include volume and panning
+envelopes, and can have multiple different samples per instrument – so you
+could record various piano notes and use a recording closest to the note you’re
+playing rather than stretching a sample several octaves, which sounds bad. I
+only render the first sample per instrument in the table above though.</p>
+
+<p>In .MOD-derived formats, each row of pattern data is played at a certain rate
+controlled by the <em>speed</em> and <em>BPM</em> which have a sort of tangential
+relationship to the terms you may be familiar with. <em>speed</em> controls the row
+speed in <em>ticks</em>, and <em>BPM</em> controls how long <em>ticks</em> are.  A <em>tick</em> is defined
+as 2500/<em>BPM</em> milliseconds.</p>
+
+<p>Typical values are <em>BPM</em>=125 and <em>speed</em>=6, corresponding to 2500/125 = 20ms
+per tick, or 50 ticks/second; and 50/6 = 8.333 rows per second. If we assume
+the downbeat happens every four rows then it works out to 125 beats per minute.
+But if <em>speed</em> is 5 then it’s 150 beats per minute, so we can’t really take the
+terms at face value.</p>
+
+<p>Each <em>tick</em> we process <em>effects</em> – modifications to the volume or pitch of a
+note. Effects are represented by three hexadecimal digits: the effect type
+(first digit) and parameter (second two digits). In XM the effect type goes
+beyond the hex digits and goes all the way from 0-9 and A-Z.</p>
+
+<p>Examples include arpeggio (switching between three notes really fast; effect
+047 plays a major chord), portamento (sliding from one note to another, like a
+trombone does; effect 1xx slides up 2xx down, and 3xx to a specific note),
+vibrato (vibrating the pitch up and down; 4xx), or ramping the volume up or
+down (Axy). If you watch closely while the song is playing you can try to work
+it out.</p>
+
+<p>I think this is what was most fun about playing .MODs and their ilk back in
+days of yore – you could actually <em>see</em> how a complex piece of music is put
+together, and watch your computer perform it live. I wanted to recreate that
+experience. There are other web-based .MOD players now, like
+<a href="http://mod.haxor.fi">mod.haxor.fi</a>, but I wanted to write my own just for fun.</p>
+
+<h2 id="real-time-audio-synthesis-in-javascript">Real-time Audio Synthesis in Javascript</h2>
+
+<p>The <code>webkitAudioContext</code> element was introduced to HTML a while back, and is
+now available in the standard as <code>AudioContext</code>. The API is fairly flexible, and
+one of the things you can do with it is get a Javascript callback which writes
+samples more or less directly to the output device, just like we used to do
+with DMA loop interrupts back in the day. It’s called <code>createScriptProcessor</code>.</p>
+
+<p>You can be up and running making all kinds of noise in a jiffy:</p>
+
+<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="kd">function</span> <span class="nx">InitAudio</span><span class="p">()</span> <span class="p">{</span>
+  <span class="c1">// Create an AudioContext, falling back to </span>
+  <span class="c1">// webkitAudioContext (e.g., for Safari)</span>
+  <span class="kd">var</span> <span class="nx">audioContext</span> <span class="o">=</span> <span class="nb">window</span><span class="p">.</span><span class="nx">AudioContext</span> <span class="o">||</span> <span class="nb">window</span><span class="p">.</span><span class="nx">webkitAudioContext</span><span class="p">;</span>
+  <span class="kd">var</span> <span class="nx">audioctx</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">audioContext</span><span class="p">();</span>
+
+  <span class="c1">// Create a &quot;gain node&quot; which will just multiply everything input</span>
+  <span class="c1">//  to it by some constant; this gives us a volume control.</span>
+  <span class="nx">gainNode</span> <span class="o">=</span> <span class="nx">audioctx</span><span class="p">.</span><span class="nx">createGain</span><span class="p">();</span>
+  <span class="nx">gainNode</span><span class="p">.</span><span class="nx">gain</span><span class="p">.</span><span class="nx">value</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">;</span>  <span class="c1">// master volume</span>
+
+  <span class="c1">// Create a script processor node with 0 input channels,</span>
+  <span class="c1">// 2 output channels, and a 4096-sample buffer size</span>
+  <span class="nx">jsNode</span> <span class="o">=</span> <span class="nx">audioctx</span><span class="p">.</span><span class="nx">createScriptProcessor</span><span class="p">(</span><span class="mi">4096</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">);</span>
+  <span class="nx">jsNode</span><span class="p">.</span><span class="nx">onaudioprocess</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">buflen</span> <span class="o">=</span> <span class="nx">e</span><span class="p">.</span><span class="nx">outputBuffer</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span>
+    <span class="kd">var</span> <span class="nx">dataL</span> <span class="o">=</span> <span class="nx">e</span><span class="p">.</span><span class="nx">outputBuffer</span><span class="p">.</span><span class="nx">getChannelData</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+    <span class="kd">var</span> <span class="nx">dataR</span> <span class="o">=</span> <span class="nx">e</span><span class="p">.</span><span class="nx">outputBuffer</span><span class="p">.</span><span class="nx">getChannelData</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+    <span class="c1">// dataL and dataR are Float32Arrays; fill them with</span>
+    <span class="c1">// samples, and the framework will play them!</span>
+  <span class="p">};</span>
+
+  <span class="c1">// Now, form a pipeline where our script feeds samples to the</span>
+  <span class="c1">// gain node, and the gain node writes samples to the</span>
+  <span class="c1">// &quot;destination&quot; which actually makes noise.</span>
+  <span class="nx">jsNode</span><span class="p">.</span><span class="nx">connect</span><span class="p">(</span><span class="nx">gainNode</span><span class="p">);</span>
+  <span class="nx">gainNode</span><span class="p">.</span><span class="nx">connect</span><span class="p">(</span><span class="nx">audioctx</span><span class="p">.</span><span class="nx">destination</span><span class="p">);</span>
+<span class="p">}</span></code></pre></div>
+
+<p>Your <code>onaudioprocess</code> function will be called back whenever new samples are
+needed to fill the output buffer. With a default samplerate of 44.1kHz, a
+4096-sample buffer will expire, and thus your callback will be called, every
+~92 milliseconds.</p>
+
+<p>Our goal is to fill this buffer up with the sum of each channel’s output
+waveform. Each channel outputs a sample playing at a certain frequency and at a
+certain volume.</p>
+
+<p><em>insert diagram of ticks/rows laid out in sample buffer</em></p>
+
+<p>But wait – our output frequency is given (by
+<code>audioctx.sampleRate</code> as it happens) and we need to play samples at different
+frequencies for each note. How do we do that?</p>
+
+<h2 id="resampling">Resampling</h2>
+
+<p>Playing a sample recorded at a different frequency from the output frequency is
+a surprisingly nontrivial problem.</p>
+
+<p>TODO:</p>
+
+<ul>
+  <li>frequency content, up to nyquist</li>
+  <li>aliasing phenomenon</li>
+  <li>FFT, brick-wall filter, sinc</li>
+  <li>amiga’s approach, artists</li>
+</ul>
+
+<p>It turns out that if we use advanced resampling techniques to eliminate
+unwanted alias harmonics, many songs (especially “chiptunes” - songs with tiny
+looping square wave or triangle wave samples, to emulate simple vintage sound
+hardware chips) sound pretty bad. The original hardware and software that
+played these either used “zero-order hold” – just output the sample closest to
+the interpolated time – or “first-order hold” – interpolate between the
+surrounding samples.</p>
+
+<p>I compromised with a very simple implementation that I think sounds pretty
+good. I use a combination of zero-order hold and a per-channel two-pole
+low-pass filter, which has very low implementation complexity.</p>
+
+<h3 id="follow-up-in-the-next-blog-post">follow up in the next blog post</h3>
+<p>about digital filters and just say we made a IIR low pass filter, will explain
+later</p>
+
+<!--
+ - background
+   - first thing i heard on a soundblaster, music you can see
+   - chiptunes
+   - amiga paula, .MOD format - assembly language for music
+   - ProTracker, FastTracker 2, ScreamTracker 3 (S3M), Impulse Tracker,
+     MilkyTracker, ...
+   - kamel.xm ripped from ...? youtube link?
+
+ - .XM format: multi-sample instruments, envelopes
+   - great for chiptunes
+   - XM documentation mostly wrong
+
+ - basics: note, inst, vol, effect
+   - "tempo" / "bpm" -> "row", "ticks"
+   - effects, some on tick 0, some "between rows"
+
+ - HTML5 AudioContext
+   - ScriptNode callback
+   - architecture: render a tick at a time, a channel at a time, a sample loop at a time
+     - fast inner loop
+   - time synchronization w/ audioContext.currentTime
+
+ - resampling: playing 8363Hz sample at @44100Hz output
+   - naive integer truncation (zero order hold)
+   - linear
+   - FFT resampling
+   - brickwall; lanczos; etc; ... too much effort
+   - cheap IIR LPF
+
+-->
+
+</article>
+
+
+
+
+
+
+
+      </div>
+    </div>
+  </div>
+
+  <footer class="center">
+  <div class="measure">
+    <a href="/" class="site-title">a1k0n.net</a>
+  </div>
+</footer>
+
+</body>
+</html>

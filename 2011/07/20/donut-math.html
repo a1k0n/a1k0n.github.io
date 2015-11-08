@@ -1,42 +1,98 @@
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en"> 
-  <head>
-<link rel="stylesheet" href="/style.css" type="text/css" media="all" /> 
-<title>Donut math&#58; how donut.c works -- a1k0n</title>
-<script type="text/javascript">
-  var _gaq = _gaq || [];
-  _gaq.push(['_setAccount', 'UA-24584703-1']);
-  _gaq.push(['_trackPageview']);
-  (function() {
-    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-    ga.src = ('https:' == document.location.protocol ? 'https://' : 'http://') + 'stats.g.doubleclick.net/dc.js';
-    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-  })();
-</script>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Donut math&#58; how donut.c works &#8211; a1k0n.net</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="Andy Sloane">
+    <meta name="keywords" content="">
+    <link rel="canonical" href="http://www.a1k0n.net/2011/07/20/donut-math.html">
+    <link rel="alternate" type="application/rss+xml" title="RSS Feed for a1k0n.net" href="/feed.xml" />
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/pixyll.css?201511080840" type="text/css">
+
+    <!-- Fonts -->
+    <link href='//fonts.googleapis.com/css?family=Merriweather:900,900italic,300,300italic' rel='stylesheet' type='text/css'>
+    <link href='//fonts.googleapis.com/css?family=Lato:900,300' rel='stylesheet' type='text/css'>
+    
+
+    <!-- Verifications -->
+    
+
+    <!-- Open Graph -->
+    <!-- From: https://github.com/mmistakes/hpstr-jekyll-theme/blob/master/_includes/head.html -->
+    <meta property="og:locale" content="en_US">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="Donut math&amp;#58; how donut.c works">
+    <meta property="og:description" content="">
+    <meta property="og:url" content="http://www.a1k0n.net/2011/07/20/donut-math.html">
+    <meta property="og:site_name" content="a1k0n.net">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary" />
+    
+    <meta name="twitter:title" content="Donut math&#58; how donut.c works" />
+    <meta name="twitter:description" content="" />
+    <meta name="twitter:url" content="http://www.a1k0n.net/2011/07/20/donut-math.html" />
+
+    
+    <script type="text/javascript">
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-24584703-1']);
+      _gaq.push(['_trackPageview']);
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+    </script>
+    
 <script type="text/javascript"
     src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
 </script>
+<script src="/js/donut.js"></script>
+
 </head>
-<body>
-<div style="width: 100%; background-color: #daf2ff; text-align: center; font-size: 12pt;"><a href="/" style="color: #1d3542;">a1k0n : Andy Sloane's weblog</a></div>
-<h1>Donut math&#58; how donut.c works</h1>
-<link href="/css/prettify.css" type="text/css" rel="stylesheet" />
 
-<script type="text/javascript" src="/js/prettify.js">
-</script>
+<body class="site">
 
-<script src="/js/donut.js">
-</script>
+	
 
-<p>There has been a sudden resurgence of interest in my <a href="/2006/09/15/obfuscated-c-donut.html">“donut” code from 2006</a>, and I’ve
+  <div class="site-wrap">
+    <header class="site-header px2 px-responsive">
+  <div class="mt2 wrap">
+    <div class="measure">
+      <a href="/" class="site-title">a1k0n.net</a>
+      <nav class="site-nav">
+        <a href="/about.html">About</a>
+
+      </nav>
+      <div class="clearfix"></div>
+      
+    </div>
+  </div>
+</header>
+
+
+    <div class="post p2 p-responsive wrap" role="main">
+      <div class="measure">
+        <div class="post-header mb2">
+  <h1>Donut math&#58; how donut.c works</h1>
+  <span class="post-meta">Jul 20, 2011</span><br>
+  
+</div>
+
+<article class="post-content">
+  <p>There has been a sudden resurgence of interest in my <a href="/2006/09/15/obfuscated-c-donut.html">“donut” code from 2006</a>, and I’ve
 had a couple requests to explain this one.  It’s been five years now, so it’s
 not exactly fresh in my memory, so I will reconstruct it from scratch, in great
 detail, and hopefully get approximately the same result.</p>
 
-<p>This is the code and the output, animated in Javascript:
-<button onclick="anim1();">toggle animation</button></p>
-<table border="0" cellspacing="0" cellpadding="0"><tr>
-<td style="background-color:#000">
-<pre style="background-color:#000; color:#ccc;">
+<p>This is the code:</p>
+<pre style="font-size: 10pt;">
              k;double sin()
          ,cos();main(){float A=
        0,B=0,i,j,z[1760];char b[
@@ -59,11 +115,10 @@ in(B),t=c*h*g-f*        e;int x=40+30*D*
          .,~~;;;========;;;:~-.
              ..,--------,*/
 </pre>
-</td>
-<td style="background-color:#000">
-<pre id="d" style="background-color:#000; color:#ccc;">
+<p>…and the output, animated in Javascript:
+<button onclick="anim1();">toggle animation</button></p>
+<pre id="d" style="background-color:#000; color:#ccc; font-size: 10pt;">
 </pre>
-</td></tr></table>
 
 <p>At its core, it’s a framebuffer and a Z-buffer into which I render pixels.
 Since it’s just rendering relatively low-resolution ASCII art, I massively
@@ -150,9 +205,10 @@ R_1 \sin \theta, &
 \left( \begin{matrix}
 \cos \phi & 0 & \sin \phi \\
 0 & 1 & 0 \\
--\sin \phi & 0 & \cos \phi \end{matrix} \right)
-=
-\left( \begin{matrix}
+-\sin \phi & 0 & \cos \phi \end{matrix} \right) %]]></script>
+
+<script type="math/tex; mode=display">% <![CDATA[
+= \left( \begin{matrix}
 (R_2 + R_1 \cos \theta)\cos \phi, &
 R_1 \sin \theta, &
 -(R_2 + R_1 \cos \theta)\sin \phi \end{matrix} \right) %]]></script>
@@ -329,95 +385,110 @@ you’ve got yourself a clever little program.</p>
 <p>Now, we have all the pieces, but how do we write the code?  Roughly like this
 (some pseudocode liberties have been taken with 2D arrays):</p>
 
-<pre class="prettyprint">
-const float theta_spacing = 0.07;
-const float phi_spacing   = 0.02;
+<div class="highlight"><pre><code class="language-c" data-lang="c"><span class="k">const</span> <span class="kt">float</span> <span class="n">theta_spacing</span> <span class="o">=</span> <span class="mf">0.07</span><span class="p">;</span>
+<span class="k">const</span> <span class="kt">float</span> <span class="n">phi_spacing</span>   <span class="o">=</span> <span class="mf">0.02</span><span class="p">;</span>
 
-const float R1 = 1;
-const float R2 = 2;
-const float K2 = 5;
-// Calculate K1 based on screen size: the maximum x-distance occurs roughly at
-// the edge of the torus, which is at x=R1+R2, z=0.  we want that to be
-// displaced 3/8ths of the width of the screen, which is 3/4th of the way from
-// the center to the side of the screen.
-// screen_width*3/8 = K1*(R1+R2)/(K2+0)
-// screen_width*K2*3/(8*(R1+R2)) = K1
-const float K1 = screen_width*K2*3/(8*(R1+R2));
+<span class="k">const</span> <span class="kt">float</span> <span class="n">R1</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+<span class="k">const</span> <span class="kt">float</span> <span class="n">R2</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>
+<span class="k">const</span> <span class="kt">float</span> <span class="n">K2</span> <span class="o">=</span> <span class="mi">5</span><span class="p">;</span>
+<span class="c1">// Calculate K1 based on screen size: the maximum x-distance occurs</span>
+<span class="c1">// roughly at the edge of the torus, which is at x=R1+R2, z=0.  we</span>
+<span class="c1">// want that to be displaced 3/8ths of the width of the screen, which</span>
+<span class="c1">// is 3/4th of the way from the center to the side of the screen.</span>
+<span class="c1">// screen_width*3/8 = K1*(R1+R2)/(K2+0)</span>
+<span class="c1">// screen_width*K2*3/(8*(R1+R2)) = K1</span>
+<span class="k">const</span> <span class="kt">float</span> <span class="n">K1</span> <span class="o">=</span> <span class="n">screen_width</span><span class="o">*</span><span class="n">K2</span><span class="o">*</span><span class="mi">3</span><span class="o">/</span><span class="p">(</span><span class="mi">8</span><span class="o">*</span><span class="p">(</span><span class="n">R1</span><span class="o">+</span><span class="n">R2</span><span class="p">));</span>
 
-render_frame(float A, float B) {
-  // precompute sines and cosines of A and B
-  float cosA = cos(A), sinA = sin(A);
-  float cosB = cos(B), sinB = sin(B);
+<span class="n">render_frame</span><span class="p">(</span><span class="kt">float</span> <span class="n">A</span><span class="p">,</span> <span class="kt">float</span> <span class="n">B</span><span class="p">)</span> <span class="p">{</span>
+  <span class="c1">// precompute sines and cosines of A and B</span>
+  <span class="kt">float</span> <span class="n">cosA</span> <span class="o">=</span> <span class="n">cos</span><span class="p">(</span><span class="n">A</span><span class="p">),</span> <span class="n">sinA</span> <span class="o">=</span> <span class="n">sin</span><span class="p">(</span><span class="n">A</span><span class="p">);</span>
+  <span class="kt">float</span> <span class="n">cosB</span> <span class="o">=</span> <span class="n">cos</span><span class="p">(</span><span class="n">B</span><span class="p">),</span> <span class="n">sinB</span> <span class="o">=</span> <span class="n">sin</span><span class="p">(</span><span class="n">B</span><span class="p">);</span>
 
-  char output[0..screen_width, 0..screen_height] = ' ';
-  float zbuffer[0..screen_width, 0..screen_height] = 0;
+  <span class="kt">char</span> <span class="n">output</span><span class="p">[</span><span class="mf">0.</span><span class="p">.</span><span class="n">screen_width</span><span class="p">,</span> <span class="mf">0.</span><span class="p">.</span><span class="n">screen_height</span><span class="p">]</span> <span class="o">=</span> <span class="sc">&#39; &#39;</span><span class="p">;</span>
+  <span class="kt">float</span> <span class="n">zbuffer</span><span class="p">[</span><span class="mf">0.</span><span class="p">.</span><span class="n">screen_width</span><span class="p">,</span> <span class="mf">0.</span><span class="p">.</span><span class="n">screen_height</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
 
-  // theta goes around the cross-sectional circle of a torus
-  for(float theta=0; theta &lt; 2*pi; theta += theta_spacing) {
-    // precompute sines and cosines of theta
-    float costheta = cos(theta), sintheta = sin(theta);
+  <span class="c1">// theta goes around the cross-sectional circle of a torus</span>
+  <span class="k">for</span> <span class="p">(</span><span class="kt">float</span> <span class="n">theta</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">theta</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="o">*</span><span class="n">pi</span><span class="p">;</span> <span class="n">theta</span> <span class="o">+=</span> <span class="n">theta_spacing</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c1">// precompute sines and cosines of theta</span>
+    <span class="kt">float</span> <span class="n">costheta</span> <span class="o">=</span> <span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">),</span> <span class="n">sintheta</span> <span class="o">=</span> <span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">);</span>
 
-    // phi goes around the center of revolution of a torus
-    for(float phi=0; phi &lt; 2*pi; phi += phi_spacing) {
-      // precompute sines and cosines of phi
-      float cosphi = cos(phi), sinphi = sin(phi);
+    <span class="c1">// phi goes around the center of revolution of a torus</span>
+    <span class="k">for</span><span class="p">(</span><span class="kt">float</span> <span class="n">phi</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">phi</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="o">*</span><span class="n">pi</span><span class="p">;</span> <span class="n">phi</span> <span class="o">+=</span> <span class="n">phi_spacing</span><span class="p">)</span> <span class="p">{</span>
+      <span class="c1">// precompute sines and cosines of phi</span>
+      <span class="kt">float</span> <span class="n">cosphi</span> <span class="o">=</span> <span class="n">cos</span><span class="p">(</span><span class="n">phi</span><span class="p">),</span> <span class="n">sinphi</span> <span class="o">=</span> <span class="n">sin</span><span class="p">(</span><span class="n">phi</span><span class="p">);</span>
     
-      // the x,y coordinate of the circle, before revolving (factored out of the above equations)
-      float circlex = R2 + R1*costheta;
-      float circley = R1*sintheta;
+      <span class="c1">// the x,y coordinate of the circle, before revolving (factored</span>
+      <span class="c1">// out of the above equations)</span>
+      <span class="kt">float</span> <span class="n">circlex</span> <span class="o">=</span> <span class="n">R2</span> <span class="o">+</span> <span class="n">R1</span><span class="o">*</span><span class="n">costheta</span><span class="p">;</span>
+      <span class="kt">float</span> <span class="n">circley</span> <span class="o">=</span> <span class="n">R1</span><span class="o">*</span><span class="n">sintheta</span><span class="p">;</span>
 
-      // final 3D (x,y,z) coordinate after rotations, directly from our math above
-      float x = circlex*(cosB*cosphi + sinA*sinB*sinphi) - circley*cosA*sinB; 
-      float y = circlex*(sinB*cosphi - sinA*cosB*sinphi) + circley*cosA*cosB;
-      float z = K2 + cosA*circlex*sinphi + circley*sinA;
-      float ooz = 1/z;  // "one over z"
+      <span class="c1">// final 3D (x,y,z) coordinate after rotations, directly from</span>
+      <span class="c1">// our math above</span>
+      <span class="kt">float</span> <span class="n">x</span> <span class="o">=</span> <span class="n">circlex</span><span class="o">*</span><span class="p">(</span><span class="n">cosB</span><span class="o">*</span><span class="n">cosphi</span> <span class="o">+</span> <span class="n">sinA</span><span class="o">*</span><span class="n">sinB</span><span class="o">*</span><span class="n">sinphi</span><span class="p">)</span>
+        <span class="o">-</span> <span class="n">circley</span><span class="o">*</span><span class="n">cosA</span><span class="o">*</span><span class="n">sinB</span><span class="p">;</span> 
+      <span class="kt">float</span> <span class="n">y</span> <span class="o">=</span> <span class="n">circlex</span><span class="o">*</span><span class="p">(</span><span class="n">sinB</span><span class="o">*</span><span class="n">cosphi</span> <span class="o">-</span> <span class="n">sinA</span><span class="o">*</span><span class="n">cosB</span><span class="o">*</span><span class="n">sinphi</span><span class="p">)</span>
+        <span class="o">+</span> <span class="n">circley</span><span class="o">*</span><span class="n">cosA</span><span class="o">*</span><span class="n">cosB</span><span class="p">;</span>
+      <span class="kt">float</span> <span class="n">z</span> <span class="o">=</span> <span class="n">K2</span> <span class="o">+</span> <span class="n">cosA</span><span class="o">*</span><span class="n">circlex</span><span class="o">*</span><span class="n">sinphi</span> <span class="o">+</span> <span class="n">circley</span><span class="o">*</span><span class="n">sinA</span><span class="p">;</span>
+      <span class="kt">float</span> <span class="n">ooz</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="n">z</span><span class="p">;</span>  <span class="c1">// &quot;one over z&quot;</span>
       
-      // x and y projection.  note that y is negated here, because y goes up in
-      // 3D space but down on 2D displays.
-      int xp = (int) (screen_width/2 + K1*ooz*x);
-      int yp = (int) (screen_height/2 - K1*ooz*y);
+      <span class="c1">// x and y projection.  note that y is negated here, because y</span>
+      <span class="c1">// goes up in 3D space but down on 2D displays.</span>
+      <span class="kt">int</span> <span class="n">xp</span> <span class="o">=</span> <span class="p">(</span><span class="kt">int</span><span class="p">)</span> <span class="p">(</span><span class="n">screen_width</span><span class="o">/</span><span class="mi">2</span> <span class="o">+</span> <span class="n">K1</span><span class="o">*</span><span class="n">ooz</span><span class="o">*</span><span class="n">x</span><span class="p">);</span>
+      <span class="kt">int</span> <span class="n">yp</span> <span class="o">=</span> <span class="p">(</span><span class="kt">int</span><span class="p">)</span> <span class="p">(</span><span class="n">screen_height</span><span class="o">/</span><span class="mi">2</span> <span class="o">-</span> <span class="n">K1</span><span class="o">*</span><span class="n">ooz</span><span class="o">*</span><span class="n">y</span><span class="p">);</span>
       
-      // calculate luminance.  ugly, but correct.
-      float L = cosphi*costheta*sinB - cosA*costheta*sinphi - sinA*sintheta + 
-                cosB*(cosA*sintheta - costheta*sinA*sinphi);
-      // L ranges from -sqrt(2) to +sqrt(2).  If it's &lt; 0, the surface is
-      // pointing away from us, so we won't bother trying to plot it.
-      if(L&gt;0) {
-        // test against the z-buffer.  larger 1/z means the pixel is closer to
-        // the viewer than what's already plotted.
-        if(ooz &gt; zbuffer[xp,yp]) {
-          zbuffer[xp,yp] = ooz;
-          int luminance_index = L*8; // this brings L into the range 0..11 (8*sqrt(2) = 11.3)
-          // now we lookup the character corresponding to the luminance and plot it in our output:
-          output[xp,yp] = ".,-~:;=!*#$@"[luminance_index];
-        }
-      }
-    }
-  }
+      <span class="c1">// calculate luminance.  ugly, but correct.</span>
+      <span class="kt">float</span> <span class="n">L</span> <span class="o">=</span> <span class="n">cosphi</span><span class="o">*</span><span class="n">costheta</span><span class="o">*</span><span class="n">sinB</span> <span class="o">-</span> <span class="n">cosA</span><span class="o">*</span><span class="n">costheta</span><span class="o">*</span><span class="n">sinphi</span> <span class="o">-</span>
+        <span class="n">sinA</span><span class="o">*</span><span class="n">sintheta</span> <span class="o">+</span> <span class="n">cosB</span><span class="o">*</span><span class="p">(</span><span class="n">cosA</span><span class="o">*</span><span class="n">sintheta</span> <span class="o">-</span> <span class="n">costheta</span><span class="o">*</span><span class="n">sinA</span><span class="o">*</span><span class="n">sinphi</span><span class="p">);</span>
+      <span class="c1">// L ranges from -sqrt(2) to +sqrt(2).  If it&#39;s &lt; 0, the surface</span>
+      <span class="c1">// is pointing away from us, so we won&#39;t bother trying to plot it.</span>
+      <span class="k">if</span> <span class="p">(</span><span class="n">L</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+        <span class="c1">// test against the z-buffer.  larger 1/z means the pixel is</span>
+        <span class="c1">// closer to the viewer than what&#39;s already plotted.</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">ooz</span> <span class="o">&gt;</span> <span class="n">zbuffer</span><span class="p">[</span><span class="n">xp</span><span class="p">,</span><span class="n">yp</span><span class="p">])</span> <span class="p">{</span>
+          <span class="n">zbuffer</span><span class="p">[</span><span class="n">xp</span><span class="p">,</span> <span class="n">yp</span><span class="p">]</span> <span class="o">=</span> <span class="n">ooz</span><span class="p">;</span>
+          <span class="kt">int</span> <span class="n">luminance_index</span> <span class="o">=</span> <span class="n">L</span><span class="o">*</span><span class="mi">8</span><span class="p">;</span>
+          <span class="c1">// luminance_index is now in the range 0..11 (8*sqrt(2) = 11.3)</span>
+          <span class="c1">// now we lookup the character corresponding to the</span>
+          <span class="c1">// luminance and plot it in our output:</span>
+          <span class="n">output</span><span class="p">[</span><span class="n">xp</span><span class="p">,</span> <span class="n">yp</span><span class="p">]</span> <span class="o">=</span> <span class="s">&quot;.,-~:;=!*#$@&quot;</span><span class="p">[</span><span class="n">luminance_index</span><span class="p">];</span>
+        <span class="p">}</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
 
-  // now, dump output[] to the screen.
-  // bring cursor to "home" location, in just about any currently-used terminal
-  // emulation mode
-  printf("\x1b[H");
-  for(int j=0;j&lt;screen_height;j++) {
-    for(int i=0;i&lt;screen_width;i++) {
-      putchar(output[i,j]);
-    }
-    putchar('\n');
-  }
+  <span class="c1">// now, dump output[] to the screen.</span>
+  <span class="c1">// bring cursor to &quot;home&quot; location, in just about any currently-used</span>
+  <span class="c1">// terminal emulation mode</span>
+  <span class="n">printf</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\x1b</span><span class="s">[H&quot;</span><span class="p">);</span>
+  <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">screen_height</span><span class="p">;</span> <span class="n">j</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">screen_width</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+      <span class="n">putchar</span><span class="p">(</span><span class="n">output</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]);</span>
+    <span class="p">}</span>
+    <span class="n">putchar</span><span class="p">(</span><span class="sc">&#39;\n&#39;</span><span class="p">);</span>
+  <span class="p">}</span>
   
-}
-</pre>
+<span class="p">}</span></code></pre></div>
 
 <p>The Javascript source for both the ASCII and canvas rendering is <a href="/js/donut.js">right here</a>.</p>
 
 
-<hr>
-<a href=''>permalink</a> | 
-<a href="/atom.xml" class=feed><img src="/img/feed-icon-14x14.png" alt="RSS" /></a> | <a href="/">a1k0n.net</a><br />
-<!--
-<div id="disqus_thread"></div>
-<-->
-</body>
+</article>
 
+
+
+
+
+
+
+      </div>
+    </div>
+  </div>
+
+  <footer class="center">
+  <div class="measure">
+    <a href="/" class="site-title">a1k0n.net</a>
+  </div>
+</footer>
+
+</body>
 </html>

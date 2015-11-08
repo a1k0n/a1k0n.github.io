@@ -3,12 +3,12 @@
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>LM318-based video amplifier &#8211; a1k0n.net</title>
+    <title>Simple Digital Filters &#8211; a1k0n.net</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="">
     <meta name="author" content="Andy Sloane">
-    
-    <link rel="canonical" href="http://www.a1k0n.net/projects/coleco/sch.html">
+    <meta name="keywords" content="">
+    <link rel="canonical" href="http://www.a1k0n.net/2015/11/11/simple-dsp.html">
     <link rel="alternate" type="application/rss+xml" title="RSS Feed for a1k0n.net" href="/feed.xml" />
 
     <!-- Custom CSS -->
@@ -26,17 +26,17 @@
     <!-- From: https://github.com/mmistakes/hpstr-jekyll-theme/blob/master/_includes/head.html -->
     <meta property="og:locale" content="en_US">
     <meta property="og:type" content="article">
-    <meta property="og:title" content="LM318-based video amplifier">
+    <meta property="og:title" content="Simple Digital Filters">
     <meta property="og:description" content="">
-    <meta property="og:url" content="http://www.a1k0n.net/projects/coleco/sch.html">
+    <meta property="og:url" content="http://www.a1k0n.net/2015/11/11/simple-dsp.html">
     <meta property="og:site_name" content="a1k0n.net">
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary" />
     
-    <meta name="twitter:title" content="LM318-based video amplifier" />
+    <meta name="twitter:title" content="Simple Digital Filters" />
     <meta name="twitter:description" content="" />
-    <meta name="twitter:url" content="http://www.a1k0n.net/projects/coleco/sch.html" />
+    <meta name="twitter:url" content="http://www.a1k0n.net/2015/11/11/simple-dsp.html" />
 
     
     <script type="text/javascript">
@@ -50,6 +50,8 @@
       })();
     </script>
     
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script src="/js/dsp2015.js"></script>
 
 </head>
 
@@ -75,36 +77,38 @@
 
     <div class="post p2 p-responsive wrap" role="main">
       <div class="measure">
-        <div class="post">
-  <header class="post-header">
-    <h1 class="h2">LM318-based video amplifier</h1>
-  </header>
-  <article class="post-content">
-  <p>I made this video amplifier while attempting to add RCA <a href="index.html">audio/video jacks to a
-ColecoVision</a>, and while not really knowing what I was doing. This
-is mostly here for posterity.</p>
-
-<p><img src="video_sch.png" /></p>
-
-<p>C2 is a power supply bypass capacitor.  It may not be necessary, and then
-again it may make a world of difference if you have a snowy output.  Use
-something like 1µF or higher.</p>
-
-<p>The LM318 is set up as a voltage follower as recommended by its datasheet.
-It feeds into C3, which removes the DC component of the video signal, and 
-R3/R4 provide a 75Ω impedance match.</p>
-
-<p>I tried some single-transistor emitter follower designs, but the impedance
-is too high; it drags down the RF circuit’s weak signal.  The LM318’s 
-relatively high input impedance seems to work out rather well.</p>
-
-<p>Also, the 150Ω resistors in parallel can just be one 75Ω
-resistor… I just didn’t have any extra 75Ωs in my resistor drawer.</p>
-
-<p><a href="pcb.html">Circuit layout</a></p>
-
-  </article>
+        <div class="post-header mb2">
+  <h1>Simple Digital Filters</h1>
+  <span class="post-meta">Nov 11, 2015</span><br>
+  
 </div>
+
+<article class="post-content">
+  <p>The <script type="math/tex">z</script> domain is a confusing and yet very simple thing.</p>
+
+<canvas width="300" height="300" id="c1"></canvas>
+
+<ul>
+  <li>real filters for audio processing</li>
+  <li>polynomials, <script type="math/tex">H(z) = \frac{Y(z)}{X(z)} = \frac{(z - a)(z -
+a^*)}{(z - p)(z - p^*)}</script></li>
+  <li>butterworth</li>
+  <li>laplace domain -&gt; z domain mapping, <script type="math/tex">z = e^{s T}</script></li>
+  <li>audio gadget, generate noise or buzz w/ keyboard notes</li>
+  <li>complex filters for SDR</li>
+  <li>quadrature, I/Q signal</li>
+  <li>no such thing as a low-pass filter complex domain</li>
+  <li>fm demodulation animation?</li>
+</ul>
+
+
+</article>
+
+
+
+
+
+
 
       </div>
     </div>

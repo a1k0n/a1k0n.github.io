@@ -3,12 +3,12 @@
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>LM318-based video amplifier &#8211; a1k0n.net</title>
+    <title>About this site &#8211; a1k0n.net</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="">
     <meta name="author" content="Andy Sloane">
     
-    <link rel="canonical" href="http://www.a1k0n.net/projects/coleco/sch.html">
+    <link rel="canonical" href="http://www.a1k0n.net/about.html">
     <link rel="alternate" type="application/rss+xml" title="RSS Feed for a1k0n.net" href="/feed.xml" />
 
     <!-- Custom CSS -->
@@ -26,17 +26,17 @@
     <!-- From: https://github.com/mmistakes/hpstr-jekyll-theme/blob/master/_includes/head.html -->
     <meta property="og:locale" content="en_US">
     <meta property="og:type" content="article">
-    <meta property="og:title" content="LM318-based video amplifier">
+    <meta property="og:title" content="About this site">
     <meta property="og:description" content="">
-    <meta property="og:url" content="http://www.a1k0n.net/projects/coleco/sch.html">
+    <meta property="og:url" content="http://www.a1k0n.net/about.html">
     <meta property="og:site_name" content="a1k0n.net">
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary" />
     
-    <meta name="twitter:title" content="LM318-based video amplifier" />
+    <meta name="twitter:title" content="About this site" />
     <meta name="twitter:description" content="" />
-    <meta name="twitter:url" content="http://www.a1k0n.net/projects/coleco/sch.html" />
+    <meta name="twitter:url" content="http://www.a1k0n.net/about.html" />
 
     
     <script type="text/javascript">
@@ -77,31 +77,22 @@
       <div class="measure">
         <div class="post">
   <header class="post-header">
-    <h1 class="h2">LM318-based video amplifier</h1>
+    <h1 class="h2">About this site</h1>
   </header>
   <article class="post-content">
-  <p>I made this video amplifier while attempting to add RCA <a href="index.html">audio/video jacks to a
-ColecoVision</a>, and while not really knowing what I was doing. This
-is mostly here for posterity.</p>
+  <p>I’m Andy Sloane and I write all kinds of software for a living and weird kinds
+of software for a hobby. I mainly work on big data and machine learning type
+things these days. I have a wife and two kids and a comfortable life in the SF
+Bay Area.</p>
 
-<p><img src="video_sch.png" /></p>
+<p>I co-founded <a href="https://vendetta-online.com/">Guild Software</a>, and have
+previously worked at Yahoo!, Google, and Spotify.  Right now I’m at a
+recently-acquired startup; it would be expensive to recruit me.</p>
 
-<p>C2 is a power supply bypass capacitor.  It may not be necessary, and then
-again it may make a world of difference if you have a snowy output.  Use
-something like 1µF or higher.</p>
+<p>Github: <a href="https://www.github.com/a1k0n/">github.com/a1k0n</a><br />
+Twitter: <a href="http://twitter.com/a1k0n/">@a1k0n</a></p>
 
-<p>The LM318 is set up as a voltage follower as recommended by its datasheet.
-It feeds into C3, which removes the DC component of the video signal, and 
-R3/R4 provide a 75Ω impedance match.</p>
-
-<p>I tried some single-transistor emitter follower designs, but the impedance
-is too high; it drags down the RF circuit’s weak signal.  The LM318’s 
-relatively high input impedance seems to work out rather well.</p>
-
-<p>Also, the 150Ω resistors in parallel can just be one 75Ω
-resistor… I just didn’t have any extra 75Ωs in my resistor drawer.</p>
-
-<p><a href="pcb.html">Circuit layout</a></p>
+<p>Site theme is <a href="http://pixyll.com">Pixyll</a> by <a href="http://johnotander.com">John Otander</a> (<a href="https://twitter.com/4lpine">@4lpine</a>).</p>
 
   </article>
 </div>

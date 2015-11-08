@@ -1,47 +1,25 @@
-<?xml version="1.0"?>
-<feed xmlns="http://www.w3.org/2005/Atom">
- 
-  <title>a1k0n.net</title>
-  <link href="http://a1k0n.net/"/>
-  <link type="application/atom+xml" rel="self" href="http://a1k0n.net/atom.xml"/>
-  <updated>2015-11-04T10:25:58-08:00</updated>
-  <id>http://a1k0n.net/</id>
-  <author>
-    <name>Andy Sloane</name>
-    <email>andy@a1k0n.net</email>
-  </author>
-
-  
-  
-  
-  
-  <entry>
-    <id>http://a1k0n.net/2011/07/20/donut-math</id>
-    <link type="text/html" rel="alternate" href="http://a1k0n.net/2011/07/20/donut-math.html"/>
-    <title>Donut math&#58; how donut.c works</title>
-    <updated>2011-07-20T00:00:00-07:00</updated>
-    <author>
-      <name>Andy Sloane</name>
-      <uri>http://a1k0n.net/</uri>
-    </author>
-    <content type="html">&lt;link href=&quot;/css/prettify.css&quot; type=&quot;text/css&quot; rel=&quot;stylesheet&quot; /&gt;
-
-&lt;script type=&quot;text/javascript&quot; src=&quot;/js/prettify.js&quot;&gt;
-&lt;/script&gt;
-
-&lt;script src=&quot;/js/donut.js&quot;&gt;
-&lt;/script&gt;
-
-&lt;p&gt;There has been a sudden resurgence of interest in my &lt;a href=&quot;/2006/09/15/obfuscated-c-donut.html&quot;&gt;“donut” code from 2006&lt;/a&gt;, and I’ve
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>a1k0n.net</title>
+    <description></description>
+    <link>http://www.a1k0n.net/</link>
+    <atom:link href="http://www.a1k0n.net/feed.xml" rel="self" type="application/rss+xml" />
+    
+    
+    
+    
+    
+    
+      <item>
+        <title>Donut math&amp;#58; how donut.c works</title>
+        <description>&lt;p&gt;There has been a sudden resurgence of interest in my &lt;a href=&quot;/2006/09/15/obfuscated-c-donut.html&quot;&gt;“donut” code from 2006&lt;/a&gt;, and I’ve
 had a couple requests to explain this one.  It’s been five years now, so it’s
 not exactly fresh in my memory, so I will reconstruct it from scratch, in great
 detail, and hopefully get approximately the same result.&lt;/p&gt;
 
-&lt;p&gt;This is the code and the output, animated in Javascript:
-&lt;button onclick=&quot;anim1();&quot;&gt;toggle animation&lt;/button&gt;&lt;/p&gt;
-&lt;table border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;tr&gt;
-&lt;td style=&quot;background-color:#000&quot;&gt;
-&lt;pre style=&quot;background-color:#000; color:#ccc;&quot;&gt;
+&lt;p&gt;This is the code:&lt;/p&gt;
+&lt;pre style=&quot;font-size: 10pt;&quot;&gt;
              k;double sin()
          ,cos();main(){float A=
        0,B=0,i,j,z[1760];char b[
@@ -64,11 +42,10 @@ in(B),t=c*h*g-f*        e;int x=40+30*D*
          .,~~;;;========;;;:~-.
              ..,--------,*/
 &lt;/pre&gt;
-&lt;/td&gt;
-&lt;td style=&quot;background-color:#000&quot;&gt;
-&lt;pre id=&quot;d&quot; style=&quot;background-color:#000; color:#ccc;&quot;&gt;
+&lt;p&gt;…and the output, animated in Javascript:
+&lt;button onclick=&quot;anim1();&quot;&gt;toggle animation&lt;/button&gt;&lt;/p&gt;
+&lt;pre id=&quot;d&quot; style=&quot;background-color:#000; color:#ccc; font-size: 10pt;&quot;&gt;
 &lt;/pre&gt;
-&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
 &lt;p&gt;At its core, it’s a framebuffer and a Z-buffer into which I render pixels.
 Since it’s just rendering relatively low-resolution ASCII art, I massively
@@ -155,9 +132,10 @@ R_1 \sin \theta, &amp;
 \left( \begin{matrix}
 \cos \phi &amp; 0 &amp; \sin \phi \\
 0 &amp; 1 &amp; 0 \\
--\sin \phi &amp; 0 &amp; \cos \phi \end{matrix} \right)
-=
-\left( \begin{matrix}
+-\sin \phi &amp; 0 &amp; \cos \phi \end{matrix} \right) %]]&gt;&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
+= \left( \begin{matrix}
 (R_2 + R_1 \cos \theta)\cos \phi, &amp;
 R_1 \sin \theta, &amp;
 -(R_2 + R_1 \cos \theta)\sin \phi \end{matrix} \right) %]]&gt;&lt;/script&gt;
@@ -334,105 +312,103 @@ you’ve got yourself a clever little program.&lt;/p&gt;
 &lt;p&gt;Now, we have all the pieces, but how do we write the code?  Roughly like this
 (some pseudocode liberties have been taken with 2D arrays):&lt;/p&gt;
 
-&lt;pre class=&quot;prettyprint&quot;&gt;
-const float theta_spacing = 0.07;
-const float phi_spacing   = 0.02;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;k&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;float&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;theta_spacing&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;0.07&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;float&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;phi_spacing&lt;/span&gt;   &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;0.02&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
 
-const float R1 = 1;
-const float R2 = 2;
-const float K2 = 5;
-// Calculate K1 based on screen size: the maximum x-distance occurs roughly at
-// the edge of the torus, which is at x=R1+R2, z=0.  we want that to be
-// displaced 3/8ths of the width of the screen, which is 3/4th of the way from
-// the center to the side of the screen.
-// screen_width*3/8 = K1*(R1+R2)/(K2+0)
-// screen_width*K2*3/(8*(R1+R2)) = K1
-const float K1 = screen_width*K2*3/(8*(R1+R2));
+&lt;span class=&quot;k&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;float&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;R1&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;float&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;R2&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;float&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;K2&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;5&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;// Calculate K1 based on screen size: the maximum x-distance occurs&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;// roughly at the edge of the torus, which is at x=R1+R2, z=0.  we&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;// want that to be displaced 3/8ths of the width of the screen, which&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;// is 3/4th of the way from the center to the side of the screen.&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;// screen_width*3/8 = K1*(R1+R2)/(K2+0)&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;// screen_width*K2*3/(8*(R1+R2)) = K1&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;float&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;K1&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;screen_width&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;K2&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;8&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;R1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;R2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;));&lt;/span&gt;
 
-render_frame(float A, float B) {
-  // precompute sines and cosines of A and B
-  float cosA = cos(A), sinA = sin(A);
-  float cosB = cos(B), sinB = sin(B);
+&lt;span class=&quot;n&quot;&gt;render_frame&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;float&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;A&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;float&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;B&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;c1&quot;&gt;// precompute sines and cosines of A and B&lt;/span&gt;
+  &lt;span class=&quot;kt&quot;&gt;float&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;cosA&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;cos&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;A&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sinA&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sin&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;A&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+  &lt;span class=&quot;kt&quot;&gt;float&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;cosB&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;cos&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;B&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sinB&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sin&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;B&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
 
-  char output[0..screen_width, 0..screen_height] = &#39; &#39;;
-  float zbuffer[0..screen_width, 0..screen_height] = 0;
+  &lt;span class=&quot;kt&quot;&gt;char&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;output&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mf&quot;&gt;0.&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;screen_width&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;0.&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;screen_height&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;sc&quot;&gt;&amp;#39; &amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+  &lt;span class=&quot;kt&quot;&gt;float&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;zbuffer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mf&quot;&gt;0.&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;screen_width&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;0.&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;screen_height&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
 
-  // theta goes around the cross-sectional circle of a torus
-  for(float theta=0; theta &amp;lt; 2*pi; theta += theta_spacing) {
-    // precompute sines and cosines of theta
-    float costheta = cos(theta), sintheta = sin(theta);
+  &lt;span class=&quot;c1&quot;&gt;// theta goes around the cross-sectional circle of a torus&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;float&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;theta&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;theta&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;pi&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;theta&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;theta_spacing&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;// precompute sines and cosines of theta&lt;/span&gt;
+    &lt;span class=&quot;kt&quot;&gt;float&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;costheta&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;cos&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;theta&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sintheta&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sin&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;theta&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
 
-    // phi goes around the center of revolution of a torus
-    for(float phi=0; phi &amp;lt; 2*pi; phi += phi_spacing) {
-      // precompute sines and cosines of phi
-      float cosphi = cos(phi), sinphi = sin(phi);
+    &lt;span class=&quot;c1&quot;&gt;// phi goes around the center of revolution of a torus&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;float&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;phi&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;phi&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;pi&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;phi&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;phi_spacing&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+      &lt;span class=&quot;c1&quot;&gt;// precompute sines and cosines of phi&lt;/span&gt;
+      &lt;span class=&quot;kt&quot;&gt;float&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;cosphi&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;cos&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;phi&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sinphi&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sin&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;phi&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
     
-      // the x,y coordinate of the circle, before revolving (factored out of the above equations)
-      float circlex = R2 + R1*costheta;
-      float circley = R1*sintheta;
+      &lt;span class=&quot;c1&quot;&gt;// the x,y coordinate of the circle, before revolving (factored&lt;/span&gt;
+      &lt;span class=&quot;c1&quot;&gt;// out of the above equations)&lt;/span&gt;
+      &lt;span class=&quot;kt&quot;&gt;float&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;circlex&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;R2&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;R1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;costheta&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+      &lt;span class=&quot;kt&quot;&gt;float&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;circley&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;R1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sintheta&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
 
-      // final 3D (x,y,z) coordinate after rotations, directly from our math above
-      float x = circlex*(cosB*cosphi + sinA*sinB*sinphi) - circley*cosA*sinB; 
-      float y = circlex*(sinB*cosphi - sinA*cosB*sinphi) + circley*cosA*cosB;
-      float z = K2 + cosA*circlex*sinphi + circley*sinA;
-      float ooz = 1/z;  // &quot;one over z&quot;
+      &lt;span class=&quot;c1&quot;&gt;// final 3D (x,y,z) coordinate after rotations, directly from&lt;/span&gt;
+      &lt;span class=&quot;c1&quot;&gt;// our math above&lt;/span&gt;
+      &lt;span class=&quot;kt&quot;&gt;float&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;circlex&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;cosB&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;cosphi&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sinA&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sinB&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sinphi&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;circley&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;cosA&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sinB&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; 
+      &lt;span class=&quot;kt&quot;&gt;float&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;y&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;circlex&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sinB&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;cosphi&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sinA&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;cosB&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sinphi&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;circley&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;cosA&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;cosB&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+      &lt;span class=&quot;kt&quot;&gt;float&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;z&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;K2&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;cosA&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;circlex&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sinphi&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;circley&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sinA&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+      &lt;span class=&quot;kt&quot;&gt;float&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ooz&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;z&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;  &lt;span class=&quot;c1&quot;&gt;// &amp;quot;one over z&amp;quot;&lt;/span&gt;
       
-      // x and y projection.  note that y is negated here, because y goes up in
-      // 3D space but down on 2D displays.
-      int xp = (int) (screen_width/2 + K1*ooz*x);
-      int yp = (int) (screen_height/2 - K1*ooz*y);
+      &lt;span class=&quot;c1&quot;&gt;// x and y projection.  note that y is negated here, because y&lt;/span&gt;
+      &lt;span class=&quot;c1&quot;&gt;// goes up in 3D space but down on 2D displays.&lt;/span&gt;
+      &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;xp&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;screen_width&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;K1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ooz&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+      &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;yp&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;screen_height&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;K1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ooz&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;y&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
       
-      // calculate luminance.  ugly, but correct.
-      float L = cosphi*costheta*sinB - cosA*costheta*sinphi - sinA*sintheta + 
-                cosB*(cosA*sintheta - costheta*sinA*sinphi);
-      // L ranges from -sqrt(2) to +sqrt(2).  If it&#39;s &amp;lt; 0, the surface is
-      // pointing away from us, so we won&#39;t bother trying to plot it.
-      if(L&amp;gt;0) {
-        // test against the z-buffer.  larger 1/z means the pixel is closer to
-        // the viewer than what&#39;s already plotted.
-        if(ooz &amp;gt; zbuffer[xp,yp]) {
-          zbuffer[xp,yp] = ooz;
-          int luminance_index = L*8; // this brings L into the range 0..11 (8*sqrt(2) = 11.3)
-          // now we lookup the character corresponding to the luminance and plot it in our output:
-          output[xp,yp] = &quot;.,-~:;=!*#$@&quot;[luminance_index];
-        }
-      }
-    }
-  }
+      &lt;span class=&quot;c1&quot;&gt;// calculate luminance.  ugly, but correct.&lt;/span&gt;
+      &lt;span class=&quot;kt&quot;&gt;float&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;L&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;cosphi&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;costheta&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sinB&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;cosA&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;costheta&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sinphi&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;sinA&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sintheta&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;cosB&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;cosA&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sintheta&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;costheta&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sinA&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sinphi&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+      &lt;span class=&quot;c1&quot;&gt;// L ranges from -sqrt(2) to +sqrt(2).  If it&amp;#39;s &amp;lt; 0, the surface&lt;/span&gt;
+      &lt;span class=&quot;c1&quot;&gt;// is pointing away from us, so we won&amp;#39;t bother trying to plot it.&lt;/span&gt;
+      &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;L&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;c1&quot;&gt;// test against the z-buffer.  larger 1/z means the pixel is&lt;/span&gt;
+        &lt;span class=&quot;c1&quot;&gt;// closer to the viewer than what&amp;#39;s already plotted.&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ooz&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;zbuffer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;xp&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;yp&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;])&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+          &lt;span class=&quot;n&quot;&gt;zbuffer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;xp&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;yp&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ooz&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+          &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;luminance_index&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;L&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;8&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+          &lt;span class=&quot;c1&quot;&gt;// luminance_index is now in the range 0..11 (8*sqrt(2) = 11.3)&lt;/span&gt;
+          &lt;span class=&quot;c1&quot;&gt;// now we lookup the character corresponding to the&lt;/span&gt;
+          &lt;span class=&quot;c1&quot;&gt;// luminance and plot it in our output:&lt;/span&gt;
+          &lt;span class=&quot;n&quot;&gt;output&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;xp&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;yp&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;.,-~:;=!*#$@&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;luminance_index&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;];&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+      &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
 
-  // now, dump output[] to the screen.
-  // bring cursor to &quot;home&quot; location, in just about any currently-used terminal
-  // emulation mode
-  printf(&quot;\x1b[H&quot;);
-  for(int j=0;j&amp;lt;screen_height;j++) {
-    for(int i=0;i&amp;lt;screen_width;i++) {
-      putchar(output[i,j]);
-    }
-    putchar(&#39;\n&#39;);
-  }
+  &lt;span class=&quot;c1&quot;&gt;// now, dump output[] to the screen.&lt;/span&gt;
+  &lt;span class=&quot;c1&quot;&gt;// bring cursor to &amp;quot;home&amp;quot; location, in just about any currently-used&lt;/span&gt;
+  &lt;span class=&quot;c1&quot;&gt;// terminal emulation mode&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;printf&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\x1b&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;[H&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;j&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;j&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;screen_height&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;j&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;++&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;screen_width&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;++&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+      &lt;span class=&quot;n&quot;&gt;putchar&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;output&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;j&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]);&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;putchar&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;sc&quot;&gt;&amp;#39;\n&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
   
-}
-&lt;/pre&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;The Javascript source for both the ASCII and canvas rendering is &lt;a href=&quot;/js/donut.js&quot;&gt;right here&lt;/a&gt;.&lt;/p&gt;
 
-</content>
-  </entry>
-  
-  
-  
-  
-  
-  <entry>
-    <id>http://a1k0n.net/2011/06/26/obfuscated-c-yahoo-logo</id>
-    <link type="text/html" rel="alternate" href="http://a1k0n.net/2011/06/26/obfuscated-c-yahoo-logo.html"/>
-    <title>Yahoo! Logo ASCII Animation in 462 bytes of C</title>
-    <updated>2011-06-26T00:00:00-07:00</updated>
-    <author>
-      <name>Andy Sloane</name>
-      <uri>http://a1k0n.net/</uri>
-    </author>
-    <content type="html">&lt;p&gt;[&lt;b&gt;Update 10/21/2015:&lt;/b&gt; Changed the title from &quot;six lines of C&quot; to &quot;462
+</description>
+        <pubDate>Wed, 20 Jul 2011 00:00:00 -0700</pubDate>
+        <link>http://www.a1k0n.net/2011/07/20/donut-math.html</link>
+        <guid isPermaLink="true">http://www.a1k0n.net/2011/07/20/donut-math.html</guid>
+      </item>
+    
+    
+    
+      <item>
+        <title>Yahoo! Logo ASCII Animation in 462 bytes of C</title>
+        <description>&lt;p&gt;[&lt;b&gt;Update 10/21/2015:&lt;/b&gt; Changed the title from &quot;six lines of C&quot; to &quot;462
 bytes of C&quot; to avoid endless arguments about what constitutes a line of C
 code.]&lt;/p&gt;
 
@@ -592,21 +568,17 @@ short and sweet.&lt;/p&gt;
 
 &lt;p&gt;I apologize in advance for the various sign errors I&#39;m sure to have made
 when typing this up, but you get the idea.&lt;/p&gt;
-</content>
-  </entry>
-  
-  
-  
-  <entry>
-    <id>http://a1k0n.net/2010/03/04/google-ai-postmortem</id>
-    <link type="text/html" rel="alternate" href="http://a1k0n.net/2010/03/04/google-ai-postmortem.html"/>
-    <title>Google AI Challenge post-mortem</title>
-    <updated>2010-03-04T00:00:00-08:00</updated>
-    <author>
-      <name>Andy Sloane</name>
-      <uri>http://a1k0n.net/</uri>
-    </author>
-    <content type="html">&lt;p&gt;[&lt;b&gt;Update 8/2/2011&lt;/b&gt;: you can play against a dumbed-down Javascript version of the bot &lt;a href=&quot;/code/tron.html&quot;&gt;here&lt;/a&gt;.]&lt;/p&gt;
+</description>
+        <pubDate>Sun, 26 Jun 2011 00:00:00 -0700</pubDate>
+        <link>http://www.a1k0n.net/2011/06/26/obfuscated-c-yahoo-logo.html</link>
+        <guid isPermaLink="true">http://www.a1k0n.net/2011/06/26/obfuscated-c-yahoo-logo.html</guid>
+      </item>
+    
+    
+    
+      <item>
+        <title>Google AI Challenge post-mortem</title>
+        <description>&lt;p&gt;[&lt;b&gt;Update 8/2/2011&lt;/b&gt;: you can play against a dumbed-down Javascript version of the bot &lt;a href=&quot;/code/tron.html&quot;&gt;here&lt;/a&gt;.]&lt;/p&gt;
 &lt;p /&gt;I can&#39;t believe &lt;a
   href=&quot;http://csclub.uwaterloo.ca/contest/rankings.php&quot;&gt;I won&lt;/a&gt;.
 
@@ -890,28 +862,21 @@ running on &lt;a href=&quot;http://www.benzedrine.cx/tron/&quot;&gt;dhartmei&#39
 still loses many games as a result of miscounting the opponent&#39;s space in the
 endgame, since my endgame evaluation wasn&#39;t very good.  But it was good enough
 for the contest.
-</content>
-  </entry>
-  
-  
-  
-  <entry>
-    <id>http://a1k0n.net/2009/11/17/hacker-challenge-2-solution</id>
-    <link type="text/html" rel="alternate" href="http://a1k0n.net/2009/11/17/hacker-challenge-2-solution.html"/>
-    <title>Hacker challenge part 2 solution</title>
-    <updated>2009-11-17T00:00:00-08:00</updated>
-    <author>
-      <name>Andy Sloane</name>
-      <uri>http://a1k0n.net/</uri>
-    </author>
-    <content type="html">&lt;p&gt;Because I am lazy and easily sidetracked, the promised update to
-the &quot;Hacker challenge&quot; (&lt;a
-href=&quot;http://a1k0n.net/blah/archives/2009/03/index.html#e2009-03-31T18_50_59.txt&quot;&gt;part
-1&lt;/a&gt;, &lt;a
-href=&quot;http://a1k0n.net/blah/archives/2009/04/index.html#e2009-04-03T21_36_15.txt&quot;&gt;part
-2&lt;/a&gt;) is now over seven months late.  So I might as well post the
-solution to part 2, which was solved by three individuals on
-&lt;a
+</description>
+        <pubDate>Thu, 04 Mar 2010 00:00:00 -0800</pubDate>
+        <link>http://www.a1k0n.net/2010/03/04/google-ai-postmortem.html</link>
+        <guid isPermaLink="true">http://www.a1k0n.net/2010/03/04/google-ai-postmortem.html</guid>
+      </item>
+    
+    
+    
+      <item>
+        <title>Hacker challenge part 2 solution</title>
+        <description>&lt;p&gt;Because I am lazy and easily sidetracked, the promised update to the &quot;Hacker
+challenge&quot; (&lt;a href=&quot;/2009/03/31/hacker-challenge.html&quot;&gt;part 1&lt;/a&gt;, &lt;a
+href=&quot;/2009/04/03/hacker-challenge-2.html&quot;&gt;part 2&lt;/a&gt;) is now over seven months
+late.  So I might as well post the solution to part 2, which was solved by
+three individuals on &lt;a
 href=&quot;http://www.reddit.com/r/programming/comments/89vma/hacker_challenge_part_2_solution_to_part_1_and_a/&quot;&gt;
 reddit (bobdole, c0dep0et, and xahtep)&lt;/a&gt;.&lt;/p&gt;
 
@@ -979,30 +944,26 @@ implementation suitable for a &quot;Hacker Challenge&quot;.  So I will leave
 that for another day, or perhaps for another person.&lt;/p&gt;
 
 &lt;p&gt;Source code for the DSA private key generator and license generator:&lt;/p&gt;
-&lt;li /&gt;&lt;a href=&quot;http://a1k0n.net/code/keydecode2.cpp.txt&quot;&gt;keydecode2.cpp&lt;/a&gt; - the challenge code from the last post (for reference)&lt;br /&gt;
-&lt;li /&gt;&lt;a href=&quot;http://a1k0n.net/code/bn.h.txt&quot;&gt;bn.h&lt;/a&gt; - quick and dirty bignum template&lt;br /&gt;
-&lt;li /&gt;&lt;a href=&quot;http://a1k0n.net/code/dl_genpriv.c.txt&quot;&gt;dl_genpriv.c&lt;/a&gt; - discrete log private/public key pair generator&lt;br /&gt;
-&lt;li /&gt;&lt;a href=&quot;http://a1k0n.net/code/dsa_genlic.c.txt&quot;&gt;dsa_genlic.c&lt;/a&gt; - license generator (key parameters hardcoded)&lt;br /&gt;
+&lt;li /&gt;&lt;a href=&quot;/code/keydecode2.cpp.txt&quot;&gt;keydecode2.cpp&lt;/a&gt; - the challenge code from the last post (for reference)&lt;br /&gt;
+&lt;li /&gt;&lt;a href=&quot;/code/bn.h.txt&quot;&gt;bn.h&lt;/a&gt; - quick and dirty bignum template&lt;br /&gt;
+&lt;li /&gt;&lt;a href=&quot;/code/dl_genpriv.c.txt&quot;&gt;dl_genpriv.c&lt;/a&gt; - discrete log private/public key pair generator&lt;br /&gt;
+&lt;li /&gt;&lt;a href=&quot;/code/dsa_genlic.c.txt&quot;&gt;dsa_genlic.c&lt;/a&gt; - license generator (key parameters hardcoded)&lt;br /&gt;
 
-</content>
-  </entry>
-  
-  
-  
-  <entry>
-    <id>http://a1k0n.net/2009/04/03/hacker-challenge-2</id>
-    <link type="text/html" rel="alternate" href="http://a1k0n.net/2009/04/03/hacker-challenge-2.html"/>
-    <title>Hacker challenge part 2</title>
-    <updated>2009-04-03T00:00:00-07:00</updated>
-    <author>
-      <name>Andy Sloane</name>
-      <uri>http://a1k0n.net/</uri>
-    </author>
-    <content type="html">&lt;p&gt;Well, I guess I&#39;m not quitting my day job to become a cryptographer
+</description>
+        <pubDate>Tue, 17 Nov 2009 00:00:00 -0800</pubDate>
+        <link>http://www.a1k0n.net/2009/11/17/hacker-challenge-2-solution.html</link>
+        <guid isPermaLink="true">http://www.a1k0n.net/2009/11/17/hacker-challenge-2-solution.html</guid>
+      </item>
+    
+    
+    
+      <item>
+        <title>Hacker challenge part 2</title>
+        <description>&lt;p&gt;Well, I guess I&#39;m not quitting my day job to become a cryptographer
 any time soon.&lt;/p&gt;
 
 &lt;p&gt;As was instantly ascertained on reddit, the key algorithm in my &quot;&lt;a
-href=&quot;http://a1k0n.net/blah/archives/2009/03/31/index.html#e2009-03-31T18_50_59.txt&quot;&gt;Hacker
+href=&quot;/2009/03/31/hacker-challenge.html&quot;&gt;Hacker
 Challenge&lt;/a&gt;&quot; is &lt;a href=&quot;http://en.wikipedia.org/wiki/RSA&quot;&gt;RSA&lt;/a&gt;.
 I was hoping that it would take at least an hour to crack the private
 key, but alas, I had severely underestimated the time that modern
@@ -1128,21 +1089,17 @@ is the reddit thread for part 2.&lt;/p&gt;
 
 &lt;p&gt;&lt;b&gt;Update&lt;/b&gt;: &lt;a href=&quot;/2009/11/17/hacker-challenge-2-solution.html&quot;&gt;The
   solution to part 2&lt;/a&gt; has been posted.&lt;/p&gt;
-</content>
-  </entry>
-  
-  
-  
-  <entry>
-    <id>http://a1k0n.net/2009/03/31/hacker-challenge</id>
-    <link type="text/html" rel="alternate" href="http://a1k0n.net/2009/03/31/hacker-challenge.html"/>
-    <title>Hacker challenge&#58; Can you make a keygen?</title>
-    <updated>2009-03-31T00:00:00-07:00</updated>
-    <author>
-      <name>Andy Sloane</name>
-      <uri>http://a1k0n.net/</uri>
-    </author>
-    <content type="html">&lt;p&gt;I like to reverse-engineer things, and I like number theory.  These
+</description>
+        <pubDate>Fri, 03 Apr 2009 00:00:00 -0700</pubDate>
+        <link>http://www.a1k0n.net/2009/04/03/hacker-challenge-2.html</link>
+        <guid isPermaLink="true">http://www.a1k0n.net/2009/04/03/hacker-challenge-2.html</guid>
+      </item>
+    
+    
+    
+      <item>
+        <title>Hacker challenge&amp;#58; Can you make a keygen?</title>
+        <description>&lt;p&gt;I like to reverse-engineer things, and I like number theory.  These
 hobbies happen to intersect in the art of reverse-engineering software
 license keys.&lt;/p&gt;
 
@@ -1158,11 +1115,9 @@ everyone. &lt;/p&gt;
 &lt;p&gt;It is sometimes shockingly easy to create a key generator.  Often a
 program that checks a license key is structured like this:  &lt;/p&gt;
 
-&lt;pre&gt;
-  licensestr = get_license_key_modal_dialog()
-  validlicensestr = make_valid_license(licensestr);
-  if(licensestr == validlicensestr) { ... }
-&lt;/pre&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;n&quot;&gt;licensestr&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;get_license_key_modal_dialog&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;validlicensestr&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;make_valid_license&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;licensestr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;if&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;licensestr&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;validlicensestr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;...&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
   
 &lt;p&gt;So now all I have to do is extract your make_valid_license code, feed
 it random garbage, and I have a key generator for your program.  One
@@ -1185,10 +1140,10 @@ say for now.&lt;/p&gt;
 
 &lt;p&gt;The code is here:&lt;/p&gt;
 
-&lt;p&gt;&lt;a href=&quot;http://a1k0n.net/code/keydecode.cpp.txt&quot;&gt;keydecode.cpp&lt;/a&gt; - key
+&lt;p&gt;&lt;a href=&quot;/code/keydecode.cpp.txt&quot;&gt;keydecode.cpp&lt;/a&gt; - key
 decoder&lt;/p&gt;
 
-&lt;p&gt;&lt;a href=&quot;http://a1k0n.net/code/bn.h.txt&quot;&gt;bn.h&lt;/a&gt; - quick and dirty bignums&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;/code/bn.h.txt&quot;&gt;bn.h&lt;/a&gt; - quick and dirty bignums&lt;/p&gt;
 
 &lt;p&gt;(The web host I&#39;m using has the wrong MIME types on .cpp and .h, so they&#39;re
 .txts - sorry)&lt;/p&gt;
@@ -1211,21 +1166,17 @@ it&#39;s been done before.  Part 2 coming later.&lt;/p&gt;
 &lt;p&gt;&lt;b&gt;Update 2&lt;/b&gt;: &lt;a href=&quot;/2009/04/03/hacker-challenge-2.html&quot;&gt;Hacker
 challenge part 2&lt;/a&gt; has been posted.&lt;/p&gt;
 
-</content>
-  </entry>
-  
-  
-  
-  <entry>
-    <id>http://a1k0n.net/2007/10/12/obfuscated-c-vendetta-online</id>
-    <link type="text/html" rel="alternate" href="http://a1k0n.net/2007/10/12/obfuscated-c-vendetta-online.html"/>
-    <title>The source code to Vendetta Online</title>
-    <updated>2007-10-12T00:00:00-07:00</updated>
-    <author>
-      <name>Andy Sloane</name>
-      <uri>http://a1k0n.net/</uri>
-    </author>
-    <content type="html">By request: &lt;a href=&quot;/code/vosource.c.txt&quot;&gt;Vendetta Online&#39;s source code&lt;/a&gt;.
+</description>
+        <pubDate>Tue, 31 Mar 2009 00:00:00 -0700</pubDate>
+        <link>http://www.a1k0n.net/2009/03/31/hacker-challenge.html</link>
+        <guid isPermaLink="true">http://www.a1k0n.net/2009/03/31/hacker-challenge.html</guid>
+      </item>
+    
+    
+    
+      <item>
+        <title>The source code to Vendetta Online</title>
+        <description>By request: &lt;a href=&quot;/code/vosource.c.txt&quot;&gt;Vendetta Online&#39;s source code&lt;/a&gt;.
 &lt;pre&gt;
                                                            _
                                                            ,
@@ -1273,21 +1224,17 @@ earlier thread&lt;/a&gt;, but the message ordering got all mixed up at some
 point when I had to reindex the message IDs in the database (sigh)).&lt;/p&gt;
 
 
-</content>
-  </entry>
-  
-  
-  
-  <entry>
-    <id>http://a1k0n.net/2007/08/24/obfuscated-c-fire</id>
-    <link type="text/html" rel="alternate" href="http://a1k0n.net/2007/08/24/obfuscated-c-fire.html"/>
-    <title>Another short C program.</title>
-    <updated>2007-08-24T00:00:00-07:00</updated>
-    <author>
-      <name>Andy Sloane</name>
-      <uri>http://a1k0n.net/</uri>
-    </author>
-    <content type="html">&lt;pre&gt;
+</description>
+        <pubDate>Fri, 12 Oct 2007 00:00:00 -0700</pubDate>
+        <link>http://www.a1k0n.net/2007/10/12/obfuscated-c-vendetta-online.html</link>
+        <guid isPermaLink="true">http://www.a1k0n.net/2007/10/12/obfuscated-c-vendetta-online.html</guid>
+      </item>
+    
+    
+    
+      <item>
+        <title>Another short C program.</title>
+        <description>&lt;pre&gt;
 b[2080];main(j){for(;;){printf(&quot;\x1b[H&quot;);for(j=1;j&amp;lt;2080;j++)b[j]=j&amp;lt;
 2000?(b[j+79]+b[j+80]+b[j]+b[j-1]+b[j+81])/5:rand()%4?0:512,j&amp;lt;1840?
 putchar((j%80)==79?&#39;\n&#39;:&quot; .:*#$H@&quot;[b[j]&amp;gt;&amp;gt;5]):0;usleep(20000);}}
@@ -1298,210 +1245,12 @@ like camoflauge instead.&lt;/p&gt;
 
 &lt;p&gt;update: fixed a crashing bug.  It has other issues with uninitialized
 data, though.&lt;/p&gt;
-</content>
-  </entry>
-  
-  
-  
-  <entry>
-    <id>http://a1k0n.net/2006/09/20/obfuscated-c-donut-2</id>
-    <link type="text/html" rel="alternate" href="http://a1k0n.net/2006/09/20/obfuscated-c-donut-2.html"/>
-    <title>Embellishing the donut&#58; an old-school CG cliche</title>
-    <updated>2006-09-20T00:00:00-07:00</updated>
-    <author>
-      <name>Andy Sloane</name>
-      <uri>http://a1k0n.net/</uri>
-    </author>
-    <content type="html">
-&lt;pre&gt;
-_,x,y,o       ,N;char       b[1840]       ;p(n,c)
-{for(;n       --;x++)       c==10?y       +=80,x=
-o-1:x&amp;gt;=       0?80&amp;gt;x?       c!=&#39;~&#39;?       b[y+x]=
-c:0:0:0       ;}c(q,l       ,r,o,v)       char*l,
-       *r;{for       (;q&amp;gt;=0;       )q=(&quot;A&quot;       &quot;YLrZ^&quot;
-       &quot;w^?EX&quot;           &quot;novne&quot;     &quot;bYV&quot;       &quot;dO}LE&quot;
-       &quot;{yWlw&quot;      &quot;Jl_Ja|[ur]zovpu&quot;   &quot;&quot;       &quot;i]e|y&quot;
-       &quot;ao_Be&quot;   &quot;osmIg}r]]r]m|wkZU}{O}&quot;         &quot;xys]]\
-x|ya|y&quot;        &quot;sm||{uel}|r{yIcsm||ya[{uE&quot;  &quot;{qY\
-w|gGor&quot;      &quot;VrVWioriI}Qac{{BIY[sXjjsVW]aM&quot;  &quot;T\
-tXjjss&quot;     &quot;sV_OUkRUlSiorVXp_qOM&amp;gt;E{BadB&quot;[_/6  ]-
-62&amp;gt;&amp;gt;_++    %6&amp;amp;1?r[q]:l[q])-o;return q;}E(a){for (
-       o= x=a,y=0,_=0;1095&amp;gt;_;)a= &quot; &amp;lt;.,`&#39;/)(\n-&quot;  &quot;\\_~&quot;[
-       c  (12,&quot;!%*/&#39;)#3&quot;  &quot;&quot;     &quot;+-6,8&quot;,&quot;\&quot;(.$&quot; &quot;01245&quot;
-       &quot; &amp;amp;79&quot;,46)+14],  p(&quot;&quot;       &quot;#$%&amp;amp;&#39;()0:439 &quot;[ c(10
-       , &quot;&amp;amp;(*#,./1345&quot; ,&quot;&#39;)&quot;       &quot;+%-$02\&quot;! &quot;, 44)+12]
--34,a);  }main(k){float     A=0,B= 0,i,j,z[1840];
-puts(&quot;&quot;  &quot;\x1b[2J&quot;);;;      for(;; ){float e=sin
-(A), n=  sin(B),g=cos(      A),m=  cos(B);for(k=
-0;1840&amp;gt;   k;k++)y=-10-k/    80   ,o=41+(k%80-40
-       )* 1.3/y+n,N=A-100.0/y,b[k]=&quot;.#&quot;[o+N&amp;amp;1],  z[k]=0;
-       E(  80-(int)(9*B)%250);for(j=0;6.28&amp;gt;j;j   +=0.07)
-       for  (i=0;6.28&amp;gt;i;i+=0.02){float c=sin(    i),  d=
-       cos(  j),f=sin(j),h=d+2,D=15/(c*h*e+f     *g+5),l
-=cos(i)        ,t=c*h*g-f*e;x=40+2*D*(l*h*  m-t*n
-),y=12+       D  *(l*h*n+t*m),o=x+80*y,N  =8*((f*
-e-c*d*g       )*m   -c*d*e-f*g-l*d*n)     ;if(D&amp;gt;z
-[o])z[o       ]=D,b[     o]=&quot; .&quot;          &quot;.,,-+&quot;
-       &quot;+=#$@&quot;       [N&amp;gt;0?N:       0];;;;}       printf(
-       &quot;%c[H&quot;,       27);for       (k=1;18       *100+41
-       &amp;gt;k;k++)       putchar       (k%80?b       [k]:10)
-       ;;;;A+=       0.053;;       B+=0.03       ;;;;;}}
-&lt;/pre&gt;
-
-(as with the &lt;a href=&quot;/2006/09/15/obfuscated-c-donut.html&quot;&gt;first one&lt;/a&gt;, compile it with -lm, and it needs
-ANSI-ish terminal emulation)
-
-</content>
-  </entry>
-  
-  
-  
-  <entry>
-    <id>http://a1k0n.net/2006/09/15/obfuscated-c-donut</id>
-    <link type="text/html" rel="alternate" href="http://a1k0n.net/2006/09/15/obfuscated-c-donut.html"/>
-    <title>Have a donut.</title>
-    <updated>2006-09-15T00:00:00-07:00</updated>
-    <author>
-      <name>Andy Sloane</name>
-      <uri>http://a1k0n.net/</uri>
-    </author>
-    <content type="html">(compile with &lt;tt&gt;gcc -o donut donut.c -lm&lt;/tt&gt;, and it needs ANSI- or
-VT100-like emulation)
-&lt;pre&gt;
-             k;double sin()
-         ,cos();main(){float A=
-       0,B=0,i,j,z[1760];char b[
-     1760];printf(&quot;\x1b[2J&quot;);for(;;
-  ){memset(b,32,1760);memset(z,0,7040)
-  ;for(j=0;6.28&amp;gt;j;j+=0.07)for(i=0;6.28
- &amp;gt;i;i+=0.02){float c=sin(i),d=cos(j),e=
- sin(A),f=sin(j),g=cos(A),h=d+2,D=1/(c*
- h*e+f*g+5),l=cos      (i),m=cos(B),n=s\
-in(B),t=c*h*g-f*        e;int x=40+30*D*
-(l*h*m-t*n),y=            12+15*D*(l*h*n
-+t*m),o=x+80*y,          N=8*((f*e-c*d*g
- )*m-c*d*e-f*g-l        *d*n);if(22&amp;gt;y&amp;amp;&amp;amp;
- y&amp;gt;0&amp;amp;&amp;amp;x&amp;gt;0&amp;amp;&amp;amp;80&amp;gt;x&amp;amp;&amp;amp;D&amp;gt;z[o]){z[o]=D;;;b[o]=
- &quot;.,-~:;=!*#$@&quot;[N&amp;gt;0?N:0];}}/*#****!!-*/
-  printf(&quot;\x1b[H&quot;);for(k=0;1761&amp;gt;k;k++)
-   putchar(k%80?b[k]:10);A+=0.04;B+=
-     0.02;}}/*****####*******!!=;:~
-       ~::==!!!**********!!!==::-
-         .,~~;;;========;;;:~-.
-             ..,--------,*/
-&lt;/pre&gt;
-
-(This was my first attempt at obfuscated C and I feel it&#39;s pretty amateurish;
-see &lt;a href=&quot;/2006/09/20/obfuscated-c-donut-2.html&quot;&gt;Donut Mark II&lt;/a&gt; for a more
-impressive demo &amp;mdash; though this one is simple and elegant in comparison.)
-</content>
-  </entry>
-  
-  
-  
-  <entry>
-    <id>http://a1k0n.net/2005/11/04/lisp-using-slime-over-ssh</id>
-    <link type="text/html" rel="alternate" href="http://a1k0n.net/2005/11/04/lisp-using-slime-over-ssh.html"/>
-    <title>Using SLIME over an SSH tunnel</title>
-    <updated>2005-11-04T00:00:00-08:00</updated>
-    <author>
-      <name>Andy Sloane</name>
-      <uri>http://a1k0n.net/</uri>
-    </author>
-    <content type="html">&lt;p&gt;If you&#39;d like to use emacs on one computer (i.e. your windows box at home) and
-use &lt;a href=&quot;http://common-lisp.net/project/slime/&quot;&gt;SLIME&lt;/a&gt; to connect to a
-Common Lisp process on a remote computer (i.e. your server at work), here&#39;s how
-I do it.&lt;/p&gt;
-
-&lt;p&gt;First, create a startup file for your favorite Lisp implementation.&lt;/p&gt;
-
-&lt;h2&gt;lisp startup file&lt;/h2&gt;
-&lt;pre&gt;
-(require &#39;asdf)
-(asdf:oos &#39;asdf:load-op &#39;swank)
- 
-; start swank
-(setf swank:*use-dedicated-output-stream* nil)
-(setf swank:*communication-style* :fd-handler)
-(swank:create-server :dont-close t)
-&lt;/pre&gt;
- 
-&lt;p&gt;Now edit your ~/.emacs so that you&#39;ve got something like the following in it:&lt;/p&gt;
- 
-&lt;h2&gt;.emacs&lt;/h2&gt;
-&lt;pre&gt;
-(require &#39;slime)
-(require &#39;tramp)
- 
-(add-hook &#39;lisp-mode-hook (lambda () (slime-mode t)))
-(add-hook &#39;inferior-lisp-mode-hook (lambda () (inferior-slime-mode t)))
- 
-(setq lisp-indent-function &#39;common-lisp-indent-function
-      slime-complete-symbol-function &#39;slime-fuzzy-complete-symbol)
- 
-(slime-setup)
- 
-;;; If you want to tunnel through an intermediate host, such as your
-;;; work firewall, use the following couple lines.  If you&#39;re using a
-;;; Windows emacs, use &#39;plink&#39; as below, otherwise substitute &#39;ssh&#39;.
-(add-to-list
- &#39;tramp-default-proxies-alist
- &#39;(&quot;\\.work-domain\\.com&quot; nil &quot;/plink:fwuserid@firewall.work-domain.com:/&quot;))
-(add-to-list
- &#39;tramp-default-proxies-alist
- &#39;(&quot;firewall\\.work-domain\\.com&quot; nil nil))
- 
-(defvar *my-box-tramp-path*
-  &quot;/ssh:me@my-box.work-domain.com:&quot;)
- 
-(defvar *current-tramp-path* nil)
-(defun connect-to-host (path)
-  (setq *current-tramp-path* path)
-  (setq slime-translate-from-lisp-filename-function
-    (lambda (f)
-      (concat *current-tramp-path* f)))
-  (setq slime-translate-to-lisp-filename-function
-    (lambda (f)
-      (substring f (length *current-tramp-path*))))
-  (slime-connect &quot;localhost&quot; 4005))
- 
-(defun my-box-slime ()
-  (interactive)
-  (connect-to-host *my-box-tramp-path*))
- 
-(defun my-box-homedir ()
-  (interactive)
-  (find-file (concat *zarniwoop-tramp-path* &quot;/home/me/&quot;)))
-&lt;/pre&gt;
-
-&lt;p&gt;Now, load up the startup file you created on your host Lisp to start
-the swank server.  Then, create an ssh tunnel, i.e. &lt;tt&gt;ssh -L
-4005:localhost:4005 me@my-work.com&lt;/tt&gt;.&lt;/p&gt;
-
-&lt;p&gt;Now you can &lt;tt&gt;M-x my-box-slime&lt;/tt&gt; to connect through your SSH
-tunnel to your work box; SLIME&#39;s &lt;tt&gt;M-&lt;/tt&gt;. command will also
-correctly open up the file containing the defun of whatever&#39;s under
-your cursor, and &lt;tt&gt;C-c C-k&lt;/tt&gt; works correctly, etc.  If you want
-to open up some lisp file, &lt;tt&gt;M-x my-box-homedir&lt;/tt&gt; is a convenient
-shortcut.&lt;/p&gt;
-
-&lt;h2&gt;For Windows users&lt;/h2&gt;
-&lt;p&gt;If you&#39;re using Windows and want to also use a multi-hop tramp method
-(i.e. ssh into your work firewall, and then ssh from there to your
-server at work), be aware that tramp 2.1.4 and prior has a bug; it&#39;s
-fixed in CVS and probably 2.1.5, which is not out yet.  Information
-and a patch is available &lt;a
-href=&quot;http://lists.gnu.org/archive/html/tramp-devel/2005-10/msg00060.html&quot;&gt;here&lt;/a&gt;.&lt;/p&gt;
-
-&lt;p&gt;You&#39;ll also want to use plink from the &lt;a
-href=&quot;http://www.chiark.greenend.org.uk/~sgtatham/putty/&quot;&gt;PuTTY&lt;/a&gt;
-distribution in lieu of ssh.  If you&#39;re doing multi-hop tramp, though,
-you need to use plink for the first hop (Windows box -&gt; &quot;firewall&quot;
-box) and ssh thereafter (&quot;firewall&quot; -&gt; &quot;server&quot;).&lt;/p&gt;
-
-</content>
-  </entry>
-  
-  
- 
-</feed>
+</description>
+        <pubDate>Fri, 24 Aug 2007 00:00:00 -0700</pubDate>
+        <link>http://www.a1k0n.net/2007/08/24/obfuscated-c-fire.html</link>
+        <guid isPermaLink="true">http://www.a1k0n.net/2007/08/24/obfuscated-c-fire.html</guid>
+      </item>
+    
+    
+  </channel>
+</rss>

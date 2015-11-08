@@ -1,25 +1,88 @@
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en"> 
-  <head>
-<link rel="stylesheet" href="/style.css" type="text/css" media="all" /> 
-<title>Hacker challenge&#58; Can you make a keygen? -- a1k0n</title>
-<script type="text/javascript">
-  var _gaq = _gaq || [];
-  _gaq.push(['_setAccount', 'UA-24584703-1']);
-  _gaq.push(['_trackPageview']);
-  (function() {
-    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-    ga.src = ('https:' == document.location.protocol ? 'https://' : 'http://') + 'stats.g.doubleclick.net/dc.js';
-    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-  })();
-</script>
-<script type="text/javascript"
-    src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
-</script>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Hacker challenge&#58; Can you make a keygen? &#8211; a1k0n.net</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="Andy Sloane">
+    <meta name="keywords" content="">
+    <link rel="canonical" href="http://www.a1k0n.net/2009/03/31/hacker-challenge.html">
+    <link rel="alternate" type="application/rss+xml" title="RSS Feed for a1k0n.net" href="/feed.xml" />
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/pixyll.css?201511080840" type="text/css">
+
+    <!-- Fonts -->
+    <link href='//fonts.googleapis.com/css?family=Merriweather:900,900italic,300,300italic' rel='stylesheet' type='text/css'>
+    <link href='//fonts.googleapis.com/css?family=Lato:900,300' rel='stylesheet' type='text/css'>
+    
+
+    <!-- Verifications -->
+    
+
+    <!-- Open Graph -->
+    <!-- From: https://github.com/mmistakes/hpstr-jekyll-theme/blob/master/_includes/head.html -->
+    <meta property="og:locale" content="en_US">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="Hacker challenge&amp;#58; Can you make a keygen?">
+    <meta property="og:description" content="">
+    <meta property="og:url" content="http://www.a1k0n.net/2009/03/31/hacker-challenge.html">
+    <meta property="og:site_name" content="a1k0n.net">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary" />
+    
+    <meta name="twitter:title" content="Hacker challenge&#58; Can you make a keygen?" />
+    <meta name="twitter:description" content="" />
+    <meta name="twitter:url" content="http://www.a1k0n.net/2009/03/31/hacker-challenge.html" />
+
+    
+    <script type="text/javascript">
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-24584703-1']);
+      _gaq.push(['_trackPageview']);
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+    </script>
+    
+
 </head>
-<body>
-<div style="width: 100%; background-color: #daf2ff; text-align: center; font-size: 12pt;"><a href="/" style="color: #1d3542;">a1k0n : Andy Sloane's weblog</a></div>
-<h1>Hacker challenge&#58; Can you make a keygen?</h1>
-<p>I like to reverse-engineer things, and I like number theory.  These
+
+<body class="site">
+
+	
+
+  <div class="site-wrap">
+    <header class="site-header px2 px-responsive">
+  <div class="mt2 wrap">
+    <div class="measure">
+      <a href="/" class="site-title">a1k0n.net</a>
+      <nav class="site-nav">
+        <a href="/about.html">About</a>
+
+      </nav>
+      <div class="clearfix"></div>
+      
+    </div>
+  </div>
+</header>
+
+
+    <div class="post p2 p-responsive wrap" role="main">
+      <div class="measure">
+        <div class="post-header mb2">
+  <h1>Hacker challenge&#58; Can you make a keygen?</h1>
+  <span class="post-meta">Mar 31, 2009</span><br>
+  
+</div>
+
+<article class="post-content">
+  <p>I like to reverse-engineer things, and I like number theory.  These
 hobbies happen to intersect in the art of reverse-engineering software
 license keys.</p>
 
@@ -35,11 +98,9 @@ everyone. </p>
 <p>It is sometimes shockingly easy to create a key generator.  Often a
 program that checks a license key is structured like this:  </p>
 
-<pre>
-  licensestr = get_license_key_modal_dialog()
-  validlicensestr = make_valid_license(licensestr);
-  if(licensestr == validlicensestr) { ... }
-</pre>
+<div class="highlight"><pre><code class="language-c" data-lang="c"><span class="n">licensestr</span> <span class="o">=</span> <span class="n">get_license_key_modal_dialog</span><span class="p">()</span>
+<span class="n">validlicensestr</span> <span class="o">=</span> <span class="n">make_valid_license</span><span class="p">(</span><span class="n">licensestr</span><span class="p">);</span>
+<span class="k">if</span><span class="p">(</span><span class="n">licensestr</span> <span class="o">==</span> <span class="n">validlicensestr</span><span class="p">)</span> <span class="p">{</span> <span class="p">...</span> <span class="p">}</span></code></pre></div>
   
 <p>So now all I have to do is extract your make_valid_license code, feed
 it random garbage, and I have a key generator for your program.  One
@@ -62,10 +123,10 @@ say for now.</p>
 
 <p>The code is here:</p>
 
-<p><a href="http://a1k0n.net/code/keydecode.cpp.txt">keydecode.cpp</a> - key
+<p><a href="/code/keydecode.cpp.txt">keydecode.cpp</a> - key
 decoder</p>
 
-<p><a href="http://a1k0n.net/code/bn.h.txt">bn.h</a> - quick and dirty bignums</p>
+<p><a href="/code/bn.h.txt">bn.h</a> - quick and dirty bignums</p>
 
 <p>(The web host I'm using has the wrong MIME types on .cpp and .h, so they're
 .txts - sorry)</p>
@@ -89,12 +150,23 @@ it's been done before.  Part 2 coming later.</p>
 challenge part 2</a> has been posted.</p>
 
 
-<hr>
-<a href=''>permalink</a> | 
-<a href="/atom.xml" class=feed><img src="/img/feed-icon-14x14.png" alt="RSS" /></a> | <a href="/">a1k0n.net</a><br />
-<!--
-<div id="disqus_thread"></div>
-<-->
-</body>
+</article>
 
+
+
+
+
+
+
+      </div>
+    </div>
+  </div>
+
+  <footer class="center">
+  <div class="measure">
+    <a href="/" class="site-title">a1k0n.net</a>
+  </div>
+</footer>
+
+</body>
 </html>

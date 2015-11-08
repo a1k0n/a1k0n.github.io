@@ -1,0 +1,6 @@
+ - convert all code highlighting over to {% highlight %} and get rid of dumb
+   prettify.js stuff
+ - double check mathjax
+ - recheck all articles
+ - a1k0n animated canvas logo? !!!
+ - footer?

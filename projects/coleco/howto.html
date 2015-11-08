@@ -1,72 +1,139 @@
+<!DOCTYPE html>
 <html>
 <head>
-<link rel="stylesheet" href="/style.css" type="text/css" media="all" /> 
-<title>colecovision A/V outs</title>
-<script type="text/javascript">
-  var _gaq = _gaq || [];
-  _gaq.push(['_setAccount', 'UA-24584703-1']);
-  _gaq.push(['_trackPageview']);
-  (function() {
-    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-  })();
-</script>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Colecovision A/V output modification &#8211; a1k0n.net</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="Andy Sloane">
+    
+    <link rel="canonical" href="http://www.a1k0n.net/projects/coleco/howto.html">
+    <link rel="alternate" type="application/rss+xml" title="RSS Feed for a1k0n.net" href="/feed.xml" />
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/pixyll.css?201511080840" type="text/css">
+
+    <!-- Fonts -->
+    <link href='//fonts.googleapis.com/css?family=Merriweather:900,900italic,300,300italic' rel='stylesheet' type='text/css'>
+    <link href='//fonts.googleapis.com/css?family=Lato:900,300' rel='stylesheet' type='text/css'>
+    
+
+    <!-- Verifications -->
+    
+
+    <!-- Open Graph -->
+    <!-- From: https://github.com/mmistakes/hpstr-jekyll-theme/blob/master/_includes/head.html -->
+    <meta property="og:locale" content="en_US">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="Colecovision A/V output modification">
+    <meta property="og:description" content="">
+    <meta property="og:url" content="http://www.a1k0n.net/projects/coleco/howto.html">
+    <meta property="og:site_name" content="a1k0n.net">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary" />
+    
+    <meta name="twitter:title" content="Colecovision A/V output modification" />
+    <meta name="twitter:description" content="" />
+    <meta name="twitter:url" content="http://www.a1k0n.net/projects/coleco/howto.html" />
+
+    
+    <script type="text/javascript">
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-24584703-1']);
+      _gaq.push(['_trackPageview']);
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+    </script>
+    
+
 </head>
-<body bgcolor=#ffffff>
-<center><a href="/">a1k0n</a> : <a href="/projects/coleco/">colecovision A/V output modification</a> : instructions</center>
-<br>
-You will need:
-<pre>
- - assembled video amp board (<a href="sch.html">schematic</a>, <a href="pcb.html">circuit layout</a>)
- - about 2ft of extra RCA cable (thin shielded stranded cable)
- - about 2ft of approx. 22 gauge stranded wire (for power and for wiring up circuit)
- - two panel-mount RCA jacks
- - some electrical tape
- - a drill and a 1/4" bit
- - mad soldering skillz
- - an oscilloscope would be helpful, but not completely necessary
- - a voltmeter would be more helpful, and is slightly more necessary
-</pre>
-The video amp board requires the following parts:
-<pre>
- - circuit board of some sort 
-   (we used 1/2 of a radio shack "dual general-purpose ic pc board" 
-    cat. no. 276-159B)
- - LM318N (IC1)
- - 2x 10k resistors (R1,R2)
- - 2x 150 ohm resistors (R3,R4)
- - 27pF capacitor (C1)
- - &gt;1uF capacitor (C2 - see <a href="sch.html">schematic</a>)
- - 47uF capacitor (C3)
-</pre>
+
+<body class="site">
+
+	
+
+  <div class="site-wrap">
+    <header class="site-header px2 px-responsive">
+  <div class="mt2 wrap">
+    <div class="measure">
+      <a href="/" class="site-title">a1k0n.net</a>
+      <nav class="site-nav">
+        <a href="/about.html">About</a>
+
+      </nav>
+      <div class="clearfix"></div>
+      
+    </div>
+  </div>
+</header>
+
+
+    <div class="post p2 p-responsive wrap" role="main">
+      <div class="measure">
+        <div class="post">
+  <header class="post-header">
+    <h1 class="h2">Colecovision A/V output modification</h1>
+  </header>
+  <article class="post-content">
+  <p>You will need:</p>
 
 <ul>
+  <li>assembled video amp board (<a href="sch.html">schematic</a>, <a href="pcb.html">circuit layout</a>)</li>
+  <li>about 2ft of extra RCA cable (thin shielded stranded cable)</li>
+  <li>about 2ft of approx. 22 gauge stranded wire (for power and for wiring up circuit)</li>
+  <li>two panel-mount RCA jacks</li>
+  <li>some electrical tape</li>
+  <li>a drill and a 1/4” bit</li>
+  <li>mad soldering skillz</li>
+  <li>an oscilloscope would be helpful, but not completely necessary</li>
+  <li>a voltmeter would be more helpful, and is slightly more necessary</li>
+</ul>
+
+<p>The video amp board requires the following parts:</p>
+
+<ul>
+  <li>circuit board of some sort 
+(we used 1/2 of a radio shack “dual general-purpose ic pc board” 
+ cat. no. 276-159B)</li>
+  <li>LM318N (IC1)</li>
+  <li>2x 10k resistors (R1,R2)</li>
+  <li>2x 150 ohm resistors (R3,R4)</li>
+  <li>27pF capacitor (C1)</li>
+  <li>&gt;1uF capacitor (C2 - see <a href="sch.html">schematic</a>)</li>
+  <li>47uF capacitor (C3)</li>
+</ul>
+
+<ol>
 <li>First step: Open up the colecovision's plastic case and metal shield.  This
-is a pain.
+is a pain.</li>
 <li>Next: Drill some 1/4" holes where you want your A/V jacks.  You'll need to 
 put them just above the mainboard so that they don't interfere with anything.  
 the finished project will look something like this:
-<a name="finished">
-<center><img src="IMAGE012.jpg"></center>
-so plan accordingly.
-<li>Then mount the RCA jacks in the holes using the supplied nuts and washers.
+<a name="finished"></a>
+<center><img src="IMAGE012.jpg" /></center>
+so plan accordingly.</li>
+<li>Then mount the RCA jacks in the holes using the supplied nuts and washers.</li>
 <li>Locate the power connection and solder a wire to ground and a wire to 
 <b>switched</b> +12V.
-<center><img src="IMAGE003.jpg"></center>
+<center><img src="IMAGE003.jpg" /></center>
 On the other side of the board is the power switch.  The bottom wire is
 soldered to the switch's ground connection and the top wire is soldered to
 the +12V post-switch.  If you have a multimeter, it's a good idea to plug in
 power and test that +12V does indeed switch on and off when you flip the 
-switch.
+switch.</li>
 <li>To both the ground and switched +12V pads solder about 7-8 inches of 
 stranded wire (tinning the wires first will help immensely).  These will
-supply power to the video amplifier circuit.
+supply power to the video amplifier circuit.</li>
 <li>Locate the video input connection to the RF modulator under the small shield
 (just pop the top of the shield off).  It's the third pin from the end and it
 has a test pad adjacent to it (there's a "1" labelling pin 1, so it's really
 pin 6 on the connector).  see diagram:
-<center><img src="IMAGE004.jpg"></center>
+<center><img src="IMAGE004.jpg" /></center></li>
 <li>Strip some of the RCA cable, separate the shield, and strip the inner 
 conductor.  Twist the strands of both the ground shield and the signal wire 
 and tin them both.  Solder the RCA cable ground shield to the existing ground 
@@ -74,43 +141,57 @@ connection at the RF shield.  Solder the signal wire to the empty test pad
 provided for our convenience.  It should then look like the above.  
 Cut the RCA cable about 4-5 inches from the connection point.  
 It will feed into the amplifier circuit which will sit next to the shielded 
-modulator section.
+modulator section.</li>
 <li>Locate the audio chip.  It's a Texas Instruments SN76489AN located near the
 center of the motherboard.  Pin 7 is the audio output, and, conveniently, pin
 8 is ground.  Cut another ~6in RCA cable and strip and tin it, then solder
 the ground to 8 and the signal to 7.  like so:
-<center><img src="IMAGE006.jpg"></center>
+<center><img src="IMAGE006.jpg" /></center>
 Unfortunately, the actual solder connection is a little blurry in that picture.
-This one is tricky, and tinning the wire is essential.
+This one is tricky, and tinning the wire is essential.</li>
 <li>Now you can connect everything up.  Power, ground, and video in connect to 
 your <a href="pcb.html">video amp board</a> as shown.  The RCA cable from the
 audio chip goes right to the RCA jack (the SN76489 will drive up to 10mA).
 You'll need another ~5in length of RCA cable to connect the video out on the
 amplifier board to the video output RCA jack.
-<center><img src="IMAGE010.jpg"></center>
+<center><img src="IMAGE010.jpg" /></center></li>
 <li>You are now finished electrically.  cover up the bottom of the video amp 
 board with a piece of paper, hook up a monitor, a cartridge, controller, and 
 power, and try it out.  If it doesn't work, your voltmeter and/or oscilloscope 
-will sure come in handy.
+will sure come in handy.</li>
 <li>Provided everything is peachy, we'll finish it up cosmetically.  Cover the 
 underside of your circuitboard with electrical tape and string the wires 
 between capacitors so it sits still next to the RF module.  You may want to
-electrical-tape it down to the motherboard also.
+electrical-tape it down to the motherboard also.</li>
 <li>Take a pliers and bend up a corner of a tab on the cover for the small RF
 shield to allow the video signal wire to escape.  (This is shown 
-<a href="#finished">above</a>)
+<a href="#finished">above</a>)</li>
 <li>Cut a little piece out of the top shield to allow the audio/video RCA 
 cables out.
-<center><img src="IMAGE014.jpg"></center>
+<center><img src="IMAGE014.jpg" /></center>
 Note: Not all colecovisions have large holes in the shield like this one, so
 you may need to improvise with tinsnips or a small saw.  Otherwise, it may
 have been smart to just string the cable through the existing holes to begin
-with!
+with!</li>
 <li>Put the top shield back on and string the power and ground connections next
 to the switch:
-<center><img src="IMAGE016.jpg"></center>
+<center><img src="IMAGE016.jpg" /></center></li>
 <li>Then put the case back together and you are in business.
-<center><img src="IMAGE019.jpg"></center>
-</ul>
+<center><img src="IMAGE019.jpg" /></center></li>
+</ol>
 
+  </article>
+</div>
+
+      </div>
+    </div>
+  </div>
+
+  <footer class="center">
+  <div class="measure">
+    <a href="/" class="site-title">a1k0n.net</a>
+  </div>
+</footer>
+
+</body>
 </html>

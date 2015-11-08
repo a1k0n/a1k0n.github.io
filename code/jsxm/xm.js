@@ -3,7 +3,7 @@ var audioctx;  // AudioContext
 
 // Load font (ripped from FastTracker 2)
 var fontimg = new Image();
-fontimg.src = "ft2font.png";
+fontimg.src = "/code/jsxm/ft2font.png";
 
 // canvas to render patterns onto
 var pat_canvas = document.createElement('canvas');
@@ -766,7 +766,6 @@ function ConvertSample(array, bits) {
 // uninterrupted for as long as possible; this also handles pingpong loops.
 function UnrollSampleLoop(samp) {
   var nloops = ((2048 + samp.looplen - 1) / samp.looplen) | 0;
-  console.log(samp.looplen, nloops);
   var pingpong = samp.type & 2;
   if (pingpong) {
     // make sure we have an even number of loops if we are pingponging
@@ -1074,12 +1073,10 @@ function LoadXM(arrayBuf) {
   return xm;
 }
 
-var playing = false;
 var jsNode, gainNode;
-var paused_events = [];
 function InitAudio() {
   if (audioctx == undefined) {
-    audioContext = window.AudioContext || window.webkitAudioContext;
+    var audioContext = window.AudioContext || window.webkitAudioContext;
     audioctx = new audioContext();
     gainNode = audioctx.createGain();
     gainNode.gain.value = 0.1;  // master volume
@@ -1089,6 +1086,8 @@ function InitAudio() {
   gainNode.connect(audioctx.destination);
 }
 
+var playing = false;
+var paused_events = [];
 function PlayXM() {
   if (!playing) {
     // put paused events back into action, if any
@@ -1200,7 +1199,7 @@ function InitFilelist() {
   }
 }
 
-function main() {
+window.onload = function() {
   InitAudio();
   InitFilelist();
   var uri = location.hash.substr(1);
@@ -1209,4 +1208,3 @@ function main() {
   }
   DownloadXM(baseuri + uri);
 }
-
