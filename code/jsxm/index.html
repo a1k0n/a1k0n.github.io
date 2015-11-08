@@ -1,25 +1,25 @@
-<head>
+---
+layout: page
+title: Javascript XM Player
+headhtml: |
   <title>js xm</title>
   <script src="xm.js"></script>
   <script src="xmeffects.js"></script>
   <script src="http://a1k0n-pub.s3-website-us-west-1.amazonaws.com/xm/xmlist.js"></script>
   <style>
+    .centered {
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+    }
 
-.centered {
-  display: block;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-#filelist a { color: #fff; }
-
+    #filelist a { color: #fff; }
   </style>
-</head>
-<body onload="main()">
-  <div style="background:#000">
-    <div><canvas class="centered" id='title' width=640 height=22></canvas></div>
-    <div><canvas class="centered" id='vu' width=224 height=64></canvas></div>
-    <div><canvas class="centered" id='gfxpattern' width=640 height=200></canvas></div>
+---
+  <div style="background:#000; overflow: auto;">
+    <div><canvas class="centered" id='title' width="640" height="22"></canvas></div>
+    <div><canvas class="centered" id='vu' width="224" height="64"></canvas></div>
+    <div><canvas class="centered" id='gfxpattern' width="640" height="200"></canvas></div>
     <div id='instruments'></div>
     <div>
       <p style="text-align: center">
@@ -39,5 +39,3 @@ todo:
  - render pattern with the wider fonts for fewer channels
  - drag-n-drop .xm files onto player
 </pre>
-</body>
-

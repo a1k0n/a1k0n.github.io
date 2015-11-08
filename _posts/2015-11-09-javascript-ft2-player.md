@@ -1,11 +1,11 @@
 ---
 title: Playing Fasttracker 2 .XM files in Javascript
 layout: post
+hide: true
 headhtml: |
   <script src="/code/jsxm/xm.js"></script>
   <script src="/code/jsxm/xmeffects.js"></script>
   <script src="http://a1k0n-pub.s3-website-us-west-1.amazonaws.com/xm/xmlist.js"></script>
-  <script src="https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js"></script>
   <style>
 
   .centered {
@@ -16,9 +16,12 @@ headhtml: |
 
   #filelist a { color: #fff; }
 
+  .playercontainer {
+    background:#000; overflow: auto;
+  }
   </style>
 ---
-<div style="background:#000; overflow: auto;">
+<div class="playercontainer">
   <div> <canvas class="centered" id="title" width="640" height="22"></canvas> </div>
   <div> <canvas class="centered" id="vu" width="224" height="64"></canvas> </div>
   <div> <canvas class="centered" id="gfxpattern" width="640" height="200"></canvas> </div>
@@ -38,12 +41,20 @@ Hit the play button above and it will play music; specifically, music composed
 with (or at least, compatible with) a program released in 1994 called
 FastTracker 2; this is a Javascript homage I wrote in a fit of nostalgia.
 
-The ubiquitous .MOD music file format which originated on the Commodore Amiga in
-the late 80s. .MOD is more or less designed around the "Paula" chip inside the
-Amiga which plays four 8-bit PCM channels simultaneously. It is fairly amazing
-what artists are able to accomplish in just four voices; I've converted a few
-of Lizardking's old .MODs to .XM format so they can be played in the player
-above; try them out with the load button above.
+FastTracker 2 looks like this:
+
+<img src="/img/ft2.png">
+
+I am using the original font to render a pastiche of the FT2 interface above.
+
+## .XM files
+
+The ubiquitous .MOD music file format originated on the Commodore Amiga in the
+late 80s. It was more or less designed around the "Paula" chip inside the Amiga
+which plays four 8-bit PCM channels simultaneously. It is fairly amazing what
+artists are able to accomplish in just four voices; I've converted a few of
+Lizardking's old four-channel .MODs to .XM format so they can be played in the
+player above; try them out with the load button above.
 
 FastTracker 2's .XM (eXtended Module) format was created as a multi-channel
 extension to .MOD in the 90s; it was written by PC demo group
@@ -51,12 +62,6 @@ extension to .MOD in the 90s; it was written by PC demo group
 contemporaneous multi-channel MOD-type music trackers, like ScreamTracker 3's
 .S3M and later Impulse Tracker's .IT. Nearly all PC demos and many games in the
 90s and early 2000s played music in one of these formats.
-
-FastTracker 2 looks like this:
-
-<img src="/img/ft2.png">
-
-I am using the original font to render a pastiche of the FT2 interface above.
 
 Underneath the hood, it's several (14 in the case of the default song that
 comes up here) *channels* independently playing *samples* at various
@@ -84,7 +89,7 @@ would add a song message field to avoid abuse of the instrument list.
 In the above example, we are about to play an E note in octave 5 with
 instrument number 2 on the first channel, and in the second channel we play the
 same note an octave higher with the same instrument, except we also lower the
-volume to 0x2C (maximum volume is 0x40, so this is between a half and 2/3rds
+volume to 0x2C (maximum volume is 0x40, so this is between a half and 3/4ths
 full volume). The second channel is also going to play with effect 0, which is
 an arpeggio, switching between 0, 0x0c or 12, and 0 semitones higher -- meaning
 it's going to rapidly play a sequence of E-6, E-7, E-6, and repeat.
@@ -172,7 +177,11 @@ needed to fill the output buffer. With a default samplerate of 44.1kHz, a
 
 Our goal is to fill this buffer up with the sum of each channel's output
 waveform. Each channel outputs a sample playing at a certain frequency and at a
-certain volume. But wait -- our output frequency is given (by
+certain volume.
+
+*insert diagram of ticks/rows laid out in sample buffer*
+
+But wait -- our output frequency is given (by
 `audioctx.sampleRate` as it happens) and we need to play samples at different
 frequencies for each note. How do we do that?
 
@@ -182,6 +191,7 @@ Playing a sample recorded at a different frequency from the output frequency is
 a surprisingly nontrivial problem.
 
 TODO:
+
  - frequency content, up to nyquist
  - aliasing phenomenon
  - FFT, brick-wall filter, sinc
@@ -196,8 +206,14 @@ the interpolated time -- or "first-order hold" -- interpolate between the
 surrounding samples.
 
 I compromised with a very simple implementation that I think sounds pretty
-good. I use a combination of first-order hold and a per-channel two-pole
+good. I use a combination of zero-order hold and a per-channel two-pole
 low-pass filter, which has very low implementation complexity.
+
+### follow up in the next blog post
+about digital filters and just say we made a IIR low pass filter, will explain
+later
+
+
 
 <!--
  - background
