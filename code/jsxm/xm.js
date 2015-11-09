@@ -1206,5 +1206,8 @@ window.onload = function() {
   if (uri == "") {
     uri = "kamel.xm";
   }
-  DownloadXM(baseuri + uri);
+  if (!uri.startsWith("http")) {
+    uri = baseuri + uri;
+  }
+  DownloadXM(uri);
 }

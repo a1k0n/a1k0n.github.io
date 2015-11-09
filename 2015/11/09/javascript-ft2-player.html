@@ -12,7 +12,7 @@
     <link rel="alternate" type="application/rss+xml" title="RSS Feed for a1k0n.net" href="/feed.xml" />
 
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="/css/pixyll.css?201511080840" type="text/css">
+    <link rel="stylesheet" href="/css/pixyll.css?201511082232" type="text/css">
 
     <!-- Fonts -->
     <link href='//fonts.googleapis.com/css?family=Merriweather:900,900italic,300,300italic' rel='stylesheet' type='text/css'>
@@ -64,8 +64,33 @@
 #filelist a { color: #fff; }
 
 .playercontainer {
-  background:#000; overflow: auto;
+  background:#000;
 }
+
+.hscroll {
+  overflow: auto;
+  margin-bottom: 14px;
+}
+
+.hscroll::-webkit-scrollbar {
+    -webkit-appearance: none;
+}
+
+.hscroll::-webkit-scrollbar:horizontal {
+    height: 11px;
+}
+
+.hscroll::-webkit-scrollbar-thumb {
+    border-radius: 2px;
+    border: 1px solid #93C3E9; /* should match background, can't be transparent */
+    background-color: #A0D4FD;
+}
+
+.hscroll::-webkit-scrollbar-track { 
+    background-color: #333; 
+    border-radius: 8px; 
+} 
+
 </style>
 
 </head>
@@ -101,8 +126,10 @@
 <article class="post-content">
   <div class="playercontainer">
   <div> <canvas class="centered" id="title" width="640" height="22"></canvas> </div>
-  <div> <canvas class="centered" id="vu" width="224" height="64"></canvas> </div>
-  <div> <canvas class="centered" id="gfxpattern" width="640" height="200"></canvas> </div>
+  <div class="hscroll">
+   <div> <canvas class="centered" id="vu" width="224" height="64"></canvas> </div>
+   <div> <canvas class="centered" id="gfxpattern" width="640" height="200"></canvas> </div>
+  </div>
   <div id="instruments"></div>
   <div>
     <p style="text-align: center">
@@ -113,17 +140,75 @@
   <div style="display: none" id="filelist"></div>
 </div>
 
+<!-- script to make the output sum diagram; discard
+<div>
+<canvas id="tickdiagram" width="600" height="300"></canvas>
+<button onclick="drawtickdiagram();">draw tick diagram</button>
+<script>
+drawnticks = 6;
+tickwidth = 59+2;
+tickheight = 20;
+function drawtickdiagram() {
+  var ctx = document.getElementById('tickdiagram').getContext('2d');
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(0, 0, 600, 300);
+  for (var i = 0; i < drawnticks; i++) {
+    ctx.strokeStyle = '#000';
+    ctx.lineWidth = 1.0;
+    var x0 = i*(tickwidth + 4) + 0.5;
+    var sumbuf = new Float32Array(_scope_width);
+    var y0 = 12.5;
+    ctx.font = "18px serif";
+    ctx.fillStyle = '#000';
+    ctx.fillText("tick " + i, x0 + 10, y0);
+    for (var j = 0; j < xm.nchan; j++) {
+      var y0 = 20 + 1 + j*(tickheight + 5) + 0.5;
+      var s = paused_events[i].scopes[j];
+      ctx.beginPath();
+      ctx.rect(x0, y0, tickwidth, tickheight);
+      ctx.stroke();
+      ctx.beginPath();
+      for (var k = 0; k < _scope_width; k++) {
+        sumbuf[k] += s[k];
+        var y = Math.max(0, Math.min(tickheight, tickheight*0.5 + s[k] * 4));
+        ctx.lineTo(x0+k+1, y0 + y);
+      }
+      ctx.stroke();
+    }
+    var y0 = 20 + 12 + xm.nchan*(tickheight + 5) + 0.5;
+    ctx.beginPath();
+    ctx.rect(x0, y0, tickwidth, tickheight);
+    for (var k = 0; k < _scope_width; k++) {
+      var y = Math.max(0, Math.min(tickheight, tickheight*0.5 + sumbuf[k] * 4));
+      ctx.lineTo(x0+k+1, y0 + y);
+    }
+    ctx.stroke();
+  }
+  var x0 = drawnticks*(tickwidth + 4) + 0.5;
+  for (var j = 0; j < xm.nchan; j++) {
+    var y0 = 20 + 1 + j*(tickheight + 5) + 0.5;
+    ctx.fillText("channel " + j, x0, y0 + 16);
+  }
+  var y0 = 20 + 12 + xm.nchan*(tickheight + 5) + 0.5;
+  ctx.fillText("output", x0, y0 + 16);
+}
+</script>
+</div>
+-->
+
 <h2 id="what-is-this-thing">What is this thing?</h2>
 
 <p>Hit the play button above and it will play music; specifically, music composed
 with (or at least, compatible with) a program released in 1994 called
-FastTracker 2; this is a Javascript homage I wrote in a fit of nostalgia.</p>
+FastTracker 2; this is a Javascript homage I wrote in a fit of nostalgia. The
+<a href="https://github.com/a1k0n/jsxm/">source code is on GitHub</a> if you’d like to
+check it out.</p>
 
 <p>FastTracker 2 looks like this:</p>
 
-<p><img src="/img/ft2.png" /></p>
+<p><img src="/img/ft2.png" alt="FastTracker II screenshot" /></p>
 
-<p>I am using the original font to render a pastiche of the FT2 interface above.</p>
+<p>I using the original font to render a pastiche of the FT2 interface above.</p>
 
 <h2 id="xm-files">.XM files</h2>
 
@@ -148,9 +233,9 @@ see scrolling above.</p>
 
 <p>Patterns are a lot like assembly language for playing music, complete with a
 slew of hexadecimal numbers and opaque syntax, except they are laid out like a
-spreadsheet rather than a single column of instructions. Each cell contains an
-instruction for playing or releasing a note with a certain instrument,
-optionally modifying the volume, panning, or pitch with <em>effects</em>.</p>
+spreadsheet rather than a single column of instructions. Each cell contains
+notations for playing or releasing a note with a certain instrument, optionally
+modifying the volume, panning, or pitch with <em>effects</em>.</p>
 
 <p>Every sound that is played is one of the <em>samples</em>, shown at the top of this
 page as little waveforms and numbers in the table below the pattern. The idea
@@ -162,7 +247,7 @@ the pitch.</p>
 musicians tended to erase those and write messages instead. Later trackers
 would add a song message field to avoid abuse of the instrument list.</p>
 
-<p><img src="/img/ft2pattern.png" /></p>
+<p><img src="/img/ft2pattern.png" alt="Annotated pattern image" /></p>
 
 <p>In the above example, we are about to play an E note in octave 5 with
 instrument number 2 on the first channel, and in the second channel we play the
@@ -171,6 +256,9 @@ volume to 0x2C (maximum volume is 0x40, so this is between a half and 3/4ths
 full volume). The second channel is also going to play with effect 0, which is
 an arpeggio, switching between 0, 0x0c or 12, and 0 semitones higher – meaning
 it’s going to rapidly play a sequence of E-6, E-7, E-6, and repeat.</p>
+
+<p>Tracker programs don’t have any knowledge of the musical scale, so they always
+render accidentals as sharps, e.g. C#4 instead of Db4.</p>
 
 <p>XM <em>instruments</em> go beyond .MOD samples in that they include volume and panning
 envelopes, and can have multiple different samples per instrument – so you
@@ -202,11 +290,11 @@ vibrato (vibrating the pitch up and down; 4xx), or ramping the volume up or
 down (Axy). If you watch closely while the song is playing you can try to work
 it out.</p>
 
-<p>I think this is what was most fun about playing .MODs and their ilk back in
-days of yore – you could actually <em>see</em> how a complex piece of music is put
-together, and watch your computer perform it live. I wanted to recreate that
-experience. There are other web-based .MOD players now, like
-<a href="http://mod.haxor.fi">mod.haxor.fi</a>, but I wanted to write my own just for fun.</p>
+<p>The intracacies of how effects work – some affect the song playing as a whole,
+some happen only on the first tick of a row, some only on every tick <em>except</em>
+the first one in a row – could be its own long and not very interesting
+article, so I’ll leave out the details. There are decent but mutually
+contradictory resources online.</p>
 
 <h2 id="real-time-audio-synthesis-in-javascript">Real-time Audio Synthesis in Javascript</h2>
 
@@ -254,43 +342,234 @@ needed to fill the output buffer. With a default samplerate of 44.1kHz, a
 
 <p>Our goal is to fill this buffer up with the sum of each channel’s output
 waveform. Each channel outputs a sample playing at a certain frequency and at a
-certain volume.</p>
+certain volume. And during a tick, the sample frequency and volume is
+constant<sup id="fnref:1"><a href="#fn:1" class="footnote">1</a></sup>.  Between ticks, we recompute the instruments, frequencies,
+volumes, etc, and on ticks which are even multiples of the current <em>speed</em>
+value (3 in the example below), we read a new row of pattern data – notes,
+instruments, effects, etc.</p>
 
-<p><em>insert diagram of ticks/rows laid out in sample buffer</em></p>
+<p>The output is just the sum of the individual channels<sup id="fnref:2"><a href="#fn:2" class="footnote">2</a></sup> for each sample.
+<img src="/img/mod-outputsum.png" alt="Output summed up per tick" /></p>
 
-<p>But wait – our output frequency is given (by
-<code>audioctx.sampleRate</code> as it happens) and we need to play samples at different
-frequencies for each note. How do we do that?</p>
+<p>When we’re done, the output will be laid out something like this:
+<img src="/img/mod-audiobuf.png" alt="Audio buffer layout diagram" /></p>
+
+<p>In this example, a tick is 20ms and our output is playing at 44.1kHz, so a tick
+is 882 samples. Of course, ticks don’t evenly divide sample buffers, and the
+<code>AudioContext</code> specification requires you to use buffer sizes which are powers
+of two and ≥ 1024. So when we render samples to our buffer, we may have to
+play a partial tick at the beginning and end.</p>
+
+<p>So in our audio callback, we figure out how many samples are in a tick, and fit
+them into the output buffer, and add up each channel’s data within a tick. It
+looks like this<sup id="fnref:3"><a href="#fn:3" class="footnote">3</a></sup>:</p>
+
+<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="kd">var</span> <span class="nx">cur_ticksamp</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>  <span class="c1">// Sample index in current tick</span>
+<span class="kd">var</span> <span class="nx">channels</span> <span class="o">=</span> <span class="p">[</span> <span class="p">...</span> <span class="p">];</span>  <span class="c1">// Channel state: sample num, offset, freq, etc</span>
+
+<span class="kd">function</span> <span class="nx">audioCallback</span><span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kd">var</span> <span class="nx">buf_remaining</span> <span class="o">=</span> <span class="nx">e</span><span class="p">.</span><span class="nx">outputBuffer</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span>
+  <span class="kd">var</span> <span class="nx">dataL</span> <span class="o">=</span> <span class="nx">e</span><span class="p">.</span><span class="nx">outputBuffer</span><span class="p">.</span><span class="nx">getChannelData</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+  <span class="kd">var</span> <span class="nx">dataR</span> <span class="o">=</span> <span class="nx">e</span><span class="p">.</span><span class="nx">outputBuffer</span><span class="p">.</span><span class="nx">getChannelData</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+
+  <span class="nx">dataL</span><span class="p">.</span><span class="nx">fill</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>  <span class="c1">// (see footnote 3)</span>
+  <span class="nx">dataR</span><span class="p">.</span><span class="nx">fill</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+
+  <span class="kd">var</span> <span class="nx">f_smp</span> <span class="o">=</span> <span class="nx">audioctx</span><span class="p">.</span><span class="nx">sampleRate</span><span class="p">;</span>  <span class="c1">// our output sample rate</span>
+  <span class="kd">var</span> <span class="nx">ticklen</span> <span class="o">=</span> <span class="mi">0</span><span class="o">|</span><span class="p">(</span><span class="nx">f_smp</span> <span class="o">*</span> <span class="mf">2.5</span> <span class="o">/</span> <span class="nx">xm</span><span class="p">.</span><span class="nx">bpm</span><span class="p">);</span>  <span class="c1">// # samples per tick</span>
+  <span class="kd">var</span> <span class="nx">offset</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+  <span class="k">while</span><span class="p">(</span><span class="nx">buf_remaining</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c1">// tickduration is the number of samples we can produce for this</span>
+    <span class="c1">// tick; either we finish the tick, or we run out of space at the</span>
+    <span class="c1">// end of the buffer</span>
+    <span class="kd">var</span> <span class="nx">tickduration</span> <span class="o">=</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">min</span><span class="p">(</span><span class="nx">buf_remaining</span><span class="p">,</span> <span class="nx">ticklen</span> <span class="o">-</span> <span class="nx">cur_ticksamp</span><span class="p">);</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="nx">cur_ticksamp</span> <span class="o">&gt;=</span> <span class="nx">ticklen</span><span class="p">)</span> <span class="p">{</span>
+      <span class="c1">// Update our channel structures with new song data</span>
+      <span class="nx">nextTick</span><span class="p">();</span>
+      <span class="nx">cur_ticksamp</span> <span class="o">-=</span> <span class="nx">ticklen</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">j</span> <span class="o">&lt;</span> <span class="nx">xm</span><span class="p">.</span><span class="nx">num_channels</span><span class="p">;</span> <span class="nx">j</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+      <span class="c1">// Add this channel&#39;s samples into the dataL/dataR buffers</span>
+      <span class="c1">// starting at &lt;offset&gt; and spanning &lt;tickduration&gt; samples</span>
+      <span class="nx">mixChannelInfoBuf</span><span class="p">(</span><span class="nx">channels</span><span class="p">[</span><span class="nx">j</span><span class="p">],</span> <span class="nx">offset</span><span class="p">,</span> <span class="nx">offset</span> <span class="o">+</span> <span class="nx">tickduration</span><span class="p">,</span>
+                        <span class="nx">dataL</span><span class="p">,</span> <span class="nx">dataR</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="nx">offset</span> <span class="o">+=</span> <span class="nx">tickduration</span><span class="p">;</span>
+    <span class="nx">cur_ticksamp</span> <span class="o">+=</span> <span class="nx">tickduration</span><span class="p">;</span>
+    <span class="nx">buf_remaining</span> <span class="o">-=</span> <span class="nx">tickduration</span><span class="p">;</span>
+  <span class="p">}</span>
+<span class="p">}</span></code></pre></div>
+
+<h2 id="note-frequencies">Note frequencies</h2>
+
+<p>In .MOD derivatives, notes at C-4 (that is, a C on octave 4) are played at a
+samplerate of 8363Hz. Everything is relative to that; an octave higher, for
+instance, would be 16726Hz – twice the frequency. For each semitone up, we
+effectively multiply the frequency by the twelfth root of two. In general, the
+frequency can be computed by <code>8363 * Math.pow(2, (note - 48) / 12.0)</code>. <code>note</code>
+here is the note number in semitones, starting at 0 for C-0 and going up to 95
+for B-7.</p>
+
+<!--  eh, nobody cares
+But in practice, .MOD (and .XM) formats actually use *periods* - the
+reciprocal of frequency, for technical and historical reasons. The various
+effects are designed around period instead of frequency. For example, in the
+.MOD format, portamento linearly changes the period each tick.
+
+The better thing to do is to change frequency (or period) on a logarithmic
+scale, and that is what .XM files do by default[footnote]. We hear frequency on a
+logarithmic scale; using an inverse (period) scale sort of approximates that,
+which is why it was done originally, but it's really no sweat for us to compute
+some exponentials every 20 milliseconds. But for historical reasons, all
+documentation about .XM still refers to "periods" even though they aren't
+really.
+
+footnote: XMs have a compatibility mode where they use an Amiga period table instead of a linear one. I don't even try to implement that here.
+
+-->
+
+<p>To support fine tuning, vibrato, slides and so forth in the XM format, effects
+modify the note “period” which is not a period but 1/16th of a (negative<sup id="fnref:4"><a href="#fn:4" class="footnote">4</a></sup>)
+semitone.  Also, each sample has a coarse and fine tuning offset which are added on when we compute the play frequency.</p>
 
 <h2 id="resampling">Resampling</h2>
 
-<p>Playing a sample recorded at a different frequency from the output frequency is
-a surprisingly nontrivial problem.</p>
+<p><code>mixChannelIntoBuf</code>’s job is to write a sample played at a certain frequency
+onto a buffer which is played at the output frequency, usually 44.1kHz.  It
+turns out that playing a sample recorded at a different frequency from the
+output frequency is a surprisingly nontrivial problem.</p>
 
-<p>TODO:</p>
+<p>From the <a href="https://en.wikipedia.org/wiki/Nyquist%E2%80%93Shannon_sampling_theorem">Nyquist-Shannon
+theorem</a>,
+we know that our original sample only contains frequencies less than or equal
+to the original sample rate. So ideally, when we play it back at the new frequency, the same set of frequencies should be played.</p>
 
-<ul>
-  <li>frequency content, up to nyquist</li>
-  <li>aliasing phenomenon</li>
-  <li>FFT, brick-wall filter, sinc</li>
-  <li>amiga’s approach, artists</li>
-</ul>
+<p>In practice, though, without using a “brick wall” or “sinc” filter, we’re going
+to end up with some spurious harmonics due to the aliasing phenomenon. The only
+way to avoid that requires a convolution as long as the original sample. In
+other words, it’s computationally expensive.</p>
+
+<p>Also, since the original .XM players didn’t do anything fancy, it’s also
+typically unnecessary.</p>
 
 <p>It turns out that if we use advanced resampling techniques to eliminate
-unwanted alias harmonics, many songs (especially “chiptunes” - songs with tiny
-looping square wave or triangle wave samples, to emulate simple vintage sound
-hardware chips) sound pretty bad. The original hardware and software that
-played these either used “zero-order hold” – just output the sample closest to
-the interpolated time – or “first-order hold” – interpolate between the
-surrounding samples.</p>
+unwanted alias harmonics, many songs<sup id="fnref:5"><a href="#fn:5" class="footnote">5</a></sup> sound pretty bad. The original
+hardware and software that played these either used “zero-order hold” – just
+output the sample closest to the interpolated time – or “first-order hold” –
+interpolate between the surrounding samples.</p>
 
 <p>I compromised with a very simple implementation that I think sounds pretty
 good. I use a combination of zero-order hold and a per-channel two-pole
-low-pass filter, which has very low implementation complexity.</p>
+low-pass filter, which has very low implementation complexity. I will leave the
+details for my next post.</p>
 
-<h3 id="follow-up-in-the-next-blog-post">follow up in the next blog post</h3>
-<p>about digital filters and just say we made a IIR low pass filter, will explain
-later</p>
+<p>Either way, we compute the speed at which we proceed through the sample, which
+is the ratio of the playback frequency to the output frequency:</p>
+
+<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="kd">function</span> <span class="nx">UpdateChannelPeriod</span><span class="p">(</span><span class="nx">ch</span><span class="p">,</span> <span class="nx">period</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kd">var</span> <span class="nx">freq</span> <span class="o">=</span> <span class="mi">8363</span> <span class="o">*</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">pow</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="p">(</span><span class="mf">1152.0</span> <span class="o">-</span> <span class="nx">period</span><span class="p">)</span> <span class="o">/</span> <span class="mf">192.0</span><span class="p">);</span>
+  <span class="nx">ch</span><span class="p">.</span><span class="nx">doff</span> <span class="o">=</span> <span class="nx">freq</span> <span class="o">/</span> <span class="nx">f_smp</span><span class="p">;</span>
+<span class="p">}</span></code></pre></div>
+
+<p>The <code>doff</code> variable is the delta offset per sample. If we are playing at
+exactly 44100Hz, then <code>doff</code> is 1, and we are just copying the sample into the
+output.</p>
+
+<p>Here’s what zero-order hold looks like, omitting many details of sample looping
+or ending:</p>
+
+<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="kd">function</span> <span class="nx">mixChannelIntoBuf</span><span class="p">(</span><span class="nx">ch</span><span class="p">,</span> <span class="nx">start</span><span class="p">,</span> <span class="nx">end</span><span class="p">,</span> <span class="nx">dataL</span><span class="p">,</span> <span class="nx">dataR</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kd">var</span> <span class="nx">samp</span> <span class="o">=</span> <span class="nx">ch</span><span class="p">.</span><span class="nx">sample</span><span class="p">;</span>
+  <span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="nx">start</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">end</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c1">// Dumb javascript tricks:</span>
+    <span class="c1">// we use a bitwise OR with 0 to truncate offset to integer</span>
+    <span class="kd">var</span> <span class="nx">s</span> <span class="o">=</span> <span class="nx">samp</span><span class="p">[</span><span class="mi">0</span><span class="o">|</span><span class="nx">ch</span><span class="p">.</span><span class="nx">off</span><span class="p">];</span>
+
+    <span class="nx">ch</span><span class="p">.</span><span class="nx">off</span> <span class="o">+=</span> <span class="nx">ch</span><span class="p">.</span><span class="nx">doff</span><span class="p">;</span>
+    <span class="nx">dataL</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="o">+=</span> <span class="nx">ch</span><span class="p">.</span><span class="nx">volL</span> <span class="o">*</span> <span class="nx">s</span><span class="p">;</span>  <span class="c1">// multiply by left volume</span>
+    <span class="nx">dataR</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="o">+=</span> <span class="nx">ch</span><span class="p">.</span><span class="nx">volR</span> <span class="o">*</span> <span class="nx">s</span><span class="p">;</span>  <span class="c1">// and right volume</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">ch</span><span class="p">.</span><span class="nx">off</span> <span class="o">&gt;=</span> <span class="nx">ch</span><span class="p">.</span><span class="nx">sample</span><span class="p">.</span><span class="nx">length</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">if</span> <span class="p">(</span><span class="nx">ch</span><span class="p">.</span><span class="nx">sample</span><span class="p">.</span><span class="nx">loop</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">ch</span><span class="p">.</span><span class="nx">off</span> <span class="o">-=</span> <span class="nx">ch</span><span class="p">.</span><span class="nx">sample</span><span class="p">.</span><span class="nx">looplen</span><span class="p">;</span>
+      <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+        <span class="k">return</span><span class="p">;</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">}</span></code></pre></div>
+
+<p>In practice I unroll that loop, compute how many samples I can generate before
+the sample ends or loops so I don’t have to test in the inner loop, and also
+unroll short sample loops in memory.</p>
+
+<p>The end result runs fast enough to play without hitches on my phone.</p>
+
+<p>The main problem with zero-order hold is that it produces hard edges between
+samples, and so there are a lot of high pitched hisses and noise. As a result,
+I added an additional low-pass filter to each channel with a cutoff equal to
+half the playback sampling frequency. My next blog post will go into detail.</p>
+
+<h2 id="synchronized-visualizations">Synchronized visualizations</h2>
+
+<p>It might seem reasonable that in order to show what’s happening on the screen
+while you’re hearing it, you need to use a really small buffer so that the
+latency between when we compute a sound buffer and when it plays is minimized.
+The problem with that is on a webpage, a low latency buffer can mean choppy
+audio as the browser might have better things to do than call your javascript
+audio callback within 20 milliseconds. It’s pretty far from a realtime system.</p>
+
+<p>But we actually don’t care about latency at all; there are no external events
+changing the sound in an unpredictable way (other than pausing, which is
+handled separately). The code on this page is using a callback buffer size of
+16384, over 300 milliseconds, and yet the oscilloscopes and patterns are
+updating at roughly the tick rate (~50Hz). How’s that work?</p>
+
+<p>Whenever I finish rendering a tick to the audio buffer, I push a visualization
+state onto a queue, keyed by the current <em>audio time</em> in samples.
+<code>AudioContext</code> has a <code>currentTime</code> attribute, which is the number of seconds
+that audio has been playing since the context was created. On my audio
+callback, I capture this and then add <code>offset / f_smp</code> to the time for each
+tick. And then I push the first few samples of each channel, plus the current
+pattern and current row, onto a queue. My rendering code just compares
+<code>audioctx.currentTime</code> against the head of the queue and renders what comes
+next.</p>
+
+<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="kd">function</span> <span class="nx">redrawScreen</span><span class="p">()</span> <span class="p">{</span>
+  <span class="k">if</span> <span class="p">(</span><span class="nx">audio_events</span><span class="p">.</span><span class="nx">length</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="k">return</span><span class="p">;</span>
+  <span class="kd">var</span> <span class="nx">e</span><span class="p">;</span>
+  <span class="kd">var</span> <span class="nx">t</span> <span class="o">=</span> <span class="nx">audioctx</span><span class="p">.</span><span class="nx">currentTime</span><span class="p">;</span>
+  <span class="k">do</span> <span class="p">{</span>
+    <span class="nx">e</span> <span class="o">=</span> <span class="nx">audio_events</span><span class="p">.</span><span class="nx">shift</span><span class="p">();</span>
+  <span class="p">}</span> <span class="k">while</span><span class="p">(</span><span class="nx">e</span><span class="p">.</span><span class="nx">t</span> <span class="o">&lt;</span> <span class="nx">t</span> <span class="o">&amp;&amp;</span> <span class="nx">audio_events</span><span class="p">.</span><span class="nx">length</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">);</span>
+  <span class="k">if</span> <span class="p">(</span><span class="nx">e</span> <span class="o">==</span> <span class="kc">undefined</span><span class="p">)</span> <span class="k">return</span><span class="p">;</span>
+
+  <span class="c1">// draw VU meters, oscilloscopes, and update pattern position</span>
+  <span class="c1">// using various 2D canvas calls</span>
+<span class="p">}</span></code></pre></div>
+
+<p>The patterns are rendered by calling <code>drawImage</code> on individual letters from
+<a href="/code/jsxm/ft2font.png">the original font image</a> onto an off-screen canvas
+every time a new pattern is to be shown, and then compositing that canvas onto
+the screen above in order to highlight the currently-playing row.</p>
+
+<h2 id="end-result">End result</h2>
+
+<p>The player is also available <a href="/code/jsxm/">here</a> without the accompanying
+article. By the way, you can load arbitrary XMs on the web by using an anchor
+with a link, e.g. http://www.a1k0n.net/code/jsxm/#http://your.host.here/blah.xm
+– but only if the host sets a CORS (<code>Access-Control-Allow-Origin</code>) header.</p>
+
+<p>I think what was most fun about playing .MODs and their ilk back in days of
+yore was that you could actually <em>see</em> how a complex piece of music is put
+together, and watch your computer perform it live. I wanted to recreate that
+experience.  There are other web-based .MOD players now, like
+<a href="http://mod.haxor.fi">mod.haxor.fi</a>, but I wanted to write my own just for fun.</p>
+
+<p>It was fun. Though it isn’t complete effects-wise, I couldn’t be happier with
+how it turned out.</p>
+
+<h3 id="footnotes">Footnotes</h3>
 
 <!--
  - background
@@ -323,6 +602,25 @@ later</p>
    - cheap IIR LPF
 
 -->
+<div class="footnotes">
+  <ol>
+    <li id="fn:1">
+      <p>The one exception being when the sample ends during the tick. <a href="#fnref:1" class="reversefootnote">&#8617;</a></p>
+    </li>
+    <li id="fn:2">
+      <p>I’ve omitted the details of stereo, but we sum up the left and right channels independently. Panning is just a different volume on the left channel vs. the right channel. <a href="#fnref:2" class="reversefootnote">&#8617;</a></p>
+    </li>
+    <li id="fn:3">
+      <p><code>Array.fill()</code> is not available in all browsers, so in practice I use a for loop to clear the buffer. And the buffer is <em>not</em> already cleared when it is passed to us; it may actually contain data from the previous callback. <a href="#fnref:3" class="reversefootnote">&#8617;</a></p>
+    </li>
+    <li id="fn:4">
+      <p>For historical reasons I won’t go into here, .MOD effects modified the sample <em>period</em>, or inverse frequency, as making linear changes to it sounds more linear to the ear; but really, it’s an approximation of the logarithmic scale the human ear actually hears. A log scale is used in .XM. So when we increment period in XM, we are stepping down 1/16th of a semitone. <a href="#fnref:4" class="reversefootnote">&#8617;</a></p>
+    </li>
+    <li id="fn:5">
+      <p>Especially “chiptunes” – songs with tiny looping square wave or triangle wave samples, to emulate simple vintage sound hardware chips. <a href="#fnref:5" class="reversefootnote">&#8617;</a></p>
+    </li>
+  </ol>
+</div>
 
 </article>
 
