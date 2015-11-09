@@ -17,14 +17,41 @@ headhtml: |
   #filelist a { color: #fff; }
 
   .playercontainer {
-    background:#000; overflow: auto;
+    background:#000;
   }
+
+  .hscroll {
+    overflow: auto;
+    margin-bottom: 14px;
+  }
+
+  .hscroll::-webkit-scrollbar {
+      -webkit-appearance: none;
+  }
+
+  .hscroll::-webkit-scrollbar:horizontal {
+      height: 11px;
+  }
+
+  .hscroll::-webkit-scrollbar-thumb {
+      border-radius: 2px;
+      border: 1px solid #93C3E9; /* should match background, can't be transparent */
+      background-color: #A0D4FD;
+  }
+
+  .hscroll::-webkit-scrollbar-track { 
+      background-color: #333; 
+      border-radius: 8px; 
+  } 
+
   </style>
 ---
 <div class="playercontainer">
   <div> <canvas class="centered" id="title" width="640" height="22"></canvas> </div>
-  <div> <canvas class="centered" id="vu" width="224" height="64"></canvas> </div>
-  <div> <canvas class="centered" id="gfxpattern" width="640" height="200"></canvas> </div>
+  <div class="hscroll">
+   <div> <canvas class="centered" id="vu" width="224" height="64"></canvas> </div>
+   <div> <canvas class="centered" id="gfxpattern" width="640" height="200"></canvas> </div>
+  </div>
   <div id="instruments"></div>
   <div>
     <p style="text-align: center">
@@ -177,9 +204,20 @@ needed to fill the output buffer. With a default samplerate of 44.1kHz, a
 
 Our goal is to fill this buffer up with the sum of each channel's output
 waveform. Each channel outputs a sample playing at a certain frequency and at a
-certain volume.
+certain volume. And during a tick, the sample frequency and volume is
+constant[^1].  Between ticks, we recompute the instruments, frequencies,
+volumes, etc, and on ticks which are even multiples of the current *speed*
+value (3 in the example below), we read a new row of pattern data -- notes,
+instruments, effects, etc.
 
-*insert diagram of ticks/rows laid out in sample buffer*
+When we're done, the output will be laid out something like this:
+![Audio buffer layout diagram](/img/mod-audiobuf.png)
+
+In this example, a tick is 20ms and our output is playing at 44.1kHz, so a tick
+is 882 samples. Of course, ticks don't evenly divide sample buffers ,and the
+`AudioContext` specification requires you to use buffer sizes which are powers
+of two and &ge; 1024. So when we render samples to our buffer, we may have to
+play a partial tick at the beginning and end.
 
 But wait -- our output frequency is given (by
 `audioctx.sampleRate` as it happens) and we need to play samples at different
@@ -214,6 +252,9 @@ about digital filters and just say we made a IIR low pass filter, will explain
 later
 
 
+### Footnotes
+
+[^1]: The one exception being when the sample ends during the tick.
 
 <!--
  - background
