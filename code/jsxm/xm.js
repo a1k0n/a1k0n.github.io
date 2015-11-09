@@ -243,11 +243,13 @@ function RedrawScreen() {
 
       // oscilloscope
       var scope = scopes[j];
-      ctx.beginPath();
-      for (var k = 0; k < _scope_width; k++) {
-        ctx.lineTo(x + 1 + k, 32 - 16 * scope[k]);
+      if (scope != undefined) {
+        ctx.beginPath();
+        for (var k = 0; k < _scope_width; k++) {
+          ctx.lineTo(x + 1 + k, 32 - 16 * scope[k]);
+        }
+        ctx.stroke();
       }
-      ctx.stroke();
     }
   }
 
