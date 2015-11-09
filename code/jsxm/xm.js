@@ -897,9 +897,7 @@ function LoadXM(arrayBuf) {
       'number': i,
     };
     if (nsamp > 0) {
-      // return a slice so we have a fresh copy and don't retain pointers to
-      // the original xm file arraybuf forever
-      var samplemap = new Uint8Array(arrayBuf, idx+33, 96).slice();
+      var samplemap = new Uint8Array(arrayBuf, idx+33, 96);
 
       var env_nvol = dv.getUint8(idx+225);
       var env_vol_type = dv.getUint8(idx+233);
