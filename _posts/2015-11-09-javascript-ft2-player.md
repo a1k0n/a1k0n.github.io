@@ -1,7 +1,6 @@
 ---
 title: Playing Fasttracker 2 .XM files in Javascript
 layout: post
-hide: true
 headhtml: |
   <script src="/code/jsxm/xm.js"></script>
   <script src="/code/jsxm/xmeffects.js"></script>
@@ -61,62 +60,6 @@ headhtml: |
   </div>
   <div style="display: none" id='filelist'></div>
 </div>
-
-<!-- script to make the output sum diagram; discard
-<div>
-<canvas id="tickdiagram" width="600" height="300"></canvas>
-<button onclick="drawtickdiagram();">draw tick diagram</button>
-<script>
-drawnticks = 6;
-tickwidth = 59+2;
-tickheight = 20;
-function drawtickdiagram() {
-  var ctx = document.getElementById('tickdiagram').getContext('2d');
-  ctx.fillStyle = '#fff';
-  ctx.fillRect(0, 0, 600, 300);
-  for (var i = 0; i < drawnticks; i++) {
-    ctx.strokeStyle = '#000';
-    ctx.lineWidth = 1.0;
-    var x0 = i*(tickwidth + 4) + 0.5;
-    var sumbuf = new Float32Array(_scope_width);
-    var y0 = 12.5;
-    ctx.font = "18px serif";
-    ctx.fillStyle = '#000';
-    ctx.fillText("tick " + i, x0 + 10, y0);
-    for (var j = 0; j < xm.nchan; j++) {
-      var y0 = 20 + 1 + j*(tickheight + 5) + 0.5;
-      var s = paused_events[i].scopes[j];
-      ctx.beginPath();
-      ctx.rect(x0, y0, tickwidth, tickheight);
-      ctx.stroke();
-      ctx.beginPath();
-      for (var k = 0; k < _scope_width; k++) {
-        sumbuf[k] += s[k];
-        var y = Math.max(0, Math.min(tickheight, tickheight*0.5 + s[k] * 4));
-        ctx.lineTo(x0+k+1, y0 + y);
-      }
-      ctx.stroke();
-    }
-    var y0 = 20 + 12 + xm.nchan*(tickheight + 5) + 0.5;
-    ctx.beginPath();
-    ctx.rect(x0, y0, tickwidth, tickheight);
-    for (var k = 0; k < _scope_width; k++) {
-      var y = Math.max(0, Math.min(tickheight, tickheight*0.5 + sumbuf[k] * 4));
-      ctx.lineTo(x0+k+1, y0 + y);
-    }
-    ctx.stroke();
-  }
-  var x0 = drawnticks*(tickwidth + 4) + 0.5;
-  for (var j = 0; j < xm.nchan; j++) {
-    var y0 = 20 + 1 + j*(tickheight + 5) + 0.5;
-    ctx.fillText("channel " + j, x0, y0 + 16);
-  }
-  var y0 = 20 + 12 + xm.nchan*(tickheight + 5) + 0.5;
-  ctx.fillText("output", x0, y0 + 16);
-}
-</script>
-</div>
--->
 
 ## What is this thing?
 
@@ -266,9 +209,9 @@ needed to fill the output buffer. With a default samplerate of 44.1kHz, a
 Our goal is to fill this buffer up with the sum of each channel's output
 waveform. Each channel outputs a sample playing at a certain frequency and at a
 certain volume. And during a tick, the sample frequency and volume is
-constant[^1].  Between ticks, we recompute the instruments, frequencies,
-volumes, etc, and on ticks which are even multiples of the current *speed*
-value (3 in the example below), we read a new row of pattern data -- notes,
+constant[^1].  Between ticks, we recompute the channel frequencies, volumes and
+envelopes; and on ticks which are even multiples of the current *speed* value
+(3 in the example below), we read a new row of pattern data -- notes,
 instruments, effects, etc.
 
 [^1]: The one exception being when the sample ends during the tick.
@@ -342,27 +285,10 @@ frequency can be computed by `8363 * Math.pow(2, (note - 48) / 12.0)`. `note`
 here is the note number in semitones, starting at 0 for C-0 and going up to 95
 for B-7.
 
-<!--  eh, nobody cares
-But in practice, .MOD (and .XM) formats actually use *periods* - the
-reciprocal of frequency, for technical and historical reasons. The various
-effects are designed around period instead of frequency. For example, in the
-.MOD format, portamento linearly changes the period each tick.
-
-The better thing to do is to change frequency (or period) on a logarithmic
-scale, and that is what .XM files do by default[footnote]. We hear frequency on a
-logarithmic scale; using an inverse (period) scale sort of approximates that,
-which is why it was done originally, but it's really no sweat for us to compute
-some exponentials every 20 milliseconds. But for historical reasons, all
-documentation about .XM still refers to "periods" even though they aren't
-really.
-
-footnote: XMs have a compatibility mode where they use an Amiga period table instead of a linear one. I don't even try to implement that here.
-
--->
-
 To support fine tuning, vibrato, slides and so forth in the XM format, effects
 modify the note "period" which is not a period but 1/16th of a (negative[^4])
-semitone.  Also, each sample has a coarse and fine tuning offset which are added on when we compute the play frequency.
+semitone.  Also, each sample has a coarse and fine tuning offset which are
+added on when we compute the play frequency.
 
 [^4]: For historical reasons I won't go into here, .MOD effects modified the sample *period*, or inverse frequency, as making linear changes to it sounds more linear to the ear; but really, it's an approximation of the logarithmic scale the human ear actually hears. A log scale is used in .XM. So when we increment period in XM, we are stepping down 1/16th of a semitone.
 
@@ -376,7 +302,8 @@ output frequency is a surprisingly nontrivial problem.
 From the [Nyquist-Shannon
 theorem](https://en.wikipedia.org/wiki/Nyquist%E2%80%93Shannon_sampling_theorem),
 we know that our original sample only contains frequencies less than or equal
-to the original sample rate. So ideally, when we play it back at the new frequency, the same set of frequencies should be played.
+to the original sample rate. So ideally, when we play it back at the new
+frequency, the same set of frequencies should be played.
 
 In practice, though, without using a "brick wall" or "sinc" filter, we're going
 to end up with some spurious harmonics due to the aliasing phenomenon. The only
@@ -461,7 +388,7 @@ But we actually don't care about latency at all; there are no external events
 changing the sound in an unpredictable way (other than pausing, which is
 handled separately). The code on this page is using a callback buffer size of
 16384, over 300 milliseconds, and yet the oscilloscopes and patterns are
-updating at roughly the tick rate (~50Hz). How's that work?
+updating at roughly the tick rate (~50Hz). How does that work?
 
 Whenever I finish rendering a tick to the audio buffer, I push a visualization
 state onto a queue, keyed by the current *audio time* in samples.

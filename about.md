@@ -11,6 +11,7 @@ I co-founded [Guild Software](https://vendetta-online.com/) long ago, and have
 since worked at Yahoo!, Google, and Spotify.  Today I'm at a startup which is
 in stealth mode and am not considering other opportunities.
 
+Email: [andy@a1k0n.net](mailto:andy@a1k0n.net)<br>
 Github: [github.com/a1k0n](https://www.github.com/a1k0n/)<br>
 Twitter: [@a1k0n](http://twitter.com/a1k0n/)
 
