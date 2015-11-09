@@ -12,7 +12,7 @@
     <link rel="alternate" type="application/rss+xml" title="RSS Feed for a1k0n.net" href="/feed.xml" />
 
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="/css/pixyll.css?201511082232" type="text/css">
+    <link rel="stylesheet" href="/css/pixyll.css?201511082304" type="text/css">
 
     <!-- Fonts -->
     <link href='//fonts.googleapis.com/css?family=Merriweather:900,900italic,300,300italic' rel='stylesheet' type='text/css'>
@@ -139,62 +139,6 @@
   </div>
   <div style="display: none" id="filelist"></div>
 </div>
-
-<!-- script to make the output sum diagram; discard
-<div>
-<canvas id="tickdiagram" width="600" height="300"></canvas>
-<button onclick="drawtickdiagram();">draw tick diagram</button>
-<script>
-drawnticks = 6;
-tickwidth = 59+2;
-tickheight = 20;
-function drawtickdiagram() {
-  var ctx = document.getElementById('tickdiagram').getContext('2d');
-  ctx.fillStyle = '#fff';
-  ctx.fillRect(0, 0, 600, 300);
-  for (var i = 0; i < drawnticks; i++) {
-    ctx.strokeStyle = '#000';
-    ctx.lineWidth = 1.0;
-    var x0 = i*(tickwidth + 4) + 0.5;
-    var sumbuf = new Float32Array(_scope_width);
-    var y0 = 12.5;
-    ctx.font = "18px serif";
-    ctx.fillStyle = '#000';
-    ctx.fillText("tick " + i, x0 + 10, y0);
-    for (var j = 0; j < xm.nchan; j++) {
-      var y0 = 20 + 1 + j*(tickheight + 5) + 0.5;
-      var s = paused_events[i].scopes[j];
-      ctx.beginPath();
-      ctx.rect(x0, y0, tickwidth, tickheight);
-      ctx.stroke();
-      ctx.beginPath();
-      for (var k = 0; k < _scope_width; k++) {
-        sumbuf[k] += s[k];
-        var y = Math.max(0, Math.min(tickheight, tickheight*0.5 + s[k] * 4));
-        ctx.lineTo(x0+k+1, y0 + y);
-      }
-      ctx.stroke();
-    }
-    var y0 = 20 + 12 + xm.nchan*(tickheight + 5) + 0.5;
-    ctx.beginPath();
-    ctx.rect(x0, y0, tickwidth, tickheight);
-    for (var k = 0; k < _scope_width; k++) {
-      var y = Math.max(0, Math.min(tickheight, tickheight*0.5 + sumbuf[k] * 4));
-      ctx.lineTo(x0+k+1, y0 + y);
-    }
-    ctx.stroke();
-  }
-  var x0 = drawnticks*(tickwidth + 4) + 0.5;
-  for (var j = 0; j < xm.nchan; j++) {
-    var y0 = 20 + 1 + j*(tickheight + 5) + 0.5;
-    ctx.fillText("channel " + j, x0, y0 + 16);
-  }
-  var y0 = 20 + 12 + xm.nchan*(tickheight + 5) + 0.5;
-  ctx.fillText("output", x0, y0 + 16);
-}
-</script>
-</div>
--->
 
 <h2 id="what-is-this-thing">What is this thing?</h2>
 
@@ -343,9 +287,9 @@ needed to fill the output buffer. With a default samplerate of 44.1kHz, a
 <p>Our goal is to fill this buffer up with the sum of each channel’s output
 waveform. Each channel outputs a sample playing at a certain frequency and at a
 certain volume. And during a tick, the sample frequency and volume is
-constant<sup id="fnref:1"><a href="#fn:1" class="footnote">1</a></sup>.  Between ticks, we recompute the instruments, frequencies,
-volumes, etc, and on ticks which are even multiples of the current <em>speed</em>
-value (3 in the example below), we read a new row of pattern data – notes,
+constant<sup id="fnref:1"><a href="#fn:1" class="footnote">1</a></sup>.  Between ticks, we recompute the channel frequencies, volumes and
+envelopes; and on ticks which are even multiples of the current <em>speed</em> value
+(3 in the example below), we read a new row of pattern data – notes,
 instruments, effects, etc.</p>
 
 <p>The output is just the sum of the individual channels<sup id="fnref:2"><a href="#fn:2" class="footnote">2</a></sup> for each sample.
@@ -411,27 +355,10 @@ frequency can be computed by <code>8363 * Math.pow(2, (note - 48) / 12.0)</code>
 here is the note number in semitones, starting at 0 for C-0 and going up to 95
 for B-7.</p>
 
-<!--  eh, nobody cares
-But in practice, .MOD (and .XM) formats actually use *periods* - the
-reciprocal of frequency, for technical and historical reasons. The various
-effects are designed around period instead of frequency. For example, in the
-.MOD format, portamento linearly changes the period each tick.
-
-The better thing to do is to change frequency (or period) on a logarithmic
-scale, and that is what .XM files do by default[footnote]. We hear frequency on a
-logarithmic scale; using an inverse (period) scale sort of approximates that,
-which is why it was done originally, but it's really no sweat for us to compute
-some exponentials every 20 milliseconds. But for historical reasons, all
-documentation about .XM still refers to "periods" even though they aren't
-really.
-
-footnote: XMs have a compatibility mode where they use an Amiga period table instead of a linear one. I don't even try to implement that here.
-
--->
-
 <p>To support fine tuning, vibrato, slides and so forth in the XM format, effects
 modify the note “period” which is not a period but 1/16th of a (negative<sup id="fnref:4"><a href="#fn:4" class="footnote">4</a></sup>)
-semitone.  Also, each sample has a coarse and fine tuning offset which are added on when we compute the play frequency.</p>
+semitone.  Also, each sample has a coarse and fine tuning offset which are
+added on when we compute the play frequency.</p>
 
 <h2 id="resampling">Resampling</h2>
 
@@ -443,7 +370,8 @@ output frequency is a surprisingly nontrivial problem.</p>
 <p>From the <a href="https://en.wikipedia.org/wiki/Nyquist%E2%80%93Shannon_sampling_theorem">Nyquist-Shannon
 theorem</a>,
 we know that our original sample only contains frequencies less than or equal
-to the original sample rate. So ideally, when we play it back at the new frequency, the same set of frequencies should be played.</p>
+to the original sample rate. So ideally, when we play it back at the new
+frequency, the same set of frequencies should be played.</p>
 
 <p>In practice, though, without using a “brick wall” or “sinc” filter, we’re going
 to end up with some spurious harmonics due to the aliasing phenomenon. The only
@@ -523,7 +451,7 @@ audio callback within 20 milliseconds. It’s pretty far from a realtime system.
 changing the sound in an unpredictable way (other than pausing, which is
 handled separately). The code on this page is using a callback buffer size of
 16384, over 300 milliseconds, and yet the oscilloscopes and patterns are
-updating at roughly the tick rate (~50Hz). How’s that work?</p>
+updating at roughly the tick rate (~50Hz). How does that work?</p>
 
 <p>Whenever I finish rendering a tick to the audio buffer, I push a visualization
 state onto a queue, keyed by the current <em>audio time</em> in samples.

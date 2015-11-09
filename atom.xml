@@ -9,6 +9,439 @@
     
     
     
+      <item>
+        <title>Playing Fasttracker 2 .XM files in Javascript</title>
+        <description>&lt;div class=&quot;playercontainer&quot;&gt;
+  &lt;div&gt; &lt;canvas class=&quot;centered&quot; id=&quot;title&quot; width=&quot;640&quot; height=&quot;22&quot;&gt;&lt;/canvas&gt; &lt;/div&gt;
+  &lt;div class=&quot;hscroll&quot;&gt;
+   &lt;div&gt; &lt;canvas class=&quot;centered&quot; id=&quot;vu&quot; width=&quot;224&quot; height=&quot;64&quot;&gt;&lt;/canvas&gt; &lt;/div&gt;
+   &lt;div&gt; &lt;canvas class=&quot;centered&quot; id=&quot;gfxpattern&quot; width=&quot;640&quot; height=&quot;200&quot;&gt;&lt;/canvas&gt; &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div id=&quot;instruments&quot;&gt;&lt;/div&gt;
+  &lt;div&gt;
+    &lt;p style=&quot;text-align: center&quot;&gt;
+      &lt;button id=&quot;playpause&quot; disabled=&quot;true&quot; style=&quot;width: 100px&quot;&gt;Play&lt;/button&gt;
+      &lt;button id=&quot;loadbutton&quot; style=&quot;width: 100px&quot;&gt;Load&lt;/button&gt;
+    &lt;/p&gt;
+  &lt;/div&gt;
+  &lt;div style=&quot;display: none&quot; id=&quot;filelist&quot;&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;h2 id=&quot;what-is-this-thing&quot;&gt;What is this thing?&lt;/h2&gt;
+
+&lt;p&gt;Hit the play button above and it will play music; specifically, music composed
+with (or at least, compatible with) a program released in 1994 called
+FastTracker 2; this is a Javascript homage I wrote in a fit of nostalgia. The
+&lt;a href=&quot;https://github.com/a1k0n/jsxm/&quot;&gt;source code is on GitHub&lt;/a&gt; if you’d like to
+check it out.&lt;/p&gt;
+
+&lt;p&gt;FastTracker 2 looks like this:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/img/ft2.png&quot; alt=&quot;FastTracker II screenshot&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;I using the original font to render a pastiche of the FT2 interface above.&lt;/p&gt;
+
+&lt;h2 id=&quot;xm-files&quot;&gt;.XM files&lt;/h2&gt;
+
+&lt;p&gt;The ubiquitous .MOD music file format originated on the Commodore Amiga in the
+late 80s. It was more or less designed around the “Paula” chip inside the Amiga
+which plays four 8-bit PCM channels simultaneously. It is fairly amazing what
+artists are able to accomplish in just four voices; I’ve converted a few of
+Lizardking’s old four-channel .MODs to .XM format so they can be played in the
+player above; try them out with the load button above.&lt;/p&gt;
+
+&lt;p&gt;FastTracker 2’s .XM (eXtended Module) format was created as a multi-channel
+extension to .MOD in the 90s; it was written by PC demo group
+&lt;a href=&quot;http://www.pouet.net/groups.php?which=161&quot;&gt;Triton&lt;/a&gt;. There were other
+contemporaneous multi-channel MOD-type music trackers, like ScreamTracker 3’s
+.S3M and later Impulse Tracker’s .IT. Nearly all PC demos and many games in the
+90s and early 2000s played music in one of these formats.&lt;/p&gt;
+
+&lt;p&gt;Underneath the hood, it’s several (14 in the case of the default song that
+comes up here) &lt;em&gt;channels&lt;/em&gt; independently playing &lt;em&gt;samples&lt;/em&gt; at various
+pitches and volume levels, controlled by the &lt;em&gt;pattern&lt;/em&gt; which is what you
+see scrolling above.&lt;/p&gt;
+
+&lt;p&gt;Patterns are a lot like assembly language for playing music, complete with a
+slew of hexadecimal numbers and opaque syntax, except they are laid out like a
+spreadsheet rather than a single column of instructions. Each cell contains
+notations for playing or releasing a note with a certain instrument, optionally
+modifying the volume, panning, or pitch with &lt;em&gt;effects&lt;/em&gt;.&lt;/p&gt;
+
+&lt;p&gt;Every sound that is played is one of the &lt;em&gt;samples&lt;/em&gt;, shown at the top of this
+page as little waveforms and numbers in the table below the pattern. The idea
+is that the musician would record an instrument, like a piano or a bass, at a
+certain note, and then we play them back at higher or lower speeds to change
+the pitch.&lt;/p&gt;
+
+&lt;p&gt;Theoretically each sample has a name like “piano” or “bass”, but in practice,
+musicians tended to erase those and write messages instead. Later trackers
+would add a song message field to avoid abuse of the instrument list.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/img/ft2pattern.png&quot; alt=&quot;Annotated pattern image&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;In the above example, we are about to play an E note in octave 5 with
+instrument number 2 on the first channel, and in the second channel we play the
+same note an octave higher with the same instrument, except we also lower the
+volume to 0x2C (maximum volume is 0x40, so this is between a half and 3/4ths
+full volume). The second channel is also going to play with effect 0, which is
+an arpeggio, switching between 0, 0x0c or 12, and 0 semitones higher – meaning
+it’s going to rapidly play a sequence of E-6, E-7, E-6, and repeat.&lt;/p&gt;
+
+&lt;p&gt;Tracker programs don’t have any knowledge of the musical scale, so they always
+render accidentals as sharps, e.g. C#4 instead of Db4.&lt;/p&gt;
+
+&lt;p&gt;XM &lt;em&gt;instruments&lt;/em&gt; go beyond .MOD samples in that they include volume and panning
+envelopes, and can have multiple different samples per instrument – so you
+could record various piano notes and use a recording closest to the note you’re
+playing rather than stretching a sample several octaves, which sounds bad. I
+only render the first sample per instrument in the table above though.&lt;/p&gt;
+
+&lt;p&gt;In .MOD-derived formats, each row of pattern data is played at a certain rate
+controlled by the &lt;em&gt;speed&lt;/em&gt; and &lt;em&gt;BPM&lt;/em&gt; which have a sort of tangential
+relationship to the terms you may be familiar with. &lt;em&gt;speed&lt;/em&gt; controls the row
+speed in &lt;em&gt;ticks&lt;/em&gt;, and &lt;em&gt;BPM&lt;/em&gt; controls how long &lt;em&gt;ticks&lt;/em&gt; are.  A &lt;em&gt;tick&lt;/em&gt; is defined
+as 2500/&lt;em&gt;BPM&lt;/em&gt; milliseconds.&lt;/p&gt;
+
+&lt;p&gt;Typical values are &lt;em&gt;BPM&lt;/em&gt;=125 and &lt;em&gt;speed&lt;/em&gt;=6, corresponding to 2500/125 = 20ms
+per tick, or 50 ticks/second; and 50/6 = 8.333 rows per second. If we assume
+the downbeat happens every four rows then it works out to 125 beats per minute.
+But if &lt;em&gt;speed&lt;/em&gt; is 5 then it’s 150 beats per minute, so we can’t really take the
+terms at face value.&lt;/p&gt;
+
+&lt;p&gt;Each &lt;em&gt;tick&lt;/em&gt; we process &lt;em&gt;effects&lt;/em&gt; – modifications to the volume or pitch of a
+note. Effects are represented by three hexadecimal digits: the effect type
+(first digit) and parameter (second two digits). In XM the effect type goes
+beyond the hex digits and goes all the way from 0-9 and A-Z.&lt;/p&gt;
+
+&lt;p&gt;Examples include arpeggio (switching between three notes really fast; effect
+047 plays a major chord), portamento (sliding from one note to another, like a
+trombone does; effect 1xx slides up 2xx down, and 3xx to a specific note),
+vibrato (vibrating the pitch up and down; 4xx), or ramping the volume up or
+down (Axy). If you watch closely while the song is playing you can try to work
+it out.&lt;/p&gt;
+
+&lt;p&gt;The intracacies of how effects work – some affect the song playing as a whole,
+some happen only on the first tick of a row, some only on every tick &lt;em&gt;except&lt;/em&gt;
+the first one in a row – could be its own long and not very interesting
+article, so I’ll leave out the details. There are decent but mutually
+contradictory resources online.&lt;/p&gt;
+
+&lt;h2 id=&quot;real-time-audio-synthesis-in-javascript&quot;&gt;Real-time Audio Synthesis in Javascript&lt;/h2&gt;
+
+&lt;p&gt;The &lt;code&gt;webkitAudioContext&lt;/code&gt; element was introduced to HTML a while back, and is
+now available in the standard as &lt;code&gt;AudioContext&lt;/code&gt;. The API is fairly flexible, and
+one of the things you can do with it is get a Javascript callback which writes
+samples more or less directly to the output device, just like we used to do
+with DMA loop interrupts back in the day. It’s called &lt;code&gt;createScriptProcessor&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;You can be up and running making all kinds of noise in a jiffy:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-js&quot; data-lang=&quot;js&quot;&gt;&lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;InitAudio&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;c1&quot;&gt;// Create an AudioContext, falling back to &lt;/span&gt;
+  &lt;span class=&quot;c1&quot;&gt;// webkitAudioContext (e.g., for Safari)&lt;/span&gt;
+  &lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;audioContext&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;window&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;AudioContext&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;||&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;window&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;webkitAudioContext&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+  &lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;audioctx&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;audioContext&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+
+  &lt;span class=&quot;c1&quot;&gt;// Create a &amp;quot;gain node&amp;quot; which will just multiply everything input&lt;/span&gt;
+  &lt;span class=&quot;c1&quot;&gt;//  to it by some constant; this gives us a volume control.&lt;/span&gt;
+  &lt;span class=&quot;nx&quot;&gt;gainNode&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;audioctx&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;createGain&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+  &lt;span class=&quot;nx&quot;&gt;gainNode&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;gain&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;value&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;0.1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;  &lt;span class=&quot;c1&quot;&gt;// master volume&lt;/span&gt;
+
+  &lt;span class=&quot;c1&quot;&gt;// Create a script processor node with 0 input channels,&lt;/span&gt;
+  &lt;span class=&quot;c1&quot;&gt;// 2 output channels, and a 4096-sample buffer size&lt;/span&gt;
+  &lt;span class=&quot;nx&quot;&gt;jsNode&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;audioctx&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;createScriptProcessor&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;4096&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+  &lt;span class=&quot;nx&quot;&gt;jsNode&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;onaudioprocess&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;buflen&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;e&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;outputBuffer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;length&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;dataL&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;e&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;outputBuffer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;getChannelData&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;dataR&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;e&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;outputBuffer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;getChannelData&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;// dataL and dataR are Float32Arrays; fill them with&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;// samples, and the framework will play them!&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;
+
+  &lt;span class=&quot;c1&quot;&gt;// Now, form a pipeline where our script feeds samples to the&lt;/span&gt;
+  &lt;span class=&quot;c1&quot;&gt;// gain node, and the gain node writes samples to the&lt;/span&gt;
+  &lt;span class=&quot;c1&quot;&gt;// &amp;quot;destination&amp;quot; which actually makes noise.&lt;/span&gt;
+  &lt;span class=&quot;nx&quot;&gt;jsNode&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;connect&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;gainNode&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+  &lt;span class=&quot;nx&quot;&gt;gainNode&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;connect&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;audioctx&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;destination&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Your &lt;code&gt;onaudioprocess&lt;/code&gt; function will be called back whenever new samples are
+needed to fill the output buffer. With a default samplerate of 44.1kHz, a
+4096-sample buffer will expire, and thus your callback will be called, every
+~92 milliseconds.&lt;/p&gt;
+
+&lt;p&gt;Our goal is to fill this buffer up with the sum of each channel’s output
+waveform. Each channel outputs a sample playing at a certain frequency and at a
+certain volume. And during a tick, the sample frequency and volume is
+constant&lt;sup id=&quot;fnref:1&quot;&gt;&lt;a href=&quot;#fn:1&quot; class=&quot;footnote&quot;&gt;1&lt;/a&gt;&lt;/sup&gt;.  Between ticks, we recompute the channel frequencies, volumes and
+envelopes; and on ticks which are even multiples of the current &lt;em&gt;speed&lt;/em&gt; value
+(3 in the example below), we read a new row of pattern data – notes,
+instruments, effects, etc.&lt;/p&gt;
+
+&lt;p&gt;The output is just the sum of the individual channels&lt;sup id=&quot;fnref:2&quot;&gt;&lt;a href=&quot;#fn:2&quot; class=&quot;footnote&quot;&gt;2&lt;/a&gt;&lt;/sup&gt; for each sample.
+&lt;img src=&quot;/img/mod-outputsum.png&quot; alt=&quot;Output summed up per tick&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;When we’re done, the output will be laid out something like this:
+&lt;img src=&quot;/img/mod-audiobuf.png&quot; alt=&quot;Audio buffer layout diagram&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;In this example, a tick is 20ms and our output is playing at 44.1kHz, so a tick
+is 882 samples. Of course, ticks don’t evenly divide sample buffers, and the
+&lt;code&gt;AudioContext&lt;/code&gt; specification requires you to use buffer sizes which are powers
+of two and ≥ 1024. So when we render samples to our buffer, we may have to
+play a partial tick at the beginning and end.&lt;/p&gt;
+
+&lt;p&gt;So in our audio callback, we figure out how many samples are in a tick, and fit
+them into the output buffer, and add up each channel’s data within a tick. It
+looks like this&lt;sup id=&quot;fnref:3&quot;&gt;&lt;a href=&quot;#fn:3&quot; class=&quot;footnote&quot;&gt;3&lt;/a&gt;&lt;/sup&gt;:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-js&quot; data-lang=&quot;js&quot;&gt;&lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;cur_ticksamp&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;  &lt;span class=&quot;c1&quot;&gt;// Sample index in current tick&lt;/span&gt;
+&lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;channels&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;...&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;];&lt;/span&gt;  &lt;span class=&quot;c1&quot;&gt;// Channel state: sample num, offset, freq, etc&lt;/span&gt;
+
+&lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;audioCallback&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;e&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;buf_remaining&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;e&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;outputBuffer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;length&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+  &lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;dataL&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;e&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;outputBuffer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;getChannelData&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+  &lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;dataR&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;e&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;outputBuffer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;getChannelData&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+  &lt;span class=&quot;nx&quot;&gt;dataL&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;fill&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;  &lt;span class=&quot;c1&quot;&gt;// (see footnote 3)&lt;/span&gt;
+  &lt;span class=&quot;nx&quot;&gt;dataR&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;fill&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+  &lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;f_smp&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;audioctx&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;sampleRate&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;  &lt;span class=&quot;c1&quot;&gt;// our output sample rate&lt;/span&gt;
+  &lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;ticklen&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;f_smp&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;2.5&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;/&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;xm&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;bpm&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;  &lt;span class=&quot;c1&quot;&gt;// # samples per tick&lt;/span&gt;
+  &lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;offset&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;while&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;buf_remaining&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;// tickduration is the number of samples we can produce for this&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;// tick; either we finish the tick, or we run out of space at the&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;// end of the buffer&lt;/span&gt;
+    &lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;tickduration&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;Math&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;min&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;buf_remaining&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;ticklen&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;cur_ticksamp&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;cur_ticksamp&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;ticklen&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+      &lt;span class=&quot;c1&quot;&gt;// Update our channel structures with new song data&lt;/span&gt;
+      &lt;span class=&quot;nx&quot;&gt;nextTick&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+      &lt;span class=&quot;nx&quot;&gt;cur_ticksamp&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;ticklen&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;j&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;j&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;xm&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;num_channels&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;j&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;++&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+      &lt;span class=&quot;c1&quot;&gt;// Add this channel&amp;#39;s samples into the dataL/dataR buffers&lt;/span&gt;
+      &lt;span class=&quot;c1&quot;&gt;// starting at &amp;lt;offset&amp;gt; and spanning &amp;lt;tickduration&amp;gt; samples&lt;/span&gt;
+      &lt;span class=&quot;nx&quot;&gt;mixChannelInfoBuf&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;channels&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;j&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;],&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;offset&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;offset&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;tickduration&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                        &lt;span class=&quot;nx&quot;&gt;dataL&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;dataR&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+    &lt;span class=&quot;nx&quot;&gt;offset&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;tickduration&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;nx&quot;&gt;cur_ticksamp&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;tickduration&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;nx&quot;&gt;buf_remaining&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;tickduration&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;note-frequencies&quot;&gt;Note frequencies&lt;/h2&gt;
+
+&lt;p&gt;In .MOD derivatives, notes at C-4 (that is, a C on octave 4) are played at a
+samplerate of 8363Hz. Everything is relative to that; an octave higher, for
+instance, would be 16726Hz – twice the frequency. For each semitone up, we
+effectively multiply the frequency by the twelfth root of two. In general, the
+frequency can be computed by &lt;code&gt;8363 * Math.pow(2, (note - 48) / 12.0)&lt;/code&gt;. &lt;code&gt;note&lt;/code&gt;
+here is the note number in semitones, starting at 0 for C-0 and going up to 95
+for B-7.&lt;/p&gt;
+
+&lt;p&gt;To support fine tuning, vibrato, slides and so forth in the XM format, effects
+modify the note “period” which is not a period but 1/16th of a (negative&lt;sup id=&quot;fnref:4&quot;&gt;&lt;a href=&quot;#fn:4&quot; class=&quot;footnote&quot;&gt;4&lt;/a&gt;&lt;/sup&gt;)
+semitone.  Also, each sample has a coarse and fine tuning offset which are
+added on when we compute the play frequency.&lt;/p&gt;
+
+&lt;h2 id=&quot;resampling&quot;&gt;Resampling&lt;/h2&gt;
+
+&lt;p&gt;&lt;code&gt;mixChannelIntoBuf&lt;/code&gt;’s job is to write a sample played at a certain frequency
+onto a buffer which is played at the output frequency, usually 44.1kHz.  It
+turns out that playing a sample recorded at a different frequency from the
+output frequency is a surprisingly nontrivial problem.&lt;/p&gt;
+
+&lt;p&gt;From the &lt;a href=&quot;https://en.wikipedia.org/wiki/Nyquist%E2%80%93Shannon_sampling_theorem&quot;&gt;Nyquist-Shannon
+theorem&lt;/a&gt;,
+we know that our original sample only contains frequencies less than or equal
+to the original sample rate. So ideally, when we play it back at the new
+frequency, the same set of frequencies should be played.&lt;/p&gt;
+
+&lt;p&gt;In practice, though, without using a “brick wall” or “sinc” filter, we’re going
+to end up with some spurious harmonics due to the aliasing phenomenon. The only
+way to avoid that requires a convolution as long as the original sample. In
+other words, it’s computationally expensive.&lt;/p&gt;
+
+&lt;p&gt;Also, since the original .XM players didn’t do anything fancy, it’s also
+typically unnecessary.&lt;/p&gt;
+
+&lt;p&gt;It turns out that if we use advanced resampling techniques to eliminate
+unwanted alias harmonics, many songs&lt;sup id=&quot;fnref:5&quot;&gt;&lt;a href=&quot;#fn:5&quot; class=&quot;footnote&quot;&gt;5&lt;/a&gt;&lt;/sup&gt; sound pretty bad. The original
+hardware and software that played these either used “zero-order hold” – just
+output the sample closest to the interpolated time – or “first-order hold” –
+interpolate between the surrounding samples.&lt;/p&gt;
+
+&lt;p&gt;I compromised with a very simple implementation that I think sounds pretty
+good. I use a combination of zero-order hold and a per-channel two-pole
+low-pass filter, which has very low implementation complexity. I will leave the
+details for my next post.&lt;/p&gt;
+
+&lt;p&gt;Either way, we compute the speed at which we proceed through the sample, which
+is the ratio of the playback frequency to the output frequency:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-js&quot; data-lang=&quot;js&quot;&gt;&lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;UpdateChannelPeriod&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;ch&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;period&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;freq&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;8363&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;Math&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;pow&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mf&quot;&gt;1152.0&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;period&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;/&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;192.0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+  &lt;span class=&quot;nx&quot;&gt;ch&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;doff&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;freq&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;/&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;f_smp&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;The &lt;code&gt;doff&lt;/code&gt; variable is the delta offset per sample. If we are playing at
+exactly 44100Hz, then &lt;code&gt;doff&lt;/code&gt; is 1, and we are just copying the sample into the
+output.&lt;/p&gt;
+
+&lt;p&gt;Here’s what zero-order hold looks like, omitting many details of sample looping
+or ending:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-js&quot; data-lang=&quot;js&quot;&gt;&lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;mixChannelIntoBuf&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;ch&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;start&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;end&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;dataL&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;dataR&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;samp&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;ch&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;sample&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;start&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;end&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;++&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;// Dumb javascript tricks:&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;// we use a bitwise OR with 0 to truncate offset to integer&lt;/span&gt;
+    &lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;s&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;samp&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;ch&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;off&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;];&lt;/span&gt;
+
+    &lt;span class=&quot;nx&quot;&gt;ch&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;off&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;ch&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;doff&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;nx&quot;&gt;dataL&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;ch&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;volL&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;s&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;  &lt;span class=&quot;c1&quot;&gt;// multiply by left volume&lt;/span&gt;
+    &lt;span class=&quot;nx&quot;&gt;dataR&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;ch&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;volR&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;s&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;  &lt;span class=&quot;c1&quot;&gt;// and right volume&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;ch&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;off&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;ch&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;sample&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;length&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+      &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;ch&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;sample&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;loop&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;nx&quot;&gt;ch&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;off&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;ch&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;sample&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;looplen&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+      &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;else&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+      &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;In practice I unroll that loop, compute how many samples I can generate before
+the sample ends or loops so I don’t have to test in the inner loop, and also
+unroll short sample loops in memory.&lt;/p&gt;
+
+&lt;p&gt;The end result runs fast enough to play without hitches on my phone.&lt;/p&gt;
+
+&lt;p&gt;The main problem with zero-order hold is that it produces hard edges between
+samples, and so there are a lot of high pitched hisses and noise. As a result,
+I added an additional low-pass filter to each channel with a cutoff equal to
+half the playback sampling frequency. My next blog post will go into detail.&lt;/p&gt;
+
+&lt;h2 id=&quot;synchronized-visualizations&quot;&gt;Synchronized visualizations&lt;/h2&gt;
+
+&lt;p&gt;It might seem reasonable that in order to show what’s happening on the screen
+while you’re hearing it, you need to use a really small buffer so that the
+latency between when we compute a sound buffer and when it plays is minimized.
+The problem with that is on a webpage, a low latency buffer can mean choppy
+audio as the browser might have better things to do than call your javascript
+audio callback within 20 milliseconds. It’s pretty far from a realtime system.&lt;/p&gt;
+
+&lt;p&gt;But we actually don’t care about latency at all; there are no external events
+changing the sound in an unpredictable way (other than pausing, which is
+handled separately). The code on this page is using a callback buffer size of
+16384, over 300 milliseconds, and yet the oscilloscopes and patterns are
+updating at roughly the tick rate (~50Hz). How does that work?&lt;/p&gt;
+
+&lt;p&gt;Whenever I finish rendering a tick to the audio buffer, I push a visualization
+state onto a queue, keyed by the current &lt;em&gt;audio time&lt;/em&gt; in samples.
+&lt;code&gt;AudioContext&lt;/code&gt; has a &lt;code&gt;currentTime&lt;/code&gt; attribute, which is the number of seconds
+that audio has been playing since the context was created. On my audio
+callback, I capture this and then add &lt;code&gt;offset / f_smp&lt;/code&gt; to the time for each
+tick. And then I push the first few samples of each channel, plus the current
+pattern and current row, onto a queue. My rendering code just compares
+&lt;code&gt;audioctx.currentTime&lt;/code&gt; against the head of the queue and renders what comes
+next.&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-js&quot; data-lang=&quot;js&quot;&gt;&lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;redrawScreen&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;audio_events&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;length&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+  &lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;e&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+  &lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;t&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;audioctx&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;currentTime&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;do&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;nx&quot;&gt;e&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;audio_events&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;shift&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;while&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;e&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;t&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;t&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;audio_events&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;length&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;e&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;undefined&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+  &lt;span class=&quot;c1&quot;&gt;// draw VU meters, oscilloscopes, and update pattern position&lt;/span&gt;
+  &lt;span class=&quot;c1&quot;&gt;// using various 2D canvas calls&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;The patterns are rendered by calling &lt;code&gt;drawImage&lt;/code&gt; on individual letters from
+&lt;a href=&quot;/code/jsxm/ft2font.png&quot;&gt;the original font image&lt;/a&gt; onto an off-screen canvas
+every time a new pattern is to be shown, and then compositing that canvas onto
+the screen above in order to highlight the currently-playing row.&lt;/p&gt;
+
+&lt;h2 id=&quot;end-result&quot;&gt;End result&lt;/h2&gt;
+
+&lt;p&gt;The player is also available &lt;a href=&quot;/code/jsxm/&quot;&gt;here&lt;/a&gt; without the accompanying
+article. By the way, you can load arbitrary XMs on the web by using an anchor
+with a link, e.g. http://www.a1k0n.net/code/jsxm/#http://your.host.here/blah.xm
+– but only if the host sets a CORS (&lt;code&gt;Access-Control-Allow-Origin&lt;/code&gt;) header.&lt;/p&gt;
+
+&lt;p&gt;I think what was most fun about playing .MODs and their ilk back in days of
+yore was that you could actually &lt;em&gt;see&lt;/em&gt; how a complex piece of music is put
+together, and watch your computer perform it live. I wanted to recreate that
+experience.  There are other web-based .MOD players now, like
+&lt;a href=&quot;http://mod.haxor.fi&quot;&gt;mod.haxor.fi&lt;/a&gt;, but I wanted to write my own just for fun.&lt;/p&gt;
+
+&lt;p&gt;It was fun. Though it isn’t complete effects-wise, I couldn’t be happier with
+how it turned out.&lt;/p&gt;
+
+&lt;h3 id=&quot;footnotes&quot;&gt;Footnotes&lt;/h3&gt;
+
+&lt;!--
+ - background
+   - first thing i heard on a soundblaster, music you can see
+   - chiptunes
+   - amiga paula, .MOD format - assembly language for music
+   - ProTracker, FastTracker 2, ScreamTracker 3 (S3M), Impulse Tracker,
+     MilkyTracker, ...
+   - kamel.xm ripped from ...? youtube link?
+
+ - .XM format: multi-sample instruments, envelopes
+   - great for chiptunes
+   - XM documentation mostly wrong
+
+ - basics: note, inst, vol, effect
+   - &quot;tempo&quot; / &quot;bpm&quot; -&gt; &quot;row&quot;, &quot;ticks&quot;
+   - effects, some on tick 0, some &quot;between rows&quot;
+
+ - HTML5 AudioContext
+   - ScriptNode callback
+   - architecture: render a tick at a time, a channel at a time, a sample loop at a time
+     - fast inner loop
+   - time synchronization w/ audioContext.currentTime
+
+ - resampling: playing 8363Hz sample at @44100Hz output
+   - naive integer truncation (zero order hold)
+   - linear
+   - FFT resampling
+   - brickwall; lanczos; etc; ... too much effort
+   - cheap IIR LPF
+
+--&gt;
+&lt;div class=&quot;footnotes&quot;&gt;
+  &lt;ol&gt;
+    &lt;li id=&quot;fn:1&quot;&gt;
+      &lt;p&gt;The one exception being when the sample ends during the tick. &lt;a href=&quot;#fnref:1&quot; class=&quot;reversefootnote&quot;&gt;&amp;#8617;&lt;/a&gt;&lt;/p&gt;
+    &lt;/li&gt;
+    &lt;li id=&quot;fn:2&quot;&gt;
+      &lt;p&gt;I’ve omitted the details of stereo, but we sum up the left and right channels independently. Panning is just a different volume on the left channel vs. the right channel. &lt;a href=&quot;#fnref:2&quot; class=&quot;reversefootnote&quot;&gt;&amp;#8617;&lt;/a&gt;&lt;/p&gt;
+    &lt;/li&gt;
+    &lt;li id=&quot;fn:3&quot;&gt;
+      &lt;p&gt;&lt;code&gt;Array.fill()&lt;/code&gt; is not available in all browsers, so in practice I use a for loop to clear the buffer. And the buffer is &lt;em&gt;not&lt;/em&gt; already cleared when it is passed to us; it may actually contain data from the previous callback. &lt;a href=&quot;#fnref:3&quot; class=&quot;reversefootnote&quot;&gt;&amp;#8617;&lt;/a&gt;&lt;/p&gt;
+    &lt;/li&gt;
+    &lt;li id=&quot;fn:4&quot;&gt;
+      &lt;p&gt;For historical reasons I won’t go into here, .MOD effects modified the sample &lt;em&gt;period&lt;/em&gt;, or inverse frequency, as making linear changes to it sounds more linear to the ear; but really, it’s an approximation of the logarithmic scale the human ear actually hears. A log scale is used in .XM. So when we increment period in XM, we are stepping down 1/16th of a semitone. &lt;a href=&quot;#fnref:4&quot; class=&quot;reversefootnote&quot;&gt;&amp;#8617;&lt;/a&gt;&lt;/p&gt;
+    &lt;/li&gt;
+    &lt;li id=&quot;fn:5&quot;&gt;
+      &lt;p&gt;Especially “chiptunes” – songs with tiny looping square wave or triangle wave samples, to emulate simple vintage sound hardware chips. &lt;a href=&quot;#fnref:5&quot; class=&quot;reversefootnote&quot;&gt;&amp;#8617;&lt;/a&gt;&lt;/p&gt;
+    &lt;/li&gt;
+  &lt;/ol&gt;
+&lt;/div&gt;
+</description>
+        <pubDate>Mon, 09 Nov 2015 00:00:00 -0800</pubDate>
+        <link>http://www.a1k0n.net/2015/11/09/javascript-ft2-player.html</link>
+        <guid isPermaLink="true">http://www.a1k0n.net/2015/11/09/javascript-ft2-player.html</guid>
+      </item>
+    
     
     
       <item>
