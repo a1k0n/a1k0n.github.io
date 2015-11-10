@@ -74,6 +74,9 @@ FastTracker 2; this is a Javascript homage I wrote in a fit of nostalgia. The
 [source code is on GitHub](https://github.com/a1k0n/jsxm/) if you'd like to
 check it out.
 
+Hit "Load" to load a few other .XMs I have handy on my web host, or drag and
+drop an .xm from your computer onto the player window.
+
 FastTracker 2 looks like this:
 
 ![FastTracker II screenshot](/img/ft2.png)
