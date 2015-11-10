@@ -1081,7 +1081,11 @@ function InitAudio() {
     gainNode = audioctx.createGain();
     gainNode.gain.value = 0.1;  // master volume
   }
-  jsNode = audioctx.createScriptProcessor(16384, 0, 2);
+  if (audioctx.createScriptProcessor == undefined) {
+    jsNode = audioctx.createJavaScriptNode(16384, 0, 2);
+  } else {
+    jsNode = audioctx.createScriptProcessor(16384, 0, 2);
+  }
   jsNode.onaudioprocess = audio_cb;
   gainNode.connect(audioctx.destination);
 }

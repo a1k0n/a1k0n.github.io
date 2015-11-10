@@ -8,11 +8,11 @@
     <meta name="description" content="">
     <meta name="author" content="Andy Sloane">
     <meta name="keywords" content="">
-    <link rel="canonical" href="http://www.a1k0n.net/2015/11/11/simple-dsp.html">
+    <link rel="canonical" href="http://www.a1k0n.net/2015/11/16/simple-dsp.html">
     <link rel="alternate" type="application/rss+xml" title="RSS Feed for a1k0n.net" href="/feed.xml" />
 
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="/css/pixyll.css?201511090710" type="text/css">
+    <link rel="stylesheet" href="/css/pixyll.css?201511101055" type="text/css">
 
     <!-- Fonts -->
     <link href='//fonts.googleapis.com/css?family=Merriweather:900,900italic,300,300italic' rel='stylesheet' type='text/css'>
@@ -28,7 +28,7 @@
     <meta property="og:type" content="article">
     <meta property="og:title" content="Simple Digital Filters">
     <meta property="og:description" content="">
-    <meta property="og:url" content="http://www.a1k0n.net/2015/11/11/simple-dsp.html">
+    <meta property="og:url" content="http://www.a1k0n.net/2015/11/16/simple-dsp.html">
     <meta property="og:site_name" content="a1k0n.net">
 
     <!-- Twitter Card -->
@@ -36,7 +36,7 @@
     
     <meta name="twitter:title" content="Simple Digital Filters" />
     <meta name="twitter:description" content="" />
-    <meta name="twitter:url" content="http://www.a1k0n.net/2015/11/11/simple-dsp.html" />
+    <meta name="twitter:url" content="http://www.a1k0n.net/2015/11/16/simple-dsp.html" />
 
     
     <script type="text/javascript">
@@ -79,17 +79,53 @@
       <div class="measure">
         <div class="post-header mb2">
   <h1>Simple Digital Filters</h1>
-  <span class="post-meta">Nov 11, 2015</span><br>
+  <span class="post-meta">Nov 16, 2015</span><br>
   
 </div>
 
 <article class="post-content">
-  <p>The <script type="math/tex">z</script> domain is a confusing and yet very simple thing.</p>
+  <p>Digital signal processing makes use of some surprisingly neat mathematics which
+seems incredibly strange at first.</p>
+
+<p>In the following notation, capital letters (<script type="math/tex">X</script>) are streams of samples and lowercase
+letters with subscripts (<script type="math/tex">x_k</script>) are individual samples.</p>
+
+<p>It starts with the operator <script type="math/tex">z</script>, which when multiplied by a stream of
+samples, advances in time by one sample. If we have a stream of samples <script type="math/tex">X</script>,
+then if <script type="math/tex">Y = X z</script>, <script type="math/tex">y_k = x_{k+1}</script>. This of course works the other way
+around which is more useful in practice: <script type="math/tex">z^{-1}</script> delays by one sample.</p>
+
+<p>The <script type="math/tex">z</script> domain is, like the Fourier or Laplace domains, an integral
+transform. A single point in <script type="math/tex">z</script> corresponds to a periodic signal in time. It
+is very closely related to the Laplace domain in fact: <script type="math/tex">z = e^{s T}</script> where T
+is the sampling period of your signal.</p>
+
+<p>What this means is that assigning <script type="math/tex">z</script> to a point in the complex plane lets us
+analyze the behavior of an equation operating on discrete signals, such as
+audio samples.</p>
+
+<p>Here’s a simple example based on an idea you’ve probably seen before. Say we
+have a simple moving-average filter, where we take 1% of our input sample and
+add it to 99% of our current value. In this case,</p>
+
+<script type="math/tex; mode=display">y_n = \alpha x_n + (1 - \alpha) y_{n-1}</script>
+
+<p>Transforming to the <script type="math/tex">z</script> domain is straightforward when we have a recurrence
+relation like this:</p>
+
+<script type="math/tex; mode=display">Y(z) = \alpha X(z) + (1 - \alpha) Y(z) z^{-1}</script>
+
+<p>The ratio of the output to the input is called the <em>transfer function</em> usually
+denoted as <script type="math/tex">H(z)</script>:</p>
+
+<script type="math/tex; mode=display">(1 - (1 - \alpha)z^{-1}) Y(z) = \alpha X(z)</script>
+
+<script type="math/tex; mode=display">H(z) = \frac{Y(z)}{X(z)} = \frac{\alpha}{1 - (1 - \alpha) z^{-1}}</script>
 
 <canvas width="300" height="300" id="c1"></canvas>
 
 <ul>
-  <li>real filters for audio processing</li>
+  <li>real (as in not complex) filters for audio processing</li>
   <li>polynomials, <script type="math/tex">H(z) = \frac{Y(z)}{X(z)} = \frac{(z - a)(z -
 a^*)}{(z - p)(z - p^*)}</script></li>
   <li>butterworth</li>
