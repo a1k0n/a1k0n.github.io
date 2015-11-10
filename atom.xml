@@ -11,7 +11,7 @@
     
       <item>
         <title>Playing Fasttracker 2 .XM files in Javascript</title>
-        <description>&lt;div class=&quot;playercontainer&quot;&gt;
+        <description>&lt;div id=&quot;playercontainer&quot; class=&quot;playercontainer&quot; ondrop=&quot;handleDrop(event)&quot; ondragover=&quot;allowDrop(event)&quot; ondragleave=&quot;allowDrop(event)&quot;&gt;
   &lt;div&gt; &lt;canvas class=&quot;centered&quot; id=&quot;title&quot; width=&quot;640&quot; height=&quot;22&quot;&gt;&lt;/canvas&gt; &lt;/div&gt;
   &lt;div class=&quot;hscroll&quot;&gt;
    &lt;div&gt; &lt;canvas class=&quot;centered&quot; id=&quot;vu&quot; width=&quot;224&quot; height=&quot;64&quot;&gt;&lt;/canvas&gt; &lt;/div&gt;

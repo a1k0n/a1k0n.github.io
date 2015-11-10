@@ -12,7 +12,7 @@
     <link rel="alternate" type="application/rss+xml" title="RSS Feed for a1k0n.net" href="/feed.xml" />
 
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="/css/pixyll.css?201511101337" type="text/css">
+    <link rel="stylesheet" href="/css/pixyll.css?201511101538" type="text/css">
 
     <!-- Fonts -->
     <link href='//fonts.googleapis.com/css?family=Merriweather:900,900italic,300,300italic' rel='stylesheet' type='text/css'>
@@ -65,6 +65,11 @@
 
 .playercontainer {
   background:#000;
+}
+
+.draghover {
+  background:#000;
+  opacity: 0.5;
 }
 
 .hscroll {
@@ -124,7 +129,7 @@
 </div>
 
 <article class="post-content">
-  <div class="playercontainer">
+  <div id="playercontainer" class="playercontainer" ondrop="handleDrop(event)" ondragover="allowDrop(event)" ondragleave="allowDrop(event)">
   <div> <canvas class="centered" id="title" width="640" height="22"></canvas> </div>
   <div class="hscroll">
    <div> <canvas class="centered" id="vu" width="224" height="64"></canvas> </div>
