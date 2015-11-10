@@ -755,10 +755,10 @@ function ConvertSample(array, bits) {
     len /= 2;
     var samp = new Float32Array(len);
     for (var k = 0; k < len; k++) {
-      acc += array[k*2] + (array[k*2 + 1] << 8);
-      var b = acc&65535;
+      var b = array[k*2] + (array[k*2 + 1] << 8);
       if (b & 32768) b = b-65536;
-      samp[k] = b / 32768.0;
+      acc = Math.max(-1, Math.min(1, acc + b / 32768.0));
+      samp[k] = acc;
     }
     return samp;
   }
