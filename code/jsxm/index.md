@@ -19,6 +19,11 @@ headhtml: |
       background:#000;
     }
 
+    .draghover {
+      background:#000;
+      opacity: 0.5;
+    }
+
     .hscroll {
       overflow: auto;
       margin-bottom: 14px;
@@ -45,7 +50,7 @@ headhtml: |
 
   </style>
 ---
-  <div class="playercontainer">
+  <div id="playercontainer" class="playercontainer" ondrop="handleDrop(event)" ondragover="allowDrop(event)" ondragleave="allowDrop(event)">
     <div><canvas class="centered" id='title' width="640" height="22"></canvas></div>
     <div class="hscroll">
       <div><canvas class="centered" id='vu' width="224" height="64"></canvas></div>
@@ -70,5 +75,4 @@ todo:
    - 7xy - tremolo
    - Gxx, Hxy, Kxx, Lxx, Pxy, Txy
  - render pattern with the wider fonts for fewer channels
- - drag-n-drop .xm files onto player
 
