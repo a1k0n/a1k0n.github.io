@@ -66,6 +66,10 @@ headhtml: |
     <div style="display: none" id='filelist'></div>
   </div>
 
+Drag .xm files onto the window above to load them, or use the load button to
+load a small selection of .xms. A longer explanation is on [my
+blog](/2015/11/09/javascript-ft2-player.html).
+
 code: <a href="http://github.com/a1k0n/jsxm/">github.com/a1k0n/jsxm</a>
 
 todo:

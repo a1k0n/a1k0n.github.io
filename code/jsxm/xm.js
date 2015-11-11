@@ -1168,6 +1168,8 @@ function LoadXMAndInit(xmdata) {
     scopes: scopes
   });
   RedrawScreen();
+
+  return xm;
 }
 
 function DownloadXM(uri) {
