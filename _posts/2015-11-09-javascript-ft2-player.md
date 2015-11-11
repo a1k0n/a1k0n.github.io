@@ -59,8 +59,8 @@ headhtml: |
   <div id="instruments"></div>
   <div>
     <p style="text-align: center">
-      <button id="playpause" disabled="true" style="width: 100px">Play</button>
-      <button id="loadbutton" style="width: 100px">Load</button>
+      <button id="playpause" disabled="true" style="width: 100px; background: #ccc;">Play</button>
+      <button id="loadbutton" style="width: 100px; background: #ccc">Load</button>
     </p>
   </div>
   <div style="display: none" id='filelist'></div>

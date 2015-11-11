@@ -1103,6 +1103,17 @@ function PlayXM() {
     }
     // start playing
     jsNode.connect(gainNode);
+
+    // hack to get iOS to play anything
+    var temp_osc = audioctx.createOscillator();
+    temp_osc.connect(audioctx.destination);
+    if (temp_osc.noteOn) temp_osc.start = temp_osc.noteOn;
+    temp_osc.frequency.value = 1;
+    temp_osc.start(0);
+    window.setTimeout(10, function() {
+      temp_osc.disconnect();
+    });
+
     requestAnimationFrame(RedrawScreen);
   }
   playing = true;
