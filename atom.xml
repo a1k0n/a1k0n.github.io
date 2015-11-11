@@ -20,8 +20,8 @@
   &lt;div id=&quot;instruments&quot;&gt;&lt;/div&gt;
   &lt;div&gt;
     &lt;p style=&quot;text-align: center&quot;&gt;
-      &lt;button id=&quot;playpause&quot; disabled=&quot;true&quot; style=&quot;width: 100px&quot;&gt;Play&lt;/button&gt;
-      &lt;button id=&quot;loadbutton&quot; style=&quot;width: 100px&quot;&gt;Load&lt;/button&gt;
+      &lt;button id=&quot;playpause&quot; disabled=&quot;true&quot; style=&quot;width: 100px; background: #ccc;&quot;&gt;Play&lt;/button&gt;
+      &lt;button id=&quot;loadbutton&quot; style=&quot;width: 100px; background: #ccc&quot;&gt;Load&lt;/button&gt;
     &lt;/p&gt;
   &lt;/div&gt;
   &lt;div style=&quot;display: none&quot; id=&quot;filelist&quot;&gt;&lt;/div&gt;

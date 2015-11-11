@@ -46,6 +46,7 @@ function RedrawZ(elem) {
   ctx.stroke();
 }
 
+var dragging_pole = undefined;
 window.onload = function() {
   var c1 = document.getElementById("c1");
   c1.onmousedown = function(e) {
@@ -56,8 +57,31 @@ window.onload = function() {
        offsetX = e.clientX - rect.left,
        offsetY = e.clientY - rect.top;
 
+    dragging_pole = undefined;
     for (var i = 0; i < poles.length; i++) {
+      var x = zcircle_radius * poles[i][0] + zcircle_x;
+      var y = zcircle_radius * poles[i][1] + zcircle_y;
+      var d2 = (x - offsetX)*(x - offsetX) + (y - offsetY)*(y - offsetY);
+      if (d2 <= 16) {
+        dragging_pole = i;
+      }
+    }
+  }
+  c1.onmouseup = function(e) {
+    dragging_pole = undefined;
+  }
 
+  c1.onmousemove = function(e) {
+    if (dragging_pole) {
+      e = e || window.event;
+
+      var target = e.target || e.srcElement,
+      rect = target.getBoundingClientRect(),
+      offsetX = e.clientX - rect.left,
+      offsetY = e.clientY - rect.top;
+      var x = (offsetX - zcircle_x) / zcircle_radius;
+      var y = (offsetY - zcircle_y) / zcircle_radius;
+      // poles[dragging_pole]
     }
   }
   RedrawZ(c1);
