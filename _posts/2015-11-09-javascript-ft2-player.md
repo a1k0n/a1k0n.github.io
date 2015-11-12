@@ -4,6 +4,8 @@ layout: post
 headhtml: |
   <script src="/code/jsxm/xm.js"></script>
   <script src="/code/jsxm/xmeffects.js"></script>
+  <script src="/code/jsxm/trackview.js"></script>
+  <script src="/code/jsxm/shell.js"></script>
   <script src="http://a1k0n-pub.s3-website-us-west-1.amazonaws.com/xm/xmlist.js"></script>
   <style>
 
@@ -50,7 +52,7 @@ headhtml: |
 
   </style>
 ---
-<div id="playercontainer" class="playercontainer" ondrop="handleDrop(event)" ondragover="allowDrop(event)" ondragleave="allowDrop(event)">
+<div id="playercontainer" class="playercontainer" ondrop="XMPlayer.handleDrop(event)" ondragover="XMPlayer.allowDrop(event)" ondragleave="XMPlayer.allowDrop(event)">
   <div> <canvas class="centered" id="title" width="640" height="22"></canvas> </div>
   <div class="hscroll">
    <div> <canvas class="centered" id="vu" width="224" height="64"></canvas> </div>
