@@ -12,7 +12,7 @@
     <link rel="alternate" type="application/rss+xml" title="RSS Feed for a1k0n.net" href="/feed.xml" />
 
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="/css/pixyll.css?201511102023" type="text/css">
+    <link rel="stylesheet" href="/css/pixyll.css?201511120804" type="text/css">
 
     <!-- Fonts -->
     <link href='//fonts.googleapis.com/css?family=Merriweather:900,900italic,300,300italic' rel='stylesheet' type='text/css'>
@@ -51,8 +51,10 @@
     </script>
     
 <title>js xm</title>
-<script src="xm.js"></script>
 <script src="xmeffects.js"></script>
+<script src="xm.js"></script>
+<script src="trackview.js"></script>
+<script src="shell.js"></script>
 <script src="http://a1k0n-pub.s3-website-us-west-1.amazonaws.com/xm/xmlist.js"></script>
 <style>
   .centered {
@@ -127,7 +129,7 @@
     <h1 class="h2">Javascript XM Player</h1>
   </header>
   <article class="post-content">
-  <div id="playercontainer" class="playercontainer" ondrop="handleDrop(event)" ondragover="allowDrop(event)" ondragleave="allowDrop(event)">
+  <div id="playercontainer" class="playercontainer" ondrop="XMPlayer.handleDrop(event)" ondragover="XMPlayer.allowDrop(event)" ondragleave="XMPlayer.allowDrop(event)">
     <div><canvas class="centered" id="title" width="640" height="22"></canvas></div>
     <div class="hscroll">
       <div><canvas class="centered" id="vu" width="224" height="64"></canvas></div>
