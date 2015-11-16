@@ -73,12 +73,3 @@ load a small selection of .xms. A longer explanation is on [my
 blog](/2015/11/09/javascript-ft2-player.html).
 
 code: <a href="http://github.com/a1k0n/jsxm/">github.com/a1k0n/jsxm</a>
-
-todo:
-
- - missing XM effects:
-   - E3x, E4x, E5x, E6x, E7x, E9x, EDx, EEx
-   - 7xy - tremolo
-   - Gxx, Hxy, Kxx, Lxx, Pxy, Txy
- - render pattern with the wider fonts for fewer channels
-

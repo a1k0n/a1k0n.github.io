@@ -11,20 +11,22 @@ var XMView = window.XMView;
 
 player.periodForNote = periodForNote;
 player.prettify_effect = prettify_effect;
-player.initAudio = initAudio;
-player.loadXM = loadXM;
-player.playXM = playXM;
-player.pauseXM = pauseXM;
-player.stopXM = stopXM;
+player.init = init;
+player.load = load;
+player.play = play;
+player.pause = pause;
+player.stop = stop;
 player.cur_songpos = -1;
 player.cur_pat = -1;
 player.cur_row = 64;
 player.cur_ticksamp = 0;
 player.cur_tick = 6;
 player.xm = {};  // contains all song data
+player.xm.global_volume = player.max_global_volume = 128;
 
 // exposed for testing
 player.nextTick = nextTick;
+player.nextRow = nextRow;
 player.Envelope = Envelope;
 
 // for pretty-printing notes
@@ -103,7 +105,31 @@ function updateChannelPeriod(ch, period) {
 }
 
 function periodForNote(ch, note) {
-  return 1920 - (note + ch.samp.note)*16 - ch.samp.fine / 8.0;
+  return 1920 - (note + ch.samp.note)*16 - ch.fine / 8.0;
+}
+
+function setCurrentPattern() {
+  var nextPat = player.xm.songpats[player.cur_songpos];
+
+  // check for out of range pattern index
+  while (nextPat >= player.xm.patterns.length) {
+    if (player.cur_songpos + 1 < player.xm.songpats.length) {
+      // first try skipping the position
+      player.cur_songpos++;
+    } else if ((player.cur_songpos === player.xm.song_looppos && player.cur_songpos !== 0)
+      || player.xm.song_looppos >= player.xm.songpats.length) {
+      // if we allready tried song_looppos or if song_looppos
+      // is out of range, go to the first position
+      player.cur_songpos = 0;
+    } else {
+      // try going to song_looppos
+      player.cur_songpos = player.xm.song_looppos;
+    }
+
+    nextPat = player.xm.songpats[player.cur_songpos];
+  }
+
+  player.cur_pat = nextPat;
 }
 
 function nextRow() {
@@ -112,7 +138,7 @@ function nextRow() {
     player.cur_songpos++;
     if (player.cur_songpos >= player.xm.songpats.length)
       player.cur_songpos = player.xm.song_looppos;
-    player.cur_pat = player.xm.songpats[player.cur_songpos];
+    setCurrentPattern();
   }
   var p = player.xm.patterns[player.cur_pat];
   var r = p[player.cur_row];
@@ -132,6 +158,7 @@ function nextRow() {
           ch.samp = inst.samples[inst.samplemap[ch.note]];
           ch.vol = ch.samp.vol;
           ch.pan = ch.samp.pan;
+          ch.fine = ch.samp.fine;
         }
       } else {
         // console.log("invalid inst", r[i][1], instruments.length);
@@ -153,6 +180,7 @@ function nextRow() {
             // (potentially) new sample
             ch.pan = ch.samp.pan;
             ch.vol = ch.samp.vol;
+            ch.fine = ch.samp.fine;
           }
           triggernote = true;
         }
@@ -225,10 +253,9 @@ function nextRow() {
       if (ch.effect != 9) ch.off = 0;
       ch.release = 0;
       ch.envtick = 0;
-      ch.vibratopos = 0;
       ch.env_vol = new EnvelopeFollower(inst.env_vol);
       ch.env_pan = new EnvelopeFollower(inst.env_pan);
-      if (ch.note != undefined) {
+      if (ch.note) {
         ch.period = periodForNote(ch, ch.note);
       }
     }
@@ -286,25 +313,31 @@ EnvelopeFollower.prototype.Tick = function(release) {
 
 function nextTick() {
   player.cur_tick++;
+  var j, ch;
+  for (j = 0; j < player.xm.nchan; j++) {
+    ch = player.xm.channelinfo[j];
+    ch.periodoffset = 0;
+  }
   if (player.cur_tick >= player.xm.tempo) {
     player.cur_tick = 0;
     nextRow();
   }
-  for (var j = 0; j < player.xm.nchan; j++) {
-    var ch = player.xm.channelinfo[j];
+  for (j = 0; j < player.xm.nchan; j++) {
+    ch = player.xm.channelinfo[j];
     var inst = ch.inst;
-    ch.periodoffset = 0;
-    if (player.cur_tick != 0) {
+    if (player.cur_tick !== 0) {
       if(ch.voleffectfn) ch.voleffectfn(ch);
       if(ch.effectfn) ch.effectfn(ch);
     }
     if (isNaN(ch.period)) {
-      console.log(prettify_notedata(player.xm.patterns[player.cur_pat][player.cur_row-1][j]),
+      console.log(prettify_notedata(
+            player.xm.patterns[player.cur_pat][player.cur_row-1][j]),
           "set channel", j, "period to NaN");
     }
-    if (inst == undefined) continue;
-    if (ch.env_vol == undefined) {
-      console.log(prettify_notedata(player.xm.patterns[player.cur_pat][player.cur_row-1][j]),
+    if (inst === undefined) continue;
+    if (ch.env_vol === undefined) {
+      console.log(prettify_notedata(
+            player.xm.patterns[player.cur_pat][player.cur_row-1][j]),
           "set channel", j, "env_vol to undefined, but note is playing");
       continue;
     }
@@ -363,8 +396,8 @@ function MixChannelIntoBuf(ch, start, end, dataL, dataR) {
   var volE = ch.volE / 64.0;    // current volume envelope
   var panE = 4*(ch.panE - 32);  // current panning envelope
   var p = panE + ch.pan - 128;  // final pan
-  var volL = volE * (128 - p) * ch.vol / 8192.0;
-  var volR = volE * (128 + p) * ch.vol / 8192.0;
+  var volL = player.xm.global_volume * volE * (128 - p) * ch.vol / (64 * 128 * 128);
+  var volR = player.xm.global_volume * volE * (128 + p) * ch.vol / (64 * 128 * 128);
   if (volL < 0) volL = 0;
   if (volR < 0) volR = 0;
   if (volR === 0 && volL === 0)
@@ -624,7 +657,7 @@ function UnrollSampleLoop(samp) {
   samp.type = 1;
 }
 
-function loadXM(arrayBuf) {
+function load(arrayBuf) {
   var dv = new DataView(arrayBuf);
   player.xm = {};
 
@@ -639,6 +672,7 @@ function loadXM(arrayBuf) {
   player.xm.tempo = dv.getUint16(0x4c, true);
   player.xm.bpm = dv.getUint16(0x4e, true);
   player.xm.channelinfo = [];
+  player.xm.global_volume = player.max_global_volume;
 
   var i, j, k;
 
@@ -654,6 +688,7 @@ function loadXM(arrayBuf) {
       mute: 0,
       volE: 0, panE: 0,
       retrig: 0,
+      vibratopos: 0,
       vibratodepth: 1,
       vibratospeed: 1,
     });
@@ -851,7 +886,7 @@ function loadXM(arrayBuf) {
 }
 
 var jsNode, gainNode;
-function initAudio() {
+function init() {
   if (!player.audioctx) {
     var audioContext = window.AudioContext || window.webkitAudioContext;
     player.audioctx = new audioContext();
@@ -868,7 +903,7 @@ function initAudio() {
 }
 
 player.playing = false;
-function playXM() {
+function play() {
   if (!player.playing) {
     // put paused events back into action, if any
     if (XMView.resume) XMView.resume();
@@ -891,7 +926,7 @@ function playXM() {
   player.playing = true;
 }
 
-function pauseXM() {
+function pause() {
   if (player.playing) {
     jsNode.disconnect(gainNode);
     if (XMView.pause) XMView.pause();
@@ -899,7 +934,7 @@ function pauseXM() {
   player.playing = false;
 }
 
-function stopXM() {
+function stop() {
   if (player.playing) {
     jsNode.disconnect(gainNode);
     player.playing = false;
@@ -908,7 +943,8 @@ function stopXM() {
   player.cur_row = 64;
   player.cur_songpos = -1;
   player.cur_ticksamp = 0;
+  player.xm.global_volume = player.max_global_volume;
   if (XMView.stop) XMView.stop();
-  initAudio();
+  init();
 }
 })(window);
