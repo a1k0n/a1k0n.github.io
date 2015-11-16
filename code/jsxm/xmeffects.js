@@ -5,7 +5,7 @@ if (!window.XMPlayer) {
 var player = window.XMPlayer;
 
 function eff_t1_0(ch) {  // arpeggio
-  if (ch.effectdata != 0 && ch.inst != undefined) {
+  if (ch.effectdata !== 0 && ch.inst !== undefined) {
     var arpeggio = [0, ch.effectdata>>4, ch.effectdata&15];
     var note = ch.note + arpeggio[player.cur_tick % 3];
     ch.period = player.periodForNote(ch, note);
@@ -13,7 +13,7 @@ function eff_t1_0(ch) {  // arpeggio
 }
 
 function eff_t0_1(ch, data) {  // pitch slide up
-  if (data != 0) {
+  if (data !== 0) {
     ch.slideupspeed = data;
   }
 }
@@ -26,7 +26,7 @@ function eff_t1_1(ch) {  // pitch slide up
 }
 
 function eff_t0_2(ch, data) {  // pitch slide down
-  if (data != 0) {
+  if (data !== 0) {
     ch.slidedownspeed = data;
   }
 }
@@ -39,7 +39,7 @@ function eff_t1_2(ch) {  // pitch slide down
 }
 
 function eff_t0_3(ch, data) {  // portamento
-  if (data != 0) {
+  if (data !== 0) {
     ch.portaspeed = data;
   }
 }
@@ -61,13 +61,14 @@ function eff_t0_4(ch, data) {  // vibrato
   if (data >> 4) {
     ch.vibratospeed = data >> 4;
   }
-  eff_t1_4(ch, data);
+  eff_t1_4(ch);
 }
 
 function eff_t1_4(ch) {  // vibrato
   ch.periodoffset = Math.sin(ch.vibratopos * Math.PI / 32) * ch.vibratodepth;
   if (isNaN(ch.periodoffset)) {
-    console.log("vibrato periodoffset NaN?", ch.vibratopos, ch.vibratodepth);
+    console.log("vibrato periodoffset NaN?",
+        ch.vibratopos, ch.vibratospeed, ch.vibratodepth);
     ch.periodoffset = 0;
   }
   ch.vibratopos += ch.vibratospeed;
@@ -94,11 +95,7 @@ function eff_t0_9(ch, data) {  // sample offset
 
 function eff_t0_a(ch, data) {  // volume slide
   if (data) {
-    if (data & 0x0f) {
-      ch.volumeslide = -(data & 0x0f);
-    } else {
-      ch.volumeslide = data >> 4;
-    }
+    ch.volumeslide = -(data & 0x0f) + (data >> 4);
   }
 }
 
@@ -137,17 +134,20 @@ function eff_t0_e(ch, data) {  // extended effects!
     case 2:  // fine porta down
       ch.period += data;
       break;
+    case 5:  // finetune
+      ch.fine = (data<<4) + data - 128;
+      break;
     case 8:  // panning
       ch.pan = data * 0x11;
       break;
     case 0x0a:  // fine vol slide up (with memory)
-      if (data == 0 && ch.finevolup != undefined)
+      if (data === 0 && ch.finevolup !== undefined)
         data = ch.finevolup;
       ch.vol = Math.min(64, ch.vol + data);
       ch.finevolup = data;
       break;
     case 0x0b:  // fine vol slide down
-      if (data == 0 && ch.finevoldown != undefined)
+      if (data === 0 && ch.finevoldown !== undefined)
         data = ch.finevoldown;
       ch.vol = Math.max(0, ch.vol - data);
       ch.finevoldown = data;
@@ -171,13 +171,37 @@ function eff_t1_e(ch) {  // note cut
 }
 
 function eff_t0_f(ch, data) {  // set tempo
-  if (data == 0) {
+  if (data === 0) {
     console.log("tempo 0?");
     return;
   } else if (data < 0x20) {
     player.xm.tempo = data;
   } else {
     player.xm.bpm = data;
+  }
+}
+
+function eff_t0_g(ch, data) {  // set global volume
+  if (data <= 0x40) {
+    // volume gets multiplied by 2 to match
+    // the initial max global volume of 128
+    player.xm.global_volume = Math.max(0, data * 2);
+  } else {
+    player.xm.global_volume = player.max_global_volume;
+  }
+}
+
+function eff_t0_h(ch, data) {  // global volume slide
+  if (data) {
+    // same as Axy but multiplied by 2
+    player.xm.global_volumeslide = (-(data & 0x0f) + (data >> 4)) * 2;
+  }
+}
+
+function eff_t1_h(ch) {  // global volume slide
+  if (player.xm.global_volumeslide !== undefined) {
+    player.xm.global_volume = Math.max(0, Math.min(player.max_global_volume,
+      player.xm.global_volume + player.xm.global_volumeslide));
   }
 }
 
@@ -206,7 +230,7 @@ function eff_t0_r(ch, data) {  // retrigger
 }
 
 function eff_t1_r(ch) {
-  if (player.cur_tick % (ch.retrig & 0x0f) == 0) {
+  if (player.cur_tick % (ch.retrig & 0x0f) === 0) {
     ch.off = 0;
   }
 }
@@ -233,8 +257,8 @@ player.effects_t0 = [  // effect functions on tick 0
   eff_t0_d,  // d
   eff_t0_e,  // e
   eff_t0_f,  // f
-  eff_unimplemented_t0,  // g
-  eff_unimplemented_t0,  // h
+  eff_t0_g,  // g
+  eff_t0_h,  // h
   eff_unimplemented_t0,  // i
   eff_unimplemented_t0,  // j
   eff_unimplemented_t0,  // k
@@ -272,8 +296,8 @@ player.effects_t1 = [  // effect functions on tick 1+
   null,   // d
   eff_t1_e,  // e
   null,   // f
-  eff_unimplemented,  // g
-  eff_unimplemented,  // h
+  null,  // g
+  eff_t1_h,  // h
   eff_unimplemented,  // i
   eff_unimplemented,  // j
   eff_unimplemented,  // k
