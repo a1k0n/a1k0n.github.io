@@ -411,14 +411,15 @@ pattern and current row, onto a queue. My rendering code just compares
 next.
 
 {% highlight js %}
+var audio_events = [];
+
 function redrawScreen() {
-  if (audio_events.length == 0) return;
   var e;
-  var t = audioctx.currentTime;
-  do {
+  var t = XMPlayer.audioctx.currentTime;
+  while (audio_events.length > 0 && audio_events[0].t < t) {
     e = audio_events.shift();
-  } while(e.t < t && audio_events.length > 0);
-  if (e == undefined) return;
+  }
+  if (!e) return;
 
   // draw VU meters, oscilloscopes, and update pattern position
   // using various 2D canvas calls

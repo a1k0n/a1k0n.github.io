@@ -52,7 +52,7 @@ $$
 H(z) = \frac{Y(z)}{X(z)} = \frac{\alpha}{1 - (1 - \alpha) z^{-1}}
 $$
 
-<canvas width="300" height="300" id="c1"></canvas>
+<canvas width="600" height="300" id="c1"></canvas>
 
  - real (as in not complex) filters for audio processing
  - polynomials, $$H(z) = \frac{Y(z)}{X(z)} = \frac{(z - a)(z -
