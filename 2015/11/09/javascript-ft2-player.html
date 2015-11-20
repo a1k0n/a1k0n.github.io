@@ -12,7 +12,7 @@
     <link rel="alternate" type="application/rss+xml" title="RSS Feed for a1k0n.net" href="/feed.xml" />
 
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="/css/pixyll.css?201511152007" type="text/css">
+    <link rel="stylesheet" href="/css/pixyll.css?201511192050" type="text/css">
 
     <!-- Fonts -->
     <link href='//fonts.googleapis.com/css?family=Merriweather:900,900italic,300,300italic' rel='stylesheet' type='text/css'>
@@ -473,14 +473,15 @@ pattern and current row, onto a queue. My rendering code just compares
 <code>audioctx.currentTime</code> against the head of the queue and renders what comes
 next.</p>
 
-<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="kd">function</span> <span class="nx">redrawScreen</span><span class="p">()</span> <span class="p">{</span>
-  <span class="k">if</span> <span class="p">(</span><span class="nx">audio_events</span><span class="p">.</span><span class="nx">length</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="k">return</span><span class="p">;</span>
+<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="kd">var</span> <span class="nx">audio_events</span> <span class="o">=</span> <span class="p">[];</span>
+
+<span class="kd">function</span> <span class="nx">redrawScreen</span><span class="p">()</span> <span class="p">{</span>
   <span class="kd">var</span> <span class="nx">e</span><span class="p">;</span>
-  <span class="kd">var</span> <span class="nx">t</span> <span class="o">=</span> <span class="nx">audioctx</span><span class="p">.</span><span class="nx">currentTime</span><span class="p">;</span>
-  <span class="k">do</span> <span class="p">{</span>
+  <span class="kd">var</span> <span class="nx">t</span> <span class="o">=</span> <span class="nx">XMPlayer</span><span class="p">.</span><span class="nx">audioctx</span><span class="p">.</span><span class="nx">currentTime</span><span class="p">;</span>
+  <span class="k">while</span> <span class="p">(</span><span class="nx">audio_events</span><span class="p">.</span><span class="nx">length</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="o">&amp;&amp;</span> <span class="nx">audio_events</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">t</span> <span class="o">&lt;</span> <span class="nx">t</span><span class="p">)</span> <span class="p">{</span>
     <span class="nx">e</span> <span class="o">=</span> <span class="nx">audio_events</span><span class="p">.</span><span class="nx">shift</span><span class="p">();</span>
-  <span class="p">}</span> <span class="k">while</span><span class="p">(</span><span class="nx">e</span><span class="p">.</span><span class="nx">t</span> <span class="o">&lt;</span> <span class="nx">t</span> <span class="o">&amp;&amp;</span> <span class="nx">audio_events</span><span class="p">.</span><span class="nx">length</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">);</span>
-  <span class="k">if</span> <span class="p">(</span><span class="nx">e</span> <span class="o">==</span> <span class="kc">undefined</span><span class="p">)</span> <span class="k">return</span><span class="p">;</span>
+  <span class="p">}</span>
+  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">e</span><span class="p">)</span> <span class="k">return</span><span class="p">;</span>
 
   <span class="c1">// draw VU meters, oscilloscopes, and update pattern position</span>
   <span class="c1">// using various 2D canvas calls</span>
