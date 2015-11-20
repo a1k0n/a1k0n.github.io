@@ -260,7 +260,7 @@ output frequency is a surprisingly nontrivial problem.&lt;/p&gt;
 &lt;p&gt;From the &lt;a href=&quot;https://en.wikipedia.org/wiki/Nyquist%E2%80%93Shannon_sampling_theorem&quot;&gt;Nyquist-Shannon
 theorem&lt;/a&gt;,
 we know that our original sample only contains frequencies less than or equal
-to the original sample rate. So ideally, when we play it back at the new
+to &lt;em&gt;half&lt;/em&gt; the original sample rate. So ideally, when we play it back at the new
 frequency, the same set of frequencies should be played.&lt;/p&gt;
 
 &lt;p&gt;In practice, though, without using a “brick wall” or “sinc” filter, we’re going
