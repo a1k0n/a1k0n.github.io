@@ -207,6 +207,12 @@ function nextRow() {
         ch.vol = Math.max(0, ch.vol - (v & 0x0f));
       } else if (v >= 0x90 && v < 0xa0) {  // fine volume slide up
         ch.vol = Math.min(64, ch.vol + (v & 0x0f));
+      } else if (v >= 0xa0 && v < 0xb0) {  // vibrato speed
+        ch.vibratospeed = v & 0x0f;
+      } else if (v >= 0xb0 && v < 0xc0) {  // vibrato w/ depth
+        ch.vibratodepth = v & 0x0f;
+        ch.voleffectfn = player.effects_t1[4];  // use vibrato effect directly
+        player.effects_t1[4](ch);  // and also call it on tick 0
       } else if (v >= 0xc0 && v < 0xd0) {  // set panning
         ch.pan = (v & 0x0f) * 0x11;
       } else {
@@ -787,8 +793,8 @@ function load(arrayBuf) {
       // FIXME: ignoring keymaps for now and assuming 1 sample / instrument
       // var keymap = getarray(dv, idx+0x21);
       var samphdrsiz = dv.getUint32(idx+0x1d, true);
-      console.log("hdrsiz %d; instrument %d: '%s' %d samples, samphdrsiz %d",
-          hdrsiz, i, instname, nsamp, samphdrsiz);
+      console.log("hdrsiz %d; instrument %s: '%s' %d samples, samphdrsiz %d",
+          hdrsiz, (i+1).toString(16), instname, nsamp, samphdrsiz);
       idx += hdrsiz;
       var totalsamples = 0;
       var samps = [];
@@ -802,7 +808,10 @@ function load(arrayBuf) {
         var samppan = dv.getUint8(idx+15);
         var sampnote = dv.getInt8(idx+16);
         var sampname = getstring(dv, idx+18, 22);
-        var sampleoffset = idx + nsamp * samphdrsiz + totalsamples;
+        var sampleoffset = totalsamples;
+        if (samplooplen === 0) {
+          samptype &= ~3;
+        }
         console.log("sample %d: len %d name '%s' loop %d/%d vol %d offset %s",
             j, samplen, sampname, samploop, samplooplen, sampvol, sampleoffset.toString(16));
         console.log("           type %d note %s(%d) finetune %d pan %d",
@@ -816,24 +825,26 @@ function load(arrayBuf) {
           'len': samplen, 'loop': samploop,
           'looplen': samplooplen, 'note': sampnote, 'fine': sampfinetune,
           'pan': samppan, 'type': samptype, 'vol': sampvol,
-          'sampledata': ConvertSample(
-              new Uint8Array(arrayBuf, sampleoffset, samplen), samptype & 16),
+          'fileoffset': sampleoffset
         };
         // length / pointers are all specified in bytes; fixup for 16-bit samples
-        if (samptype & 16) {
+        samps.push(samp);
+        idx += samphdrsiz;
+        totalsamples += samplen;
+      }
+      for (j = 0; j < nsamp; j++) {
+        var samp = samps[j];
+        samp.sampledata = ConvertSample(
+            new Uint8Array(arrayBuf, idx + samp.fileoffset, samp.len), samp.type & 16);
+        if (samp.type & 16) {
           samp.len /= 2;
           samp.loop /= 2;
           samp.looplen /= 2;
         }
-
         // unroll short loops and any pingpong loops
         if ((samp.type & 3) && (samp.looplen < 2048 || (samp.type & 2))) {
           UnrollSampleLoop(samp);
         }
-        samps.push(samp);
-
-        idx += samphdrsiz;
-        totalsamples += samplen;
       }
       idx += totalsamples;
       inst.samplemap = samplemap;
