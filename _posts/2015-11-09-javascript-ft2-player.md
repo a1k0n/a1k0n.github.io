@@ -6,7 +6,7 @@ headhtml: |
   <script src="/code/jsxm/xmeffects.js"></script>
   <script src="/code/jsxm/trackview.js"></script>
   <script src="/code/jsxm/shell.js"></script>
-  <script src="http://a1k0n-pub.s3-website-us-west-1.amazonaws.com/xm/xmlist.js"></script>
+  <script src="//a1k0n-pub.s3.amazonaws.com/xm/xmlist.js"></script>
   <style>
 
   .centered {

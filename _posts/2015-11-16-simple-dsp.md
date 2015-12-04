@@ -3,7 +3,7 @@ title: Simple Digital Filters
 layout: post
 hide: true
 headhtml: |
-  <script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  <script src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
   <script src="/js/dsp2015.js"></script>
 ---
 Digital signal processing makes use of some surprisingly neat mathematics which
@@ -53,6 +53,7 @@ H(z) = \frac{Y(z)}{X(z)} = \frac{\alpha}{1 - (1 - \alpha) z^{-1}}
 $$
 
 <canvas width="600" height="300" id="c1"></canvas>
+<pre id="f1"></pre>
 
  - real (as in not complex) filters for audio processing
  - polynomials, $$H(z) = \frac{Y(z)}{X(z)} = \frac{(z - a)(z -
