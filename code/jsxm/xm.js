@@ -215,6 +215,11 @@ function nextRow() {
         player.effects_t1[4](ch);  // and also call it on tick 0
       } else if (v >= 0xc0 && v < 0xd0) {  // set panning
         ch.pan = (v & 0x0f) * 0x11;
+      } else if (v >= 0xf0 && v <= 0xff) {  // portamento
+        if (v & 0x0f) {
+          ch.portaspeed = (v & 0x0f) << 4;
+        }
+        ch.voleffectfn = player.effects_t1[3];  // just run 3x0
       } else {
         console.log("channel", i, "volume effect", v.toString(16));
       }
@@ -233,7 +238,7 @@ function nextRow() {
     }
 
     // special handling for portamentos: don't trigger the note
-    if (ch.effect == 3 || ch.effect == 5) {
+    if (ch.effect == 3 || ch.effect == 5 || r[i][2] >= 0xf0) {
       if (r[i][0] != -1) {
         ch.periodtarget = periodForNote(ch, ch.note);
       }
@@ -927,17 +932,12 @@ function play() {
     jsNode.connect(gainNode);
 
     // hack to get iOS to play anything
-    /*
-     * this seems to cause other player issues... disabling for now
     var temp_osc = player.audioctx.createOscillator();
     temp_osc.connect(player.audioctx.destination);
     if (temp_osc.noteOn) temp_osc.start = temp_osc.noteOn;
-    temp_osc.frequency.value = 1;
     temp_osc.start(0);
-    setTimeout(10, function() {
-      temp_osc.disconnect();
-    });
-    */
+    temp_osc.stop();
+    temp_osc.disconnect();
   }
   player.playing = true;
 }
