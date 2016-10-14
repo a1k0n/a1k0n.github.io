@@ -437,7 +437,7 @@ D00Sequencer.prototype.nextSeq = function(song, channel) {
       this.arrOffset--;  // hang here forever
       return;
     } else if (e == 0xffff) {
-      this.arrOffset = 1;  // loop back to beginning
+      this.arrOffset = 1 + this.arrangement[this.arrOffset];  // loop back to beginning
     } else if (e >= 0x8000) {
       this.transpose = e & 0xff;
     } else {
