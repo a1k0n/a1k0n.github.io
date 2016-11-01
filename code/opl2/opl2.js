@@ -33,6 +33,8 @@ var d00NoteTable = [  // ripped from JCH's player
   0x1a41, 0x1a63, 0x1a87, 0x1d57, 0x1d6b, 0x1d81, 0x1d98, 0x1db0, 0x1dca,
   0x1de5, 0x1e02, 0x1e20, 0x1e41, 0x1e63, 0x1e87];
 
+var attackTable = [];
+
 function initTables() {
   // The OPL2 synthesizer does not have any kind of multiplier; it multiplies
   // by adding in log space, and then exponentiating using this 2^0 .. 2^1
@@ -53,6 +55,11 @@ function initTables() {
   for (var i = 0; i < 512; i++) {
     // logSinTbl = np.round(-np.log(np.sin((np.arange(512)+0.5) * np.pi / 512)) / np.log(2) * 256).astype(np.int32)
     logSinTbl[i] = -Math.log(Math.sin((i+0.5) * Math.PI / 512)) / Math.log(2) * 256 + 0.5;
+  }
+  var x = 512;
+  for (var i = 0; i < 36; i++) {
+    attackTable.push(8*x);
+    x -= (x >> 3) + 1;
   }
 }
 
@@ -98,7 +105,9 @@ Operator.prototype.genCarrierWave = function(vol, modulation, numSamples, out) {
     for (var i = 0; i < numSamples; i++) {
       var m = p + modulation[i];  // m = modulated phase
       var l = logSinTbl[m & 511] + vol[i];  // l = -log(sin(p)) - log(volume)
-      var w = expTbl[l & 0xff] >> (l >> 8);  // table-based exponentiation: w = 4096 * 2^(-l/256)
+      var w = 0;
+      if (l <= 7935)  // we need to special-case this because x >> 32 === x >> 0 in javascript
+        w = expTbl[l & 0xff] >> (l >> 8);  // table-based exponentiation: w = 4096 * 2^(-l/256)
       if (m & 512) w = -w;  // negative part of sin wave
       p += dp;  // phase increment
       out[i] += w;
@@ -109,7 +118,8 @@ Operator.prototype.genCarrierWave = function(vol, modulation, numSamples, out) {
       var m = p + modulation[i];
       if (m & 512) {
         var l = logSinTbl[m & 511] + vol[i];
-        w = expTbl[l & 0xff] >> (l >> 8);
+        if (l <= 7935)
+          w = expTbl[l & 0xff] >> (l >> 8);
       }
       p += dp;
       out[i] += w;
@@ -118,7 +128,9 @@ Operator.prototype.genCarrierWave = function(vol, modulation, numSamples, out) {
     for (var i = 0; i < numSamples; i++) {
       var m = p + modulation[i];
       var l = logSinTbl[m & 511] + vol[i];
-      var w = expTbl[l & 0xff] >> (l >> 8);
+      var w = 0;
+      if (l <= 7935)
+        w = expTbl[l & 0xff] >> (l >> 8);
       p += dp;
       out[i] += w;
     }
@@ -128,7 +140,8 @@ Operator.prototype.genCarrierWave = function(vol, modulation, numSamples, out) {
       var m = p + modulation[i];
       if (m & 256) {
         var l = logSinTbl[m & 255] + vol[i];
-        w = expTbl[l & 0xff] >> (l >> 8);
+        if (l <= 7935)
+          w = expTbl[l & 0xff] >> (l >> 8);
       }
       p += dp;
       out[i] += w;
@@ -171,7 +184,11 @@ Operator.prototype.genModulatorWave = function(vol, numSamples, out) {
       var m = p + ((w + w1) >> feedbackShift);  // m = modulated phase
       w1 = w;
       var l = logSinTbl[m & 511] + vol[i];  // l = -log(sin(p)) - log(volume)
-      w = expTbl[l & 0xff] >> (l >> 8);  // table-based exponentiation: w = 4096 * 2^(-l/256)
+      if (l >= 7936) {  // special case because x >> 32 === x >> 0
+        w = 0;  // we want x >> (31 or more) === 0
+      } else {
+        w = expTbl[l & 0xff] >> (l >> 8);  // table-based exponentiation: w = 4096 * 2^(-l/256)
+      }
       if (m & 512) w = -w;  // negative part of sin wave
       p += dp;  // phase increment
       out[i] = w;
@@ -182,7 +199,11 @@ Operator.prototype.genModulatorWave = function(vol, numSamples, out) {
       w1 = w;
       if (m & 512) {
         var l = logSinTbl[m & 511] + vol[i];
-        w = expTbl[l & 0xff] >> (l >> 8);
+        if (l >= 7936) {
+          w = 0;
+        } else {
+          w = expTbl[l & 0xff] >> (l >> 8);
+        }
       } else {
         w = 0;
       }
@@ -194,7 +215,11 @@ Operator.prototype.genModulatorWave = function(vol, numSamples, out) {
       var m = p + ((w + w1) >> feedbackShift);
       w1 = w;
       var l = logSinTbl[m & 511] + vol[i];
-      w = expTbl[l & 0xff] >> (l >> 8);
+      if (l >= 7936) {
+        w = 0;
+      } else {
+        w = expTbl[l & 0xff] >> (l >> 8);
+      }
       p += dp;
       out[i] = w;
     }
@@ -204,7 +229,11 @@ Operator.prototype.genModulatorWave = function(vol, numSamples, out) {
       w1 = w;
       if (m & 256) {
         var l = logSinTbl[m & 255] + vol[i];
-        w = expTbl[l & 0xff] >> (l >> 8);
+        if (l >= 7936) {
+          w = 0;
+        } else {
+          w = expTbl[l & 0xff] >> (l >> 8);
+        }
       } else {
         w = 0;
       }
@@ -239,14 +268,14 @@ Envelope.prototype.setADSR = function(att, dec, sus, rel) {
   // N.B.: needs adjustment for output sampling frequency
   // we also need to look at key scaling rate for the channel
 
-  // just a guess here based on the weird dosbox adlib code
-  // will test on a real YM3812 soon
-  // attack follows the half-sine curve 0..255
-  // and it takes something like (282624 >> att) samples to complete
-  // so dt * (282624 >> att) = 255
-  // dt = 255 / (282624 >> att)
-  //    = (255 << att) / 282624
-  this.attackInc = (255 << att) / (4*282624);
+  // So on a real YM3812, with attack set at 4, the volume changes every 512 samples
+  // according to a schedule:
+  //   v[0] = 4096
+  //   v[i] = v[0] - (v[0]>>3) - 1
+  // since each volume level has a period of 512 samples at rate 4,
+  // rate 0 would have a period of 512 << 4 or 8192
+  // so we have a 13-bit counter
+  this.attackInc = 1 << att;  // TODO: adjust for relative sampling frequency
 
   // decay and release seem to use these linear rates
   this.decayInc = (1 << dec) / 768.0;  // ???
@@ -272,12 +301,12 @@ Envelope.prototype.generate = function(level, numSamples, out) {
   var offset = 0;
   while (offset < numSamples) {
     if (this.adsrMode == 0) {  // attack
-      while (offset < numSamples && this.attackPhase < 256) {
-        vol = logSinTbl[0|this.attackPhase];
+      while (offset < numSamples && this.attackPhase < 8192 * 36) {
+        vol = attackTable[this.attackPhase >> 13];
         this.attackPhase += this.attackInc;
         out[offset++] = vol + level;
       }
-      if (this.attackPhase > 255) {
+      if (this.attackPhase >= 8192 * 36) {
         this.adsrMode++;
         vol = 0;
       }
@@ -497,6 +526,9 @@ D00Sequencer.prototype.nextRow = function(song, channel) {
     } else if (eff == 0x0c) {  // change instrument?
       // console.log('instrument', channel.num, data);
       channel.setD00Instrument(song.instruments[data]);
+      if (data == 0) {  // silence channel
+        channel.releaseNote();
+      }
       this.instNum = data;
     } else if (eff < 4) {  // note w/ tie or repeats
       var retrig = eff < 2;  // 0000-1fff -> note (retrigger), 2000-3fff -> tie
@@ -577,7 +609,7 @@ function D00Player(song) {
     this.sequencers[i] = new D00Sequencer(song.arrangement[i], song)
   }
   // one-note test
-  // this.channels[0].setD00Instrument(song.instruments[6]);
+  // this.channels[0].setD00Instrument(song.instruments[1]);
   // this.channels[0].playD00Note(48);
 }
 
@@ -615,13 +647,19 @@ D00Player.prototype.updateDisplay = function() {
   document.getElementById("b").innerHTML = patternDisplay.join("\n");
 }
 
+var scratch1 = new Int32Array(4096);
+var scratch2 = new Int32Array(4096);
+var outbuf = new Int32Array(4096);
+
 D00Player.prototype.generate = function(bufLength, dataL, dataR) {
   // if i were ambitious here this would be a float
   var samplesPerTick = 0 | (sampleRate_ / this.tickRate);
 
-  var scratch1 = new Int32Array(samplesPerTick);
-  var scratch2 = new Int32Array(samplesPerTick);
-  var outbuf = new Int32Array(samplesPerTick);
+  if (scratch1.length < samplesPerTick) {
+    scratch1 = new Int32Array(samplesPerTick);
+    scratch2 = new Int32Array(samplesPerTick);
+    outbuf = new Int32Array(samplesPerTick);
+  }
 
   var offset = 0;
   while (offset < bufLength) {
@@ -674,12 +712,12 @@ window.onload = function() {
     var audioContext = window.AudioContext || window.webkitAudioContext;
     audioctx = new audioContext();
     gainNode = audioctx.createGain();
-    gainNode.gain.value = 0.1;  // master volume
+    gainNode.gain.value = 0.2;  // master volume
   }
   if (audioctx.createScriptProcessor === undefined) {
-    jsNode = audioctx.createJavaScriptNode(1024, 0, 2);
+    jsNode = audioctx.createJavaScriptNode(2048, 0, 2);
   } else {
-    jsNode = audioctx.createScriptProcessor(1024, 0, 2);
+    jsNode = audioctx.createScriptProcessor(2048, 0, 2);
   }
   jsNode.onaudioprocess = audioCallback;
   jsNode.connect(gainNode);
