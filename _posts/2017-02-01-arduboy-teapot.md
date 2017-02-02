@@ -100,25 +100,65 @@ float multiplications.
 However the profiler showed me I was basically spending all my time in the
 32-bit multiply and divide routines.
 
-The AVR has a variety of 2-cycle 8x8 -> 16 multiply instructions, and this
-makes extensive use of that. It does not have any efficient way to perform
-division, though, so I had to replace all division with either subtract loops
-(the triangle filler does this) or fake it (the perspective projection is a
-linear Taylor expansion of $$ \frac{k1}{z + k2} $$).
+### Division is slow
+The AVR does not have any efficient way to perform division -- divides are
+*super* expensive.  There were two places where division was heavily used: in
+the triangle filler, to determine line slopes, and in 3D perspective
+projection.
+
+In the triangle filler, we're making a relatively small adjustment and the
+quotient shouldn't be very large. I just replaced `dy02 /= dx02; fy02 %= dx02;`
+with a subtraction loop:
+
+{% highlight cpp %}
+  // unroll divmod here; this is sadly much faster
+  while (fy02 >= dx02) { ++dy02; fy02 -= dx02; }
+  while (fy02 <= -dx02) { --dy02; fy02 += dx02; }
+{% endhighlight %}
+
+For perspective projection, I decided to linearly approximate the division by
+*z*. This looks good enough for viewing a single object, but wouldn't hold up
+to scrutiny if we were rendering a whole room. The computation to perform is to
+get the screen coordinates *x<sub>s</sub>* and *y<sub>s</sub>* from the object
+*x*, *y*, and *z*, plus a distance *d* between the camera and the object, and a
+scale factor *k* to account for the screen size and field of view.
+
+$$ x_s = f(z) = \frac{k x}{d - z} $$
+
+If we just take a linear Taylor expansion around $$ z = 0 $$, we end up with:
+
+$$ x_s = f(0) + f'(0)\ z = \left(\frac{k}{d} + \frac{k}{d^2} z\right) x $$
+
+*z*, being an eight-bit signed object coordinate, ranges between -127 and +127.
+A *d* of 2<sup>10</sup> (i.e., 1024) gives a nice 3D effect given that *z*
+range without looking very distorted, and a scale factor of 2<sup>20</sup> puts
+the projection in roughly the correct range for our 1024-subpixel-unit tall
+display.
+
+With these nice round numbers, it works out to $$ x_s = (1024 + z)\ x $$, which
+means we can just re-use that subexpression and multiply for *y* as well. Which
+is good, because...
+
+### Multiplication is fast
+The AVR has a variety of 2-cycle 8x8 -> 16 multiply instructions, and it
+behooves us to make extensive use of that, rather than letting gcc generate
+calls to 32-bit multiply routines. Which means we need to reduce our precision,
+where possible, to 8 bits.
 
 The first step in rendering (DrawObject if you're looking at the code) is to
 create a rotation matrix; this is done with a 10-bit precision sine lookup
 table (another neat trick I discovered: 1024 * (sin(x) - x) is < 256
 everywhere, so a 10-bit precise sine LUT fits in 8 bits just by adding x back
 on), and some 32 bit math to construct a rotation matrix once up front, and
-then that matrix is quantized down to 8 bits.
+then that matrix is quantized down to 8 bits. This is only done once per frame,
+so it's not a big deal.
 
 The object models are also quantized down to 8 bit coordinates with a little
 [python script](https://github.com/a1k0n/arduboy3d/blob/master/convertobj.py)
 which takes an .obj format, rescales the model and quantizes to 8 bits, fuses
 merged vertices, and also rescales / quantizes face normal vectors.  Then the
 rotation is a 3x3 8-bit matrix multiplied with an 8-bit 3-vector; the AVR has a
-special instruction (fmuls) which will do a 1.7 signed fixed point
+special instruction (`fmuls`) which will do a 1.7 signed fixed point
 multiplication which is exactly what I needed, and is available in avr-gcc as
 `__builtin_avr_fmuls()`.
 
@@ -145,21 +185,58 @@ bytes), stack and other globals, I definitely don't have another 377 bytes left
 (137 z coordinates, 240 face orders) to dynamically sort.
 
 Instead, I pre-sort the faces, as I'm not hurting for flash space. The model
-comes with the faces "baked in" sorted by +x, and also has auxiliary face
-orders sorted by y and z. At runtime, I figure out which axis is most facing
-toward (or away from) the camera, choose the face order from the lookup table
-(reversed if necessary), and render in that order. It's close enough.
+comes with the faces "baked in" sorted by *x*, and also has auxiliary face
+orders sorted by *y* and *z*. At runtime, I figure out which axis is most
+facing toward (or away from) the camera, choose the face order from the lookup
+table (reversed if necessary), and render in that order. It's close enough.
 
 ## Profiling on Arduboy
 I was surprised to find there's no real decent arduino profiler option.
 
-I ended up hacking together something ugly; I have to manually count the number
-of 'push' instructions in the generated assembly to figure out where the return
-address on the stack is to get it to work, but once it is working it sends a
-stream of sampled addresses over the USB port. It also walks the stack a bit
-and probes the flash for anything that points to a CALL instruction; so that
-if, for instance, the avr-gcc multiply routine is interrupted, it can find the
-function which called it and attribute the sample to that function as well.
+I ended up hacking together a statistical profiler on a timer interrupt which
+walks the stack:
+
+{% highlight cpp %}
+static const size_t PROFILEBUFSIZ = 32;
+static volatile uint8_t profilebuf_[PROFILEBUFSIZ];
+static volatile uint8_t profileptr_ = 0;
+
+ISR(TIMER4_OVF_vect) {
+  if (profileptr_+2 <= PROFILEBUFSIZ) {
+    uint8_t *profdata = profilebuf_ + profileptr_;
+    // disassemble, count # pushes in prologue, add 1 to determine SP+x
+    uint8_t *spdata = SP+17;  // pointer to data on stack when this ISR was hit
+    profdata[1] = spdata[0];  // copy into profiling data buffer
+    profdata[0] = spdata[1];
+    profileptr_ += 2;
+    for (uint8_t j = 2; j < 16 && profileptr_+2 < PROFILEBUFSIZ; j += 2) {
+      // walk the stack and see if we have any return addresses available
+
+      // subtract 2 words to get address of potential call instruction (opcode 0x940e);
+      // attribute this sample to that instruction
+      uint16_t stackvalue = (spdata[j] << 8) + spdata[j+1] - 2;
+      if (stackvalue >= 0x4000  // is this a valid flash address?
+          || pgm_read_word_near(stackvalue << 1) != 0x940e) {
+        break;
+      }
+      profdata[j] = stackvalue & 255;
+      profdata[j+1] = stackvalue >> 8;
+      profdata[j-1] |= 0x80;  // add continuation bit on previous addr
+      profileptr_ += 2;
+    }
+  }
+}
+{% endhighlight %}
+
+I have to manually count the number of 'push' instructions in the generated
+assembly to figure out where the return address on the stack is to get it to
+work, but once it is working it loads a buffer with a stream of sampled
+addresses, which later in the code I stream out the USB port.
+
+It also walks the stack a bit and probes the flash for anything that points to
+a CALL instruction; so that if, for instance, the avr-gcc multiply routine is
+interrupted, it can find the function which called it and attribute the sample
+to that function as well.
 
 There is an auxiliary python scripts which collect the data from USB and save
 the histogram out, and another one to annotate the disassembly with the
