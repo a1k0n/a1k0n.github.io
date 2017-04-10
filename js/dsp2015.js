@@ -29,7 +29,9 @@ function transferMag(z) {
   return Math.sqrt(h);
 }
 
-function redrawZ(elem) {
+function redrawZ() {
+  ///////// draw Z domain circle
+  var elem = document.getElementById('zdomain');
   var ctx = elem.getContext('2d');
   ctx.clearRect(0, 0, elem.width, elem.height);
   ctx.strokeStyle = '#111';
@@ -54,24 +56,37 @@ function redrawZ(elem) {
   ctx.stroke();
 
   // now draw frequency response
+  elem = document.getElementById('fresponse');
+  ctx = elem.getContext('2d');
+  ctx.clearRect(0, 0, elem.width, elem.height);
+  ctx.beginPath();
   var gain = 1.0/Math.max(transferMag([1.0, 0]), transferMag([-1.0, 0]));
-  ctx.moveTo(350, 100);
-  ctx.lineTo(550, 100);
+  /*
+  ctx.moveTo(0, 0);
+  ctx.lineTo(200, 100);
 
-  ctx.moveTo(350, 150);
-  ctx.lineTo(550, 150);
+  ctx.moveTo(0, 100);
+  ctx.lineTo(200, 100);
+  */
 
-  ctx.moveTo(350, 200);
-  ctx.lineTo(550, 200);
-
-  ctx.moveTo(350, 100);
+  ctx.moveTo(0, 90);
+  ctx.lineTo(200, 90);
   // linear plot
   for (i = 0; i <= 200; i++) {
     var z = cexp([0, Math.PI * i / 200.0]);
     var g = gain * transferMag(z);
-    ctx.lineTo(350 + i, 200 - 100*g);
+    if (i == 0) {
+      ctx.moveTo(0, 90 - 40*g);
+    } else {
+      ctx.lineTo(i, 90 - 40*g);
+    }
   }
-  /*
+  ctx.stroke();
+
+  elem = document.getElementById('logresponse');
+  ctx = elem.getContext('2d');
+  ctx.clearRect(0, 0, elem.width, elem.height);
+  ctx.beginPath();
   // bode plot
   // freq from "10Hz" to "22kHz", assuming 44kHz sampling rate
   var f0 = 10.0 / 44100.0;
@@ -81,12 +96,16 @@ function redrawZ(elem) {
     var f = Math.exp(i * (l1 - l0) / 200.0 + l0);
     var z = cexp([0, Math.PI * 2 * f]);
     var y = 10*Math.log10(gain * transferMag(z));
-    ctx.lineTo(350 + i, 100 - 2*y);
+    ctx.lineTo(i, 50 - 2*y);
   }
-  */
+  ctx.stroke();
 
   // impulse response
-  ctx.moveTo(350, 250);
+  elem = document.getElementById('impulse');
+  ctx = elem.getContext('2d');
+  ctx.clearRect(0, 0, elem.width, elem.height);
+  ctx.beginPath();
+  ctx.moveTo(0.5, 50);
   var y1 = 0, y2 = 0;
   // assume two conjugate poles for now
   // h(z) = y(z)/x(z) = 1/[(z-p)(z-p*)]
@@ -96,10 +115,10 @@ function redrawZ(elem) {
   var a = 2*poles[0][0];
   var b = poles[0][0]*poles[0][0] + poles[0][1]*poles[0][1];
   for (i = 0; i <= 100; i++) {
-    var z = cexp([0, Math.PI * i / 200.0]);
-    var g = gain * transferMag(z);
     var y = x + a*y1 - b*y2;
-    ctx.lineTo(350 + 2*i, 250 - 50*y);
+    if (y > 1) y = 1;
+    if (y < -1) y = -1;
+    ctx.lineTo(0.5 + 2*i, 50 - 100*y);
     x = 0;
     y2 = y1;
     y1 = y;
@@ -129,7 +148,7 @@ function findPole(offsetX, offsetY) {
 
 var dragging_pole, drag_x0, drag_y0;
 window.onload = function() {
-  var c1 = document.getElementById("c1");
+  var c1 = document.getElementById("zdomain");
   c1.onmousedown = function(e) {
     e = e || window.event;
 
@@ -168,8 +187,19 @@ window.onload = function() {
       pstar[1] = -p[1];
       drag_x0 = offsetX;
       drag_y0 = offsetY;
-      redrawZ(c1);
+      redrawZ();
     }
   };
-  redrawZ(c1);
+  redrawZ();
+};
+
+var piano_keys1 = "ZSXDCVGBHNMK<L>;/";
+var piano_keys2 = "Q2W3ER5T6Y7UI9O0P";
+
+window.onkeydown = function(e) {
+  console.log(e);
+};
+
+window.onkeyup = function(e) {
+  console.log(e);
 };
