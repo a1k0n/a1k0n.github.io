@@ -2,9 +2,7 @@
 title: 3D Rendering on an Arduboy
 layout: post
 headhtml: |
-  <script type="text/javascript"
-      src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
-  </script>
+  <script type="text/javascript" async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 ---
 The [Arduboy](http://arduboy.com/) is a cute little credit-card sized
 Arduino-compatible with a 128x64 black and white OLED screen. It has 32kb of
@@ -147,11 +145,11 @@ where possible, to 8 bits.
 
 The first step in rendering (DrawObject if you're looking at the code) is to
 create a rotation matrix; this is done with a 10-bit precision sine lookup
-table (another neat trick I discovered: 1024 * (sin(x) - x) is < 256
-everywhere, so a 10-bit precise sine LUT fits in 8 bits just by adding x back
-on), and some 32 bit math to construct a rotation matrix once up front, and
-then that matrix is quantized down to 8 bits. This is only done once per frame,
-so it's not a big deal.
+table (another neat trick I discovered: 1024 * (sin(x) - x) is < 256 in the
+first quadrant, so a 10-bit precise sine LUT fits in 8 bits just by adding x
+back on), and some 32 bit math to construct a rotation matrix once up front,
+and then that matrix is quantized down to 8 bits. This is only done once per
+frame, so it's not a big deal.
 
 The object models are also quantized down to 8 bit coordinates with a little
 [python script](https://github.com/a1k0n/arduboy3d/blob/master/convertobj.py)
@@ -238,7 +236,7 @@ a CALL instruction; so that if, for instance, the avr-gcc multiply routine is
 interrupted, it can find the function which called it and attribute the sample
 to that function as well.
 
-There is an auxiliary python scripts which collect the data from USB and save
+There is an auxiliary python script which collects the data from USB and saves
 the histogram out, and another one to annotate the disassembly with the
 histogram.
 

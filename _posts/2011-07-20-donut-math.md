@@ -2,10 +2,8 @@
 title: Donut math&#58; how donut.c works
 layout: post
 headhtml: |
-  <script type="text/javascript"
-      src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
-  </script>
   <script src="/js/donut.js"></script>
+  <script type="text/javascript" async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 ---
 There has been a sudden resurgence of interest in my <a
 href="/2006/09/15/obfuscated-c-donut.html">"donut" code from 2006</a>, and I've
