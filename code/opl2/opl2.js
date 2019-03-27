@@ -705,7 +705,9 @@ function audioCallback(e) {
   d00Player.generate(buflen, dataL, dataR);
 }
 
-window.onload = function() {
+window.play = function() {
+  document.getElementById('playbutton').hidden = true;
+
   initTables();
 
   if (!audioctx) {
