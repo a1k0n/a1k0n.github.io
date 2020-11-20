@@ -4,12 +4,10 @@ title: About this site
 ---
 I'm Andy Sloane and I write all kinds of software for a living and weird kinds
 of software for a hobby. I mainly work on big data and machine learning type
-things these days. I have a wife and two kids and a comfortable life in the SF
-Bay Area.
+things these days.
 
 I co-founded [Guild Software](https://vendetta-online.com/) long ago, and have
-since worked at Yahoo!, Google, and Spotify.  Today I'm at a startup which is
-in stealth mode and am not considering other opportunities.
+since worked at Yahoo!, Google, Spotify, and Cisco.
 
 Email: [andy@a1k0n.net](mailto:andy@a1k0n.net)<br>
 Github: [github.com/a1k0n](https://www.github.com/a1k0n/)<br>

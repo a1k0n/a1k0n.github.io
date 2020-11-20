@@ -1,5 +1,5 @@
 ---
-title: Fast line-following robots part 1&colon; control
+title: Fast line-following robots
 layout: post
 headhtml: |
   <script type="text/javascript" async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
