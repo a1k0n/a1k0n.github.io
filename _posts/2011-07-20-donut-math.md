@@ -5,6 +5,8 @@ headhtml: |
   <script src="/js/donut.js"></script>
   <script type="text/javascript" async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 ---
+\[**Update 1/13/2021**: I wrote a follow-up with [some optimizations](/2021/01/13/optimizing-donut.html). \]
+
 There has been a sudden resurgence of interest in my <a
 href="/2006/09/15/obfuscated-c-donut.html">"donut" code from 2006</a>, and I've
 had a couple requests to explain this one.  It's been five years now, so it's
