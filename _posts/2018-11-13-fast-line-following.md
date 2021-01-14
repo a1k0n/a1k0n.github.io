@@ -254,8 +254,7 @@ phototransistors pointing at the ground, or a front-facing (preferably
 wide-angle) camera.
 
 Either way, we can at least indirectly measure these parameters. To track them
-over time and refine our estimates requires a Kalman filter, which I will cover
-in my next post.
+over time and refine our estimates requires a Kalman filter.
 
 For now, this is a very brief overview of how it was done in the first video above:
 
@@ -281,7 +280,5 @@ rapidly increasing *y<sub>e</sub>*. This is why I added a Kalman filter to
 track the line's position relative to the car, and wheel encoders, brushless
 motor sensor feedback, and/or MEMS gyroscopes can help tremendously with this
 approach.
-
-I will cover measuring and tracking in detail in my next post.
 
 [^1]: Alain Micaelli, Claude Samson. Trajectory tracking for unicycle-type and two-steering-wheels mobile robots. [Research Report] RR-2097, INRIA. 1993.

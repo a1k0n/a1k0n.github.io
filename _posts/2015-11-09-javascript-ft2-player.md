@@ -334,7 +334,7 @@ interpolate between the surrounding samples.
 I compromised with a very simple implementation that I think sounds pretty
 good. I use a combination of zero-order hold and a per-channel two-pole
 low-pass filter, which has very low implementation complexity. I will leave the
-details for my next post.
+details out here.
 
 Either way, we compute the speed at which we proceed through the sample, which
 is the ratio of the playback frequency to the output frequency:
@@ -383,7 +383,7 @@ The end result runs fast enough to play without hitches on my phone.
 The main problem with zero-order hold is that it produces hard edges between
 samples, and so there are a lot of high pitched hisses and noise. As a result,
 I added an additional low-pass filter to each channel with a cutoff equal to
-half the playback sampling frequency. My next blog post will go into detail.
+half the playback sampling frequency.
 
 ## Synchronized visualizations
 
