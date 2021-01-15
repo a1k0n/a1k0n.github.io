@@ -177,6 +177,7 @@ and produced the following C code which runs well on embedded devices which can
 do 32-bit multiplications and have ~4k of available RAM:
 
 ```c
+#include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
@@ -189,7 +190,7 @@ do 32-bit multiplications and have ~4k of available RAM:
   x = x*_>>10; \
   y = y*_>>10;
 
-char b[1760], z[1760];
+int8_t b[1760], z[1760];
 
 void main() {
   int sA=1024,cA=0,sB=1024,cB=0,_;
@@ -215,7 +216,7 @@ void main() {
             N = (-cA*x7 - cB*((-sA*x7>>10) + x2) - ci*(cj*sB >> 10) >> 10) - x5 >> 7;
 
         int o = x + 80 * y;
-        char zz = (x6-K2)>>15;
+        int8_t zz = (x6-K2)>>15;
         if (22 > y && y > 0 && x > 0 && 80 > x && zz < z[o]) {
           z[o] = zz;
           b[o] = ".,-~:;=!*#$@"[N > 0 ? N : 0];
