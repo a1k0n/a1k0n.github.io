@@ -163,7 +163,7 @@ $$
 This says: Rotate each pixel $$[x_i, y_i]$$ by the car's heading angle
 $$\theta$$, subtract the car's position $$[u, v]$$, and compare it to the grid
 point we think it should be on $$[g_{xi}, g_{yi}]$$. We want to minimize the
-sum of the squares of all pixels, $$\sum_{i} \mathbf{r}_{i}^\top \mathbf{r}_i$$.
+sum of the squares of all residuals, $$\sum_{i} \mathbf{r}_{i}^\top \mathbf{r}_i$$.
 
 (Note: $$[x_i, y_i]$$ here are the pixels after undoing the camera transform /
 distortion, so they are not pixel coordinates but rather normalized
