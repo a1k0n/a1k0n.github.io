@@ -4,26 +4,29 @@ layout: post
 headhtml: |
   <script type="text/javascript" async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 ---
-My [DIYRobocars](https://diyrobocars.com/) entry has come a long way since my
-[last post](/2018/11/13/fast-line-following.html) on the subject. I want to
-highlight a localization algorithm I came up with which works really well (in
-this specific setting, but could be adapted elsewhere). I've been using it in
-races for a while and it really stepped up the speeds I was able to achieve
-(about 22mph on the front straight of this small track). It makes use of a
-fisheye camera looking towards the ceiling, and a localization update runs in
-about 1ms at 640x480 on a Raspberry Pi 3, with precision on the order of a few
-centimeters.
+My [DIYRobocars](https://diyrobocars.com/) autonomous RC car has come a long
+way since my [last post](/2018/11/13/fast-line-following.html) on the subject.
+I want to highlight a localization algorithm I came up with which works really
+well, at least in this specific setting. I've been using it in races for a
+while and it really stepped up the speeds I was able to achieve without the car
+getting "lost" -- about 22mph on the front straight of this small track. It
+makes use of a fisheye camera looking towards the ceiling, and a localization
+update runs in about 1ms at 640x480 on a Raspberry Pi 3, with precision on the
+order of a few centimeters.
 
 Here is a recent race against [another car](https://twitter.com/SmallPixelCar)
 which is about as fast, except it uses LIDAR to localize using the traffic
 cones as landmarks. (My car previously localized using the cones as well,
 except using a monocular camera, but the ceiling lights are much better when we
-have them.) It's a three lap race where there's an extra random cone on the
-track, and the cars squeezed in to avoid it and instead hit each other.
+have them. Cone-based localization deserves a blog post of its own.) It's a
+three lap head-to-head race where there's an extra random cone on the track. We
+haven't developed passing strategies yet though, so there are frequent racing
+incidents...
 
 <iframe width="560" height="315" src="https://www.youtube.com/embed/PsfkLj527Go" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 *DIYRobocars race on March 7, 2020. We had a little accident but my car (blue)
-somehow made it through unscathed...*
+somehow made it through unscathed... I finished my three laps just to record a
+time for that heat.*
 
 I put a fisheye lens Raspberry Pi camera out the front windshield of a 1/10
 scale touring car. It's mounted sideways because it has a wider field of view
@@ -41,11 +44,11 @@ I record telemetry and video in each race, which I can then replay through a
 In the lower-right corner of the video is a virtual view of the car's position
 and speed, entirely derived from the ceiling light localization algorithm.
 
-You can see that with the fisheye lens, it can see a *lot* of ceiling lights
-from any point on the track, and they're all set up in a regular grid with one
-or two exceptions. The algorithm is robust to extra lights being added, lights
-being burned out, and other cars flying over the top of the camera (watch
-closely at 0:07), without losing tracking.
+With the fisheye lens, it can see a *lot* of ceiling lights from any point on
+the track, and they're all set up in a regular grid with one or two exceptions.
+The algorithm is robust to extra lights being added, lights being burned out,
+and other cars flying over the top of the camera (watch closely at 0:07),
+without losing tracking.
 
 Since it's hard to tell what's going on from the raw, sideways fisheye camera,
 the tool has an option to use `cv2.undistort` and remap the image as if it were
@@ -57,10 +60,10 @@ looking straight out the front windshield:
 To make this practical at high FPS on a Raspberry Pi, I chose to make some
 simplifying assumptions: assume all the ceiling lights are point sources on a
 perfectly even grid, and that the camera moves along the floor at a fixed
-height. This turned out to be good enough to work in practice, but the method
-doesn't necessarily require it. Drop ceilings are fairly common in office
-buildings, and they provide a nearly perfectly even grid in which lights are
-installed.
+height. This turned out to be good enough to work in practice. The method
+doesn't necessarily require an even grid, it just needs to be able to determine
+the distance to the nearest landmark from any point. In a grid, that's trivial,
+but it's not hard to use a map of the ceiling layout instead.
 
 I also assumed I knew the grid size ahead of time, since I can just measure the
 ceiling tile sizes and count the spaces between lights, and also measure the
@@ -101,18 +104,19 @@ pixels pointing too far away from the ceiling.
 Note that the tracking code does *not* use `cv2.undistortImage` or equivalent.
 The illustration above shows what undistorting the whole image does: objects
 far away from the camera with relatively small numbers of pixels in the source
-image take up a disproportional number of pixels in the output, and the objects
-directly in front taking up most of the image are just a tiny portion of the
+image take up a large number of blurry pixels in the output, and the objects
+directly in front taking up most of the image are a small portion of the
 output. What I want to do is give equal weight to each pixel in the source
 image, and less weight to potential outliers. That way, the lights directly
 above the camera are mostly what it will try to track on, which gives better
 accuracy.
 
 Once the lookup table is available, the problem reduces to matching a 2D grid
-to all the corrected pixel locations for all pixels within the mask which are
-white (that is, the luminance is above a threshold). The mask is necessary to
-deal with reflections from the car's body and light from nearby windows -- it
-makes sure we're only looking upwards for ceiling lights.
+to all the corrected pixel locations for all pixels within the mask which look
+like ceiling lights, meaning the grayscale pixel is brighter than some
+threshold. The mask is necessary to deal with reflections from the car's body
+and light from nearby windows -- it makes sure we're only looking upwards for
+ceiling lights.
 
 # Least squares grid alignment
 
@@ -139,9 +143,9 @@ it by $$-\theta$$ around the center and then translate it by $$[-u, -v]$$, the
 grid should line up with the pixels in our image which are above the "white"
 threshold.
 
-To do the optimization, we repeat two steps: first, start with an initial guess
-for $$[u, v, \theta$$]. Find the nearest grid point to every transformed white
-pixel, and then solve for an updated $$[u, v, \theta]$$ to minimize the
+To do the optimization, we start with an initial guess for $$[u, v, \theta$$]
+and repeat two steps: First, find the nearest grid point to every transformed
+white pixel, and then solve for an updated $$[u, v, \theta]$$ to minimize the
 residuals. Solving for $$[u, v, \theta]$$ may cause some pixels to match
 different grid points, so repeating the two steps a few times is usually
 necessary, otherwise it would be solved in closed form. In practice, once the
@@ -156,7 +160,10 @@ $$\mathbf{r}_i = \begin{bmatrix}\cos{\theta} & \sin{\theta}\\-\sin{\theta} & \co
 \begin{bmatrix}g_{xi} \\ g_{yi} \end{bmatrix}
 $$
 
-and we want to minimize the squared residuals $$\sum_{i} \mathbf{r}_{i}^\top \mathbf{r}_i$$.
+This says: Rotate each pixel $$[x_i, y_i]$$ by the car's heading angle
+$$\theta$$, subtract the car's position $$[u, v]$$, and compare it to the grid
+point we think it should be on $$[g_{xi}, g_{yi}]$$. We want to minimize the
+sum of the squares of all pixels, $$\sum_{i} \mathbf{r}_{i}^\top \mathbf{r}_i$$.
 
 (Note: $$[x_i, y_i]$$ here are the pixels after undoing the camera transform /
 distortion, so they are not pixel coordinates but rather normalized
@@ -305,8 +312,8 @@ of a ceiling light. They are:
 
 $$
 \begin{align}
-\Sigma_1 & = \sum_i \left(x_i \sin{\theta} - y_i \cos{\theta} \right) \\
-\Sigma_2 & = \sum_i \left(x_i \cos{\theta} + y_i \sin{\theta} \right) \\
+\Sigma_1 & = \sum_i \left(x_i \sin{\theta} - y_i \cos{\theta} \right) = \sum_i \delta R x_i \\
+\Sigma_2 & = \sum_i \left(x_i \cos{\theta} + y_i \sin{\theta} \right) = \sum_i \delta R y_i \\
 \Sigma_3 & = \sum_i \left(x_i^2 + y_i^2 \right) \\
 \Sigma_4 & = \sum_i \Delta x_i \\
 \Sigma_5 & = \sum_i \Delta y_i \\
@@ -314,9 +321,8 @@ $$
 \end{align}
 $$
 
-These are just six floats we add up along the way (I could have given them less
-fancy names, I suppose), and then we construct and solve this system of
-equations for our update:
+These are just six floats we add up while looping over the image pixels, and
+then we construct and solve this system of equations for our update:
 
 $$
 \begin{bmatrix}u' \\ v' \\ \theta'\end{bmatrix} = \begin{bmatrix}u \\ v \\ \theta\end{bmatrix} -
@@ -418,19 +424,15 @@ uv = np.mgrid[:480, :640][[1, 0]].transpose(1, 2, 0).astype(np.float32)
 pts = cv2.fisheye.undistortPoints(uv, K=K, D=dist)
 ```
 
-I further rotate `pts` to compensate for the tilt of the camera, and then
-export it as a lookup table; the C++ code then loads it on initialization.
-Let's call it `float cameraLUT[640*480][2]`.
+I further rotate and renormalize `pts` to compensate for the tilt of the
+camera, and then export it as a lookup table; the C++ code then loads it on
+initialization.  Let's call it `float cameraLUT[640*480][2]`.
 
 We'll also initialize `float u=0, v=0, theta=0;`
 
 ### Update from camera image
 
-The actual code running on the car for this is
-[here](https://github.com/a1k0n/cycloid/blob/master/src/localization/ceiltrack/ceiltrack.cc#L462-L556)
-but it's a bit cluttered because there are two SIMD versions (SSE and NEON) and
-a bunch of other optimizations and hacks, and the variable names are a bit
-different than described in this article. But what it does is:
+Step by step, the update algorithm is:
 
  - Get the grayscale image -- I have the camera sending native YUV420 frames,
    so I just take the Y channel here.
@@ -441,12 +443,19 @@ different than described in this article. But what it does is:
    - Initialize float accumulators `Sigma1`..`Sigma6` (defined above) to 0
    - Precompute $$\sin \theta$$ and $$\cos \theta$$ -- constant for all pixels
    - For each pixel `x`, `y` in `xybuf`:
-     - Compute the distance to the nearest landmark $$\Delta x, \Delta y$$, using
-       e.g. `moddist` for grids
+     - Compute the distance to the nearest landmark $$\Delta x_i, \Delta y_i$$, using
+       e.g. `moddist` for grids, as well as $$\delta R x_i, \delta R y_i$$, etc.
      - Add the pixel's contribution to `Sigma1`..`Sigma6`, defined above in the
        "Adding it all up" section
    - Compute updates to `u`, `v`, `theta` defined above using the length of
      `xybuf` for `N`.
+
+The actual code running on the car for this is
+[here](https://github.com/a1k0n/cycloid/blob/master/src/localization/ceiltrack/ceiltrack.cc#L462-L556)
+but it's a bit cluttered because there are two SIMD versions (SSE and NEON) and
+a bunch of other optimizations and hacks, and the variable names are a bit
+different than described in this article, but it should be recognizable from
+this description.
 
 Efficiently implemented, the most expensive part of this algorithm is the
 branch misprediction penalty it incurs when thresholding white pixels and
@@ -466,7 +475,28 @@ it will just be a blur). Using the position and angle of the tracking result,
 the floor pixels are reprojected to a bird's eye view as I drive the car around
 manually along the track.
 
+The tracking isn't perfect, and the geometry I'm using to project the floor in
+front of the car isn't perfect, so there's a little wonkiness in the result,
+but it's good enough to use as a map.
+
+![track planner GUI](/img/trackplan.png)<br>
+*Track planner GUI. Cyan circles are ceiling light locations; blue dots are
+centers of curvature, orange dots are cone locations. The magenta line is a
+minimum curvature line, but not one used for racing anymore.*
+
 I then import this into another tool to define a racetrack using the
 ceiling-derived map, run an optimization procedure which computes the best
 racing line from any point, and send the optimized map to the car. After that,
 it will drive autonomously.
+
+# Conclusion
+
+This ceiling light tracking algorithm works so well I consider localization on
+this track a solved problem and have been focusing on other areas, like
+reinforcement learning based algorithms for autonomous racing.
+
+Unfortunately, [Circuit Launch](https://circuitlaunch.com/), our regular racing
+venue, has torn out the entire ceiling in a recent renovation, so once we can
+start racing again we'll have to see whether the perfect grid assumption still
+holds, or if it needs to be extended with an actual ceiling map. Nevertheless,
+I'm pretty confident that this is the best way to do 2D indoor localization.
