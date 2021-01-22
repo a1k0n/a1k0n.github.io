@@ -327,9 +327,9 @@ then we construct and solve this system of equations for our update:
 $$
 \begin{bmatrix}u' \\ v' \\ \theta'\end{bmatrix} = \begin{bmatrix}u \\ v \\ \theta\end{bmatrix} -
 \begin{bmatrix}
-N - \lambda & 0 & \Sigma_1 \\
-0 & N - \lambda & \Sigma_2 \\
-\Sigma_1 & \Sigma_2 & \Sigma_3
+N + \lambda & 0 & \Sigma_1 \\
+0 & N + \lambda & \Sigma_2 \\
+\Sigma_1 & \Sigma_2 & \Sigma_3 + \lambda
 \end{bmatrix}^{-1}
 \begin{bmatrix}
 -\Sigma_4 \\
@@ -354,13 +354,16 @@ had SymPy spit out a solution?
 # redefine our JTJ, JTr matrices in terms of the sums defined above
 N, lamda, S1, S2, S3, S4, S5, S6 = symbols(
     "N lambda Sigma1 Sigma2 Sigma3 Sigma4 Sigma5 Sigma6")
-JTJ = Matrix([[N - lamda, 0, S1], [0, N-lamda, S2], [S1, S2, S3]])
+
+# the last element *should* be S3+lambda, but we'll assume we
+# add lambda to S3 separately, because it simplifies the math
+JTJ = Matrix([[N+lamda, 0, S1], [0, N+lamda, S2], [S1, S2, S3]])
 JTr = Matrix([[-S4], [-S5], [-S6]])
 simplify(JTJ.inv() * JTr)
 ```
 
 $$
-\left[\begin{matrix}\frac{N \Sigma_{1} \Sigma_{6} - N \Sigma_{3} \Sigma_{4} - \Sigma_{1} \Sigma_{2} \Sigma_{5} - \Sigma_{1} \Sigma_{6} \lambda + \Sigma_{2}^{2} \Sigma_{4} + \Sigma_{3} \Sigma_{4} \lambda}{N^{2} \Sigma_{3} - N \Sigma_{1}^{2} - N \Sigma_{2}^{2} - 2 N \Sigma_{3} \lambda + \Sigma_{1}^{2} \lambda + \Sigma_{2}^{2} \lambda + \Sigma_{3} \lambda^{2}}\\\frac{N \Sigma_{2} \Sigma_{6} - N \Sigma_{3} \Sigma_{5} + \Sigma_{1}^{2} \Sigma_{5} - \Sigma_{1} \Sigma_{2} \Sigma_{4} - \Sigma_{2} \Sigma_{6} \lambda + \Sigma_{3} \Sigma_{5} \lambda}{N^{2} \Sigma_{3} - N \Sigma_{1}^{2} - N \Sigma_{2}^{2} - 2 N \Sigma_{3} \lambda + \Sigma_{1}^{2} \lambda + \Sigma_{2}^{2} \lambda + \Sigma_{3} \lambda^{2}}\\\frac{- \Sigma_{1} \Sigma_{4} - \Sigma_{2} \Sigma_{5} + \Sigma_{6} \left(N - \lambda\right)}{- N \Sigma_{3} + \Sigma_{1}^{2} + \Sigma_{2}^{2} + \Sigma_{3} \lambda}\end{matrix}\right]
+\left[\begin{matrix}\frac{N \Sigma_{1} \Sigma_{6} - N \Sigma_{3} \Sigma_{4} - \Sigma_{1} \Sigma_{2} \Sigma_{5} + \Sigma_{1} \Sigma_{6} \lambda + \Sigma_{2}^{2} \Sigma_{4} - \Sigma_{3} \Sigma_{4} \lambda}{N^{2} \Sigma_{3} - N \Sigma_{1}^{2} - N \Sigma_{2}^{2} + 2 N \Sigma_{3} \lambda - \Sigma_{1}^{2} \lambda - \Sigma_{2}^{2} \lambda + \Sigma_{3} \lambda^{2}}\\\frac{N \Sigma_{2} \Sigma_{6} - N \Sigma_{3} \Sigma_{5} + \Sigma_{1}^{2} \Sigma_{5} - \Sigma_{1} \Sigma_{2} \Sigma_{4} + \Sigma_{2} \Sigma_{6} \lambda - \Sigma_{3} \Sigma_{5} \lambda}{N^{2} \Sigma_{3} - N \Sigma_{1}^{2} - N \Sigma_{2}^{2} + 2 N \Sigma_{3} \lambda - \Sigma_{1}^{2} \lambda - \Sigma_{2}^{2} \lambda + \Sigma_{3} \lambda^{2}}\\\frac{\Sigma_{1} \Sigma_{4} + \Sigma_{2} \Sigma_{5} - \Sigma_{6} \left(N + \lambda\right)}{N \Sigma_{3} - \Sigma_{1}^{2} - \Sigma_{2}^{2} + \Sigma_{3} \lambda}\end{matrix}\right]
 $$
 
 Now I know what you're thinking: "you're kidding, right?" Are we going to type
@@ -383,18 +386,19 @@ for i, e in enumerate(es[0]):  # output C expressions
 ```
 ```c
 float x0 = Sigma1*Sigma6;
-float x1 = Sigma3*lambda;
-float x2 = pow(Sigma2, 2);
-float x3 = N*Sigma3;
-float x4 = Sigma2*Sigma5;
+float x1 = pow(Sigma2, 2);
+float x2 = N*Sigma3;
+float x3 = Sigma2*Sigma5;
+float x4 = Sigma3*lambda;
 float x5 = pow(Sigma1, 2);
-float x6 = 1.0/(pow(N, 2)*Sigma3 - 2*N*x1 - N*x2 - N*x5 + Sigma3*pow(lambda, 2) + lambda*x2 + lambda*x5);
+float x6 = 1.0/(pow(N, 2)*Sigma3 - N*x1 - N*x5 + Sigma3*pow(lambda, 2)
+           - lambda*x1 + 2*lambda*x2 - lambda*x5);
 float x7 = Sigma2*Sigma6;
 float x8 = Sigma1*Sigma4;
 
-u -= x6*(N*x0 - Sigma1*x4 + Sigma4*x1 + Sigma4*x2 - Sigma4*x3 - lambda*x0);
-v -= x6*(N*x7 - Sigma2*x8 + Sigma5*x1 - Sigma5*x3 + Sigma5*x5 - lambda*x7);
-theta -= (Sigma6*(N - lambda) - x4 - x8)/(x1 + x2 - x3 + x5);
+u -= x6*(N*x0 - Sigma1*x3 + Sigma4*x1 - Sigma4*x2 - Sigma4*x4 + lambda*x0);
+v -= x6*(N*x7 - Sigma2*x8 - Sigma5*x2 - Sigma5*x4 + Sigma5*x5 + lambda*x7);
+theta -= (-Sigma6*(N + lambda) + x3 + x8)/(-x1 + x2 + x4 - x5);
 ```
 
 Once we've summed up our `Sigma1`..`Sigma6` variables, the above snippet
