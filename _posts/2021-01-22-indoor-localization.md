@@ -352,18 +352,18 @@ had SymPy spit out a solution?
 
 ```python
 # redefine our JTJ, JTr matrices in terms of the sums defined above
-N, lamda, S1, S2, S3, S4, S5, S6 = symbols(
-    "N lambda Sigma1 Sigma2 Sigma3 Sigma4 Sigma5 Sigma6")
-
-# the last element *should* be S3+lambda, but we'll assume we
-# add lambda to S3 separately, because it simplifies the math
-JTJ = Matrix([[N+lamda, 0, S1], [0, N+lamda, S2], [S1, S2, S3]])
+N, S1, S2, S3, S4, S5, S6 = symbols(
+    "N Sigma1 Sigma2 Sigma3 Sigma4 Sigma5 Sigma6")
+# Note: we'll add lambda to N and S3 before computing the solution,
+# as it simplifies the following algebra a lot.
+JTJ = Matrix([[N, 0, S1], [0, N, S2], [S1, S2, S3]])
+JTr = Matrix([[-S4], [-S5], [-S6]])
 JTr = Matrix([[-S4], [-S5], [-S6]])
 simplify(JTJ.inv() * JTr)
 ```
 
 $$
-\left[\begin{matrix}\frac{N \Sigma_{1} \Sigma_{6} - N \Sigma_{3} \Sigma_{4} - \Sigma_{1} \Sigma_{2} \Sigma_{5} + \Sigma_{1} \Sigma_{6} \lambda + \Sigma_{2}^{2} \Sigma_{4} - \Sigma_{3} \Sigma_{4} \lambda}{N^{2} \Sigma_{3} - N \Sigma_{1}^{2} - N \Sigma_{2}^{2} + 2 N \Sigma_{3} \lambda - \Sigma_{1}^{2} \lambda - \Sigma_{2}^{2} \lambda + \Sigma_{3} \lambda^{2}}\\\frac{N \Sigma_{2} \Sigma_{6} - N \Sigma_{3} \Sigma_{5} + \Sigma_{1}^{2} \Sigma_{5} - \Sigma_{1} \Sigma_{2} \Sigma_{4} + \Sigma_{2} \Sigma_{6} \lambda - \Sigma_{3} \Sigma_{5} \lambda}{N^{2} \Sigma_{3} - N \Sigma_{1}^{2} - N \Sigma_{2}^{2} + 2 N \Sigma_{3} \lambda - \Sigma_{1}^{2} \lambda - \Sigma_{2}^{2} \lambda + \Sigma_{3} \lambda^{2}}\\\frac{\Sigma_{1} \Sigma_{4} + \Sigma_{2} \Sigma_{5} - \Sigma_{6} \left(N + \lambda\right)}{N \Sigma_{3} - \Sigma_{1}^{2} - \Sigma_{2}^{2} + \Sigma_{3} \lambda}\end{matrix}\right]
+\left[\begin{matrix}\frac{- N \Sigma_{1} \Sigma_{6} + \Sigma_{1} \Sigma_{2} \Sigma_{5} + \Sigma_{4} \left(N \Sigma_{3} - \Sigma_{2}^{2}\right)}{N \left(- N \Sigma_{3} + \Sigma_{1}^{2} + \Sigma_{2}^{2}\right)}\\\frac{- N \Sigma_{2} \Sigma_{6} + \Sigma_{1} \Sigma_{2} \Sigma_{4} + \Sigma_{5} \left(N \Sigma_{3} - \Sigma_{1}^{2}\right)}{N \left(- N \Sigma_{3} + \Sigma_{1}^{2} + \Sigma_{2}^{2}\right)}\\\frac{N \Sigma_{6} - \Sigma_{1} \Sigma_{4} - \Sigma_{2} \Sigma_{5}}{- N \Sigma_{3} + \Sigma_{1}^{2} + \Sigma_{2}^{2}}\end{matrix}\right]
 $$
 
 Now I know what you're thinking: "you're kidding, right?" Are we going to type
@@ -377,7 +377,7 @@ expressions in terms of those variables, generating a very efficient routine
 for computing ridiculously complex expressions. Check this out:
 
 ```python
-ts, es = cse(simplify(JTJ.inv() * JTr))
+ts, es = cse(JTJ.inv() * JTr)
 for t in ts:  # output each temporary variable name and C expression
     print('float', t[0], '=', ccode(t[1]) + ';')
 print('')
@@ -385,20 +385,21 @@ for i, e in enumerate(es[0]):  # output C expressions
     print(["u", "v", "theta"][i], '-=', ccode(e) + ';')
 ```
 ```c
-float x0 = Sigma1*Sigma6;
-float x1 = pow(Sigma2, 2);
+float x0 = pow(Sigma1, 2);
+float x1 = -x0;
 float x2 = N*Sigma3;
-float x3 = Sigma2*Sigma5;
-float x4 = Sigma3*lambda;
-float x5 = pow(Sigma1, 2);
-float x6 = 1.0/(pow(N, 2)*Sigma3 - N*x1 - N*x5 + Sigma3*pow(lambda, 2)
-           - lambda*x1 + 2*lambda*x2 - lambda*x5);
-float x7 = Sigma2*Sigma6;
-float x8 = Sigma1*Sigma4;
+float x3 = pow(Sigma2, 2);
+float x4 = x2 - x3;
+float x5 = 1.0/(x1 + x4);
+float x6 = Sigma6*x5;
+float x7 = 1.0/(pow(N, 2)*Sigma3 - N*x0 - N*x3);
+float x8 = Sigma5*x7;
+float x9 = Sigma1*Sigma2;
+float x10 = Sigma4*x7;
 
-u -= x6*(N*x0 - Sigma1*x3 + Sigma4*x1 - Sigma4*x2 - Sigma4*x4 + lambda*x0);
-v -= x6*(N*x7 - Sigma2*x8 - Sigma5*x2 - Sigma5*x4 + Sigma5*x5 + lambda*x7);
-theta -= (-Sigma6*(N + lambda) + x3 + x8)/(-x1 + x2 + x4 - x5);
+u -= Sigma1*x6 - x10*x4 - x8*x9;
+v -= Sigma2*x6 - x10*x9 - x8*(x1 + x2);
+theta -= -N*x6 + Sigma1*Sigma4*x5 + Sigma2*Sigma5*x5;
 ```
 
 Once we've summed up our `Sigma1`..`Sigma6` variables, the above snippet
@@ -406,6 +407,10 @@ computes the amount to subtract from `u`, `v`, and `theta` to get the new least
 squares solution, without needing to call out to a matrix library. It's really
 not much code. (I would personally change all `pow(x, 2)` into `x*x` first,
 though).
+
+One thing I glossed over: I took $$\lambda$$ out temporarily from the
+derivation to simplify, so to put it back in you need to do `N += lambda;
+Sigma3 += lambda;` before running the above code.
 
 # The full algorithm
 
